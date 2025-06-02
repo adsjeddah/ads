@@ -21,9 +21,9 @@
 4. اختر "Public bucket" ✅
 5. اضغط Create
 
-### 3. الحصول على Service Role Key:
-1. اذهب إلى Settings > API
-2. انسخ `service_role` key (احتفظ به بأمان!)
+### 3. ✅ Service Role Key (تم الحصول عليه):
+تم حفظ المفتاح في ملف `.env.production`
+⚠️ هذا المفتاح سري جداً - لا تشاركه أبداً!
 
 ### 4. النشر على Vercel:
 1. اذهب إلى [vercel.com](https://vercel.com)
