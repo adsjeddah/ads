@@ -5,25 +5,18 @@ services:
     env: node
     plan: free
     buildCommand: "npm install && npm run build"
-    startCommand: "npm run start" # Starts Next.js production server
+    startCommand: "npm run start"
     envVars:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        # This will be the URL of your backend service on Render
-        # Example: https://jeddah-ads-backend.onrender.com
         value: backend-service-url # Replace with your backend's Render URL after it's created
-      # Add any other NEXT_PUBLIC_ environment variables your frontend needs
 
   # Backend Express.js Service
   - type: web
     name: jeddah-ads-backend
     env: node
     plan: free
-    disk:
-      name: data-disk
-      mountPath: /var/data
-      sizeGB: 1
     buildCommand: "npm install"
     startCommand: "npm run server"
     healthCheckPath: /api/health
@@ -34,7 +27,9 @@ services:
         value: 10000
       - key: JWT_SECRET
         generateValue: true
+      # SQLite database will be stored locally (data will be lost on restart)
       - key: DATABASE_PATH
-        value: /var/data/jeddah_ads.db
+        value: ./jeddah_ads.db
+      # Uploads will be stored temporarily (data will be lost on restart)
       - key: UPLOADS_DIR
-        value: /var/data/uploads
+        value: ./uploads
