@@ -19,7 +19,7 @@ services:
   - type: web
     name: jeddah-ads-backend
     env: node
-    plan: free
+    # plan: free # Temporarily commented out for diagnostics
     disks: # Moved disks definition higher
       - name: data-disk
         mountPath: /var/data
