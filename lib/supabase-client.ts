@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-// هذه القيم ستأتي من متغيرات البيئة في Vercel
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+// بيانات مشروعك الفعلية من Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://faiyalnevtffqksrmxpt.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhaXlhbG5ldnRmZnFrc3JteHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4ODA1MTksImV4cCI6MjA2NDQ1NjUxOX0.zUV_T64w8NCJoawMRQ_cabmAdlK8VSk_qEQKMYUQ88A'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
