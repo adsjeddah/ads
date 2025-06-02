@@ -1,0 +1,18 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "cd server && npm install express cors bcryptjs jsonwebtoken multer sqlite3 && node index.js"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[[services]]
+name = "jeddah-ads-backend"
+type = "web"
+
+[services.jeddah-ads-backend]
+port = 5001
+
+[[services.jeddah-ads-backend.volumes]]
+name = "data"
+mountPath = "/data"
