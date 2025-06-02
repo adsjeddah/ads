@@ -20,6 +20,10 @@ services:
     name: jeddah-ads-backend
     env: node
     plan: free
+    disks: # Moved disks definition higher
+      - name: data-disk
+        mountPath: /var/data
+        sizeGB: 1
     buildCommand: "npm install"
     startCommand: "npm run server"
     healthCheckPath: /api/health
@@ -34,7 +38,3 @@ services:
         value: /var/data/jeddah_ads.db
       - key: UPLOADS_DIR
         value: /var/data/uploads
-    disks:
-      - name: data-disk
-        mountPath: /var/data
-        sizeGB: 1
