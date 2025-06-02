@@ -10,7 +10,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        value: backend-service-url # Replace with your backend's Render URL after it's created
+        value: https://jeddah-ads-backend.onrender.com/api
 
   # Backend Express.js Service
   - type: web
