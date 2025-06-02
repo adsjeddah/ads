@@ -20,21 +20,21 @@ services:
     name: jeddah-ads-backend
     env: node
     plan: free
-    buildCommand: "npm install" # Only install dependencies for the server
-    startCommand: "npm run server" # This runs 'node server/index.js'
-    healthCheckPath: /api/health # Add a simple health check endpoint to your Express app
+    buildCommand: "npm install"
+    startCommand: "npm run server"
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000 # Render injects its own PORT, but good to have a default
+        value: 10000
       - key: JWT_SECRET
-        generateValue: true # Let Render generate a secure secret, or set your own
+        generateValue: true
       - key: DATABASE_PATH
-        value: /var/data/jeddah_ads.db # Path on the persistent disk
+        value: /var/data/jeddah_ads.db
       - key: UPLOADS_DIR
-        value: /var/data/uploads # Path on the persistent disk for uploads
+        value: /var/data/uploads
     disks:
       - name: data-disk
         mountPath: /var/data
-        sizeGB: 1 # Smallest persistent disk size
+        sizeGB: 1
