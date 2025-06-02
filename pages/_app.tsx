@@ -1,0 +1,33 @@
+import '@/styles/globals.css'
+import type { AppProps } from 'next/app'
+import { Toaster } from 'react-hot-toast'
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <>
+      <Component {...pageProps} />
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+            borderRadius: '10px',
+            padding: '16px',
+          },
+          success: {
+            style: {
+              background: '#10b981',
+            },
+          },
+          error: {
+            style: {
+              background: '#ef4444',
+            },
+          },
+        }}
+      />
+    </>
+  )
+}
