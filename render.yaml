@@ -27,6 +27,8 @@ services:
         value: 10000
       - key: JWT_SECRET
         generateValue: true
+      - key: FRONTEND_URL
+        value: https://jeddah-ads-frontend.onrender.com
       # SQLite database will be stored locally (data will be lost on restart)
       - key: DATABASE_PATH
         value: ./jeddah_ads.db
