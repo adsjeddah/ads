@@ -19,11 +19,11 @@ services:
   - type: web
     name: jeddah-ads-backend
     env: node
-    # plan: free # Temporarily commented out for diagnostics
-    disks: # Moved disks definition higher
-      - name: data-disk
-        mountPath: /var/data
-        sizeGB: 1
+    plan: free
+    disk:
+      name: data-disk
+      mountPath: /var/data
+      sizeGB: 1
     buildCommand: "npm install"
     startCommand: "npm run server"
     healthCheckPath: /api/health
