@@ -91,7 +91,7 @@ export default function NewAdvertiser() {
 
   const fetchPlans = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/plans');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/plans`);
       // إزالة التكرارات بناءً على الاسم والسعر
       const uniquePlans = response.data.reduce((acc: any[], plan: any) => {
         const exists = acc.find(p => p.name === plan.name && p.price === plan.price);
@@ -119,7 +119,7 @@ export default function NewAdvertiser() {
     setLoadingExisting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5001/api/admin/advertisers', {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/admin/advertisers`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setExistingAdvertisers(
@@ -243,7 +243,7 @@ export default function NewAdvertiser() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5001/api/admin/advertisers', data, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/admin/advertisers`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
