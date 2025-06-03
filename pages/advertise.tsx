@@ -32,7 +32,7 @@ export default function Advertise() {
 
   const fetchPlans = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/plans');
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/plans`);
       // De-duplicate plans based on name and price to avoid repetition
       const uniquePlans = response.data.reduce((acc: Plan[], current: Plan) => {
         const x = acc.find(item => item.name === current.name && item.price === current.price);
@@ -59,7 +59,7 @@ export default function Advertise() {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:5001/api/ad-requests', {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests`, {
         ...formData,
         plan_id: selectedPlan
       });

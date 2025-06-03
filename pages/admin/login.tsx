@@ -3,7 +3,9 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { FaLock, FaUser, FaSignInAlt } from 'react-icons/fa';
-import axios from 'axios';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../../lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 export default function AdminLogin() {
@@ -19,16 +21,41 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/login', formData);
+      // Sign in with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
       
-      // حفظ التوكن في localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Check if user is admin
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (!adminDoc.exists()) {
+        await auth.signOut();
+        throw new Error('ليس لديك صلاحيات الدخول كمسؤول');
+      }
+      
+      // Get ID token
+      const idToken = await user.getIdToken();
+      
+      // Store token and user info
+      localStorage.setItem('token', idToken);
+      localStorage.setItem('user', JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        name: adminDoc.data()?.name || 'Admin'
+      }));
       
       toast.success('تم تسجيل الدخول بنجاح');
       router.push('/admin/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'خطأ في تسجيل الدخول');
+      console.error('Login error:', error);
+      if (error.code === 'auth/user-not-found') {
+        toast.error('البريد الإلكتروني غير مسجل');
+      } else if (error.code === 'auth/wrong-password') {
+        toast.error('كلمة المرور غير صحيحة');
+      } else if (error.code === 'auth/invalid-email') {
+        toast.error('البريد الإلكتروني غير صالح');
+      } else {
+        toast.error(error.message || 'خطأ في تسجيل الدخول');
+      }
     } finally {
       setLoading(false);
     }

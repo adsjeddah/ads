@@ -39,6 +39,27 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local env files
+.env.local
+.env
+
+# firebase service account
+firebase-service-account.json
+*-service-account.json
+
+# local scripts
+set-local-admin.js
+scripts/test-*.js
+scripts/reset-*.js
+scripts/verify-*.js
+scripts/add-*.js
+scripts/create-*.js
+
+# temporary rules
+firestore-temp.rules
+firestore-open.rules
+storage-open.rules
+
 # database
 *.db
 *.sqlite

@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { adminAuth, adminDb } from '../../../lib/firebase-admin';
-import { COLLECTIONS } from '../../../lib/firebase';
 import { Admin } from '../../../types/models';
 import bcrypt from 'bcryptjs'; // If you store hashed passwords for admins in Firestore
+import jwt from 'jsonwebtoken';
 
 // This API route is an example. Actual login flow will primarily use Firebase Client SDK.
 // This route could be used to:
@@ -12,12 +11,16 @@ import bcrypt from 'bcryptjs'; // If you store hashed passwords for admins in Fi
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<{ isAdmin?: boolean; message?: string; error?: string; token?: string }>
+  res: NextApiResponse<{ isAdmin?: boolean; message?: string; error?: string; token?: string; user?: any }>
 ) {
   if (req.method === 'POST') {
     try {
       const { idToken, email, password } // idToken from Firebase client auth, or email/password for custom check
         = req.body;
+
+      // Firebase authentication
+      const { adminAuth, adminDb } = await import('../../../lib/firebase-admin');
+      const { COLLECTIONS } = await import('../../../lib/firebase');
 
       if (idToken) {
         // Option 1: Verify Firebase ID Token and check custom claims

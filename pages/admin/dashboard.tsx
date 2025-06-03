@@ -73,9 +73,9 @@ export default function AdminDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [statsRes, advertisersRes, requestsRes] = await Promise.all([
-        axios.get('http://localhost:5001/api/admin/statistics', { headers }),
-        axios.get('http://localhost:5001/api/admin/advertisers', { headers }),
-        axios.get('http://localhost:5001/api/admin/ad-requests', { headers })
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/statistics/dashboard`, { headers }),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/advertisers`, { headers }),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests`, { headers })
       ]);
 
       setStatistics(statsRes.data);
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5001/api/admin/advertisers/${id}`, {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/advertisers/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('تم حذف المعلن بنجاح');
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
   const handleUpdateRequestStatus = async (id: number, status: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5001/api/admin/ad-requests/${id}`, 
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests/${id}`,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
