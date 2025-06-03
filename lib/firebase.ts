@@ -1,12 +1,8 @@
-// firebase-examples/firebase-config.ts
-// مثال على إعداد Firebase في مشروعك
-
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
-// ضع هذه القيم في ملف .env.local
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -17,19 +13,21 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize services
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
 
-// Helper functions
+// Collection names
 export const COLLECTIONS = {
   ADVERTISERS: 'advertisers',
   PLANS: 'plans',
   SUBSCRIPTIONS: 'subscriptions',
   INVOICES: 'invoices',
   AD_REQUESTS: 'ad_requests',
-  PAYMENTS: 'payments'
+  PAYMENTS: 'payments',
+  STATISTICS: 'statistics',
+  ADMINS: 'admins'
 };
