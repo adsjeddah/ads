@@ -75,19 +75,75 @@ export class PlanService {
 
   // إنشاء الخطط الافتراضية
   static async createDefaultPlans() {
-    const defaultPlans = [
-      { name: 'خطة أسبوعين', duration_days: 14, price: 500, features: 'ظهور في جميع الصفحات, دعم فني' },
-      { name: 'خطة شهر', duration_days: 30, price: 800, features: 'ظهور في جميع الصفحات, دعم فني, أولوية في الترتيب' },
-      { name: 'خطة شهرين', duration_days: 60, price: 1400, features: 'ظهور في جميع الصفحات, دعم فني, أولوية في الترتيب, تقارير شهرية' },
-      { name: 'خطة 3 أشهر', duration_days: 90, price: 1800, features: 'ظهور في جميع الصفحات, دعم فني, أولوية في الترتيب, تقارير شهرية, شعار مميز' }
-    ];
-
-    const existingPlans = await this.getAll();
-    
-    if (existingPlans.length === 0) {
-      for (const plan of defaultPlans) {
-        await this.create(plan);
+    try {
+      const existingPlans = await this.getAll();
+      
+      // إذا كانت هناك خطط موجودة، لا تفعل شيئًا
+      if (existingPlans.length > 0) {
+        return existingPlans;
       }
+      
+      // إرجاع الخطط الافتراضية بدون محاولة الكتابة
+      // سيقوم المدير بإضافتها من خلال واجهة الإدارة
+      const defaultPlans = [
+        {
+          id: 'temp-1',
+          name: 'خطة أسبوعين',
+          description: 'للتجربة والشركات الجديدة',
+          price: 500,
+          duration_days: 14,
+          features: [
+            'ظهور في دليل شركات نقل العفش',
+            'عرض رقم الهاتف والواتساب',
+            'إضافة وصف مختصر للخدمات',
+            'ظهور في نتائج البحث المحلي',
+            'دعم فني عبر الواتساب'
+          ],
+          is_active: true,
+          created_at: new Date()
+        },
+        {
+          id: 'temp-2',
+          name: 'خطة شهر',
+          description: 'الأكثر طلباً للشركات النشطة',
+          price: 800,
+          duration_days: 30,
+          features: [
+            'جميع مميزات خطة الأسبوعين',
+            'أولوية في ترتيب الظهور',
+            'إضافة شعار الشركة',
+            'عرض صور لأعمال النقل السابقة',
+            'إحصائيات عدد المشاهدات',
+            'ظهور مميز بإطار ذهبي'
+          ],
+          is_active: true,
+          created_at: new Date()
+        },
+        {
+          id: 'temp-3',
+          name: 'خطة شهرين',
+          description: 'للشركات الرائدة في نقل العفش',
+          price: 1400,
+          duration_days: 60,
+          features: [
+            'جميع مميزات خطة الشهر',
+            'ظهور في أعلى نتائج البحث',
+            'صفحة خاصة بتفاصيل الشركة',
+            'إمكانية إضافة عروض وخصومات',
+            'شارة "شركة موثوقة" المميزة',
+            'تقارير شهرية مفصلة',
+            'دعم فني مخصص على مدار الساعة'
+          ],
+          is_active: true,
+          created_at: new Date()
+        }
+      ];
+      
+      return defaultPlans;
+    } catch (error) {
+      console.log('عرض الخطط الافتراضية المؤقتة');
+      // في حالة الخطأ، أرجع خطط افتراضية للعرض
+      return [];
     }
   }
 }

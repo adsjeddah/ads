@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "export": "next build && next export -o out",
     "start": "next start"
   },
   "dependencies": {
+    "@firebase/functions": "^0.12.8",
     "@types/node": "20.10.5",
     "@types/react": "18.2.45",
     "@types/react-dom": "18.2.18",
@@ -16,8 +18,10 @@
     "bcryptjs": "2.4.3",
     "date-fns": "3.0.6",
     "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "firebase": "^11.8.1",
     "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
     "framer-motion": "10.16.16",
     "jsonwebtoken": "9.0.2",
     "next": "14.0.4",

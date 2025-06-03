@@ -241,10 +241,10 @@ export default function Advertise() {
                     {/* Plan Features */}
                     <div className="p-6">
                       <ul className="space-y-3">
-                        {plan.features.split(',').map((feature, idx) => (
+                        {(Array.isArray(plan.features) ? plan.features : plan.features.split(',')).map((feature, idx) => (
                           <li key={idx} className="flex items-start gap-2">
                             <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{feature.trim()}</span>
+                            <span className="text-gray-700">{typeof feature === 'string' ? feature.trim() : feature}</span>
                           </li>
                         ))}
                       </ul>

@@ -13,18 +13,18 @@ export default async function handler(
     return res.status(400).json({ error: 'Invalid plan ID' });
   }
 
-  // Optional: Verify admin token for modifying or deleting plans
-  // const token = req.headers.authorization?.split('Bearer ')[1];
-  // if (req.method === 'PUT' || req.method === 'DELETE') {
-  //   if (!token) {
-  //     return res.status(401).json({ error: 'Unauthorized: No token provided' });
-  //   }
-  //   try {
-  //     await verifyAdminToken(token);
-  //   } catch (error: any) {
-  //     return res.status(403).json({ error: 'Forbidden: ' + error.message });
-  //   }
-  // }
+  // Verify admin token for modifying or deleting plans
+  const token = req.headers.authorization?.split('Bearer ')[1];
+  if (req.method === 'PUT' || req.method === 'DELETE') {
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+    try {
+      await verifyAdminToken(token);
+    } catch (error: any) {
+      return res.status(403).json({ error: 'Forbidden: ' + error.message });
+    }
+  }
 
   if (req.method === 'GET') {
     try {

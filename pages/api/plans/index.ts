@@ -9,22 +9,29 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      // Create default plans if they don't exist
-      await PlanService.createDefaultPlans();
-      const plans = await PlanService.getAll();
+      // محاولة جلب الخطط من قاعدة البيانات
+      let plans = await PlanService.getAll();
+      
+      // إذا لم توجد خطط، استخدم الخطط الافتراضية
+      if (plans.length === 0) {
+        plans = await PlanService.createDefaultPlans();
+      }
+      
       res.status(200).json(plans);
     } catch (error: any) {
       console.error('Error fetching plans:', error);
-      res.status(500).json({ error: 'Failed to fetch plans: ' + error.message });
+      // في حالة الخطأ، أرجع الخطط الافتراضية
+      const defaultPlans = await PlanService.createDefaultPlans();
+      res.status(200).json(defaultPlans);
     }
   } else if (req.method === 'POST') {
     try {
-      // Optional: Verify admin token for creating plans
-      // const token = req.headers.authorization?.split('Bearer ')[1];
-      // if (!token) {
-      //   return res.status(401).json({ error: 'Unauthorized: No token provided' });
-      // }
-      // await verifyAdminToken(token);
+      // Verify admin token for creating plans
+      const token = req.headers.authorization?.split('Bearer ')[1];
+      if (!token) {
+        return res.status(401).json({ error: 'Unauthorized: No token provided' });
+      }
+      await verifyAdminToken(token);
 
       const planData = req.body as Omit<Plan, 'id' | 'created_at'>;
       if (!planData.name || !planData.duration_days || planData.price == null) {
@@ -34,9 +41,9 @@ export default async function handler(
       res.status(201).json({ id: newPlanId });
     } catch (error: any) {
       console.error('Error creating plan:', error);
-      // if (error.message.includes('Unauthorized') || error.message.includes('admin')) {
-      //   return res.status(403).json({ error: 'Forbidden: ' + error.message });
-      // }
+      if (error.message.includes('Unauthorized') || error.message.includes('admin')) {
+        return res.status(403).json({ error: 'Forbidden: ' + error.message });
+      }
       res.status(500).json({ error: 'Failed to create plan: ' + error.message });
     }
   } else {

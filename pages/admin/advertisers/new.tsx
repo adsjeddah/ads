@@ -119,7 +119,7 @@ export default function NewAdvertiser() {
     setLoadingExisting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/admin/advertisers`, {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setExistingAdvertisers(
@@ -480,7 +480,14 @@ export default function NewAdvertiser() {
                               <h4 className="font-semibold text-gray-800">{plan.name}</h4>
                               <p className="text-sm text-gray-600 mt-1">المدة: {plan.duration_days} يوم</p>
                               {plan.features && (
-                                <p className="text-xs text-gray-500 mt-2">{plan.features}</p>
+                                <div className="mt-2 space-y-1">
+                                  {(Array.isArray(plan.features) ? plan.features : [plan.features]).slice(0, 3).map((feature: string, idx: number) => (
+                                    <p key={idx} className="text-xs text-gray-500 flex items-start gap-1">
+                                      <span className="text-green-500">•</span>
+                                      <span>{feature}</span>
+                                    </p>
+                                  ))}
+                                </div>
                               )}
                             </div>
                             <div className="text-right">

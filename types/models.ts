@@ -17,9 +17,11 @@ export interface Advertiser {
 export interface Plan {
   id?: string;
   name: string;
+  description?: string;
   duration_days: number;
   price: number;
-  features?: string;
+  features?: string | string[];
+  is_active?: boolean;
   created_at: Date;
 }
 

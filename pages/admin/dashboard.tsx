@@ -221,6 +221,17 @@ export default function AdminDashboard() {
                   </span>
                 )}
               </button>
+              <Link href="/admin/plans">
+                <button
+                  className={`py-4 px-2 border-b-2 transition-colors ${
+                    false
+                      ? 'border-primary-500 text-primary-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  خطط الأسعار
+                </button>
+              </Link>
             </div>
           </div>
         </div>

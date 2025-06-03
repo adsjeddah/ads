@@ -9,25 +9,49 @@ import jwt from 'jsonwebtoken';
 // 2. Check if the authenticated user is an admin (e.g., by checking a custom claim or a role in Firestore).
 // 3. Create a session cookie (if using custom session management).
 
+// Cache for admin tokens to reduce Firebase auth operations
+const tokenCache = new Map<string, { isAdmin: boolean, expiry: number }>();
+const TOKEN_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{ isAdmin?: boolean; message?: string; error?: string; token?: string; user?: any }>
 ) {
   if (req.method === 'POST') {
     try {
-      const { idToken, email, password } // idToken from Firebase client auth, or email/password for custom check
-        = req.body;
+      const { idToken, email, password } = req.body;
+
+      // Check cached token first if provided
+      if (idToken && tokenCache.has(idToken)) {
+        const cached = tokenCache.get(idToken)!;
+        if (Date.now() < cached.expiry) {
+          console.log('Using cached token validation');
+          return res.status(200).json({ 
+            isAdmin: cached.isAdmin, 
+            message: 'Admin verified from cache' 
+          });
+        } else {
+          // Expired cache entry
+          tokenCache.delete(idToken);
+        }
+      }
 
       // Firebase authentication
       const { adminAuth, adminDb } = await import('../../../lib/firebase-admin');
       const { COLLECTIONS } = await import('../../../lib/firebase');
 
       if (idToken) {
-        // Option 1: Verify Firebase ID Token and check custom claims
+        // Verify Firebase ID Token and check custom claims
         const decodedToken = await adminAuth.verifyIdToken(idToken);
-        if (decodedToken.admin === true) {
-          // Optionally, create a session cookie here if not relying on client-side Firebase auth persistence
-          // For now, just confirm admin status
+        const isAdmin = decodedToken.admin === true;
+        
+        // Cache the result
+        tokenCache.set(idToken, {
+          isAdmin,
+          expiry: Date.now() + TOKEN_CACHE_DURATION
+        });
+        
+        if (isAdmin) {
           return res.status(200).json({ isAdmin: true, message: 'Admin verified' });
         } else {
           return res.status(403).json({ error: 'Forbidden: User is not an admin' });
