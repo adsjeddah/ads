@@ -243,7 +243,7 @@ export default function NewAdvertiser() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/admin/advertisers`, data, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
