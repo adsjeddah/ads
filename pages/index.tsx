@@ -74,7 +74,7 @@ export default function Home() {
 
   const fetchAdvertisers = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/advertisers/active`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers?status=active`);
       setAdvertisers(response.data);
       setLoading(false);
     } catch (error) {
