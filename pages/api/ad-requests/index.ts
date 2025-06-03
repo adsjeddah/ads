@@ -9,10 +9,19 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      // Optional: Verify admin token if all ad-requests are admin-only view
-      // const token = req.headers.authorization?.split('Bearer ')[1];
-      // if (!token) return res.status(401).json({ error: 'Unauthorized' });
-      // await verifyAdminToken(token);
+      // Temporarily allow read without auth to debug
+      // TODO: Re-enable admin verification after debugging
+      /*
+      const token = req.headers.authorization?.split('Bearer ')[1];
+      if (!token) return res.status(401).json({ error: 'Unauthorized: No token provided' });
+      
+      try {
+        await verifyAdminToken(token);
+      } catch (authError: any) {
+        console.error('Admin token verification failed:', authError);
+        return res.status(403).json({ error: 'Forbidden: Invalid or expired token' });
+      }
+      */
 
       const { status } = req.query;
       const adRequests = await AdRequestService.getAll(status as string | undefined);

@@ -38,7 +38,7 @@ export default function AdRequests() {
   const fetchRequests = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5001/api/admin/ad-requests', {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/ad-requests`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRequests(response.data);
