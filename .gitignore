@@ -26,6 +26,11 @@ yarn-error.log*
 .env*.local
 .env
 .env.production
+.env.development
+
+# Railway and Vercel
+.railway/
+.vercel/
 
 # vercel
 .vercel
