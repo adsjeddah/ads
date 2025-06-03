@@ -17,13 +17,27 @@ export class PlanService {
   // جلب جميع الخطط
   static async getAll() {
     const plansRef = collection(db, COLLECTIONS.PLANS);
-    const q = query(plansRef, orderBy('price', 'asc'));
+    let snapshot;
     
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    try {
+      // Try with ordering by price
+      const q = query(plansRef, orderBy('price', 'asc'));
+      snapshot = await getDocs(q);
+    } catch (error: any) {
+      // If index is not ready, get all without ordering
+      console.log('Plans index not ready, using fallback query');
+      snapshot = await getDocs(plansRef);
+    }
+    
+    const plans = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     } as Plan));
+    
+    // Sort manually if we used the fallback
+    plans.sort((a, b) => (a.price || 0) - (b.price || 0));
+    
+    return plans;
   }
 
   // جلب خطة واحدة
