@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen } from 'react-icons/fa';
+import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaCertificate, FaBolt, FaGift, FaBell, FaExclamationTriangle, FaInfoCircle, FaUsers, FaPercent, FaUndoAlt } from 'react-icons/fa';
+import { MdVerified, MdLocalOffer, MdSecurity } from 'react-icons/md';
+import { AiFillSafetyCertificate } from 'react-icons/ai';
 import axios from 'axios';
 import Link from 'next/link';
 
@@ -148,27 +150,90 @@ export default function Home() {
                 مع ضمان الجودة والأسعار المنافسة
               </p>
               
-              <div className="flex flex-wrap justify-center gap-4 mb-12">
+              {/* شارات الثقة والضمانات */}
+              <div className="flex flex-wrap justify-center gap-4 mb-8">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg"
+                  className="flex items-center gap-2 bg-gradient-to-r from-green-500/10 to-green-600/10 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-green-500/20"
+                >
+                  <MdVerified className="text-green-600 text-xl" />
+                  <span className="font-bold text-green-800">شركات مرخصة من وزارة النقل</span>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-blue-600/10 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-blue-500/20"
+                >
+                  <FaUndoAlt className="text-blue-600 text-xl" />
+                  <span className="font-bold text-blue-800">ضمان استرجاع 100%</span>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500/10 to-purple-600/10 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-purple-500/20"
+                >
+                  <MdSecurity className="text-purple-600 text-xl" />
+                  <span className="font-bold text-purple-800">تأمين شامل على المنقولات</span>
+                </motion.div>
+              </div>
+
+              {/* عداد الإنجازات */}
+              <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-yellow-500/20 max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <div className="text-3xl md:text-4xl font-bold text-orange-600 mb-2">+15,000</div>
+                    <div className="text-gray-700 font-semibold">عملية نقل ناجحة</div>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <div className="text-3xl md:text-4xl font-bold text-yellow-600 mb-2">98%</div>
+                    <div className="text-gray-700 font-semibold">نسبة رضا العملاء</div>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <div className="text-3xl md:text-4xl font-bold text-red-600 mb-2">24/7</div>
+                    <div className="text-gray-700 font-semibold">خدمة طوارئ متاحة</div>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* الخدمات المميزة */}
+              <div className="flex flex-wrap justify-center gap-3 mb-12">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
                 >
                   <FaShieldAlt className="text-primary-500" />
-                  <span className="font-semibold">شركات مرخصة</span>
+                  <span className="font-semibold text-sm">شركات مرخصة</span>
                 </motion.div>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg"
+                  className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
                 >
                   <FaClock className="text-secondary-500" />
-                  <span className="font-semibold">خدمة 24/7</span>
+                  <span className="font-semibold text-sm">خدمة 24/7</span>
                 </motion.div>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg"
+                  className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
                 >
                   <FaStar className="text-accent-500" />
-                  <span className="font-semibold">ضمان الجودة</span>
+                  <span className="font-semibold text-sm">ضمان الجودة</span>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
+                >
+                  <FaCheckCircle className="text-green-500" />
+                  <span className="font-semibold text-sm">فك وتركيب مجاني</span>
                 </motion.div>
               </div>
 
@@ -243,17 +308,28 @@ export default function Home() {
                                 </div>
                               )}
     
+                              {/* عروض خاصة */}
+                              {index % 3 === 0 && (
+                                <div className="mb-3">
+                                  <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1">
+                                    <FaGift />
+                                    <span>خصم 15% للحجز اليوم</span>
+                                  </div>
+                                </div>
+                              )}
+
                               {/* Contact Buttons */}
-                              <div className="space-y-2"> {/* Reduced space between buttons */}
+                              <div className="space-y-2">
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleCall(advertiser.phone)}
-                                  className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                                  className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-6 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden"
                                 >
-                                  <FaPhone />
-                                  <span>اتصل الآن</span>
-                                  {/* Phone number text removed from button */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
+                                  <FaPhone className="animate-bounce" />
+                                  <span className="relative">اتصل الآن - رد فوري</span>
+                                  <FaBolt className="text-yellow-300 animate-pulse" />
                                 </motion.button>
     
                                 {advertiser.whatsapp && (
@@ -261,14 +337,24 @@ export default function Home() {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleWhatsApp(advertiser.whatsapp!, advertiser.company_name)}
-                                    className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                                    className="w-full flex items-center justify-between gap-3 bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-6 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200"
                                   >
-                                    <FaWhatsapp className="text-xl" />
-                                    <span>واتساب</span>
-                                    {/* WhatsApp number text was not here, so it's fine */}
+                                    <div className="flex items-center gap-2">
+                                      <FaWhatsapp className="text-xl" />
+                                      <span>احصل على عرض سعر مجاني</span>
+                                    </div>
+                                    <FaGift className="text-yellow-300" />
                                   </motion.button>
                                 )}
                               </div>
+
+                              {/* شارة الطوارئ */}
+                              {index % 2 === 0 && (
+                                <div className="mt-3 flex items-center justify-center gap-2 text-xs text-red-600 font-bold">
+                                  <FaExclamationTriangle className="animate-pulse" />
+                                  <span>خدمة طوارئ 24/7</span>
+                                </div>
+                              )}
                             </div>
 
                             {/* Premium Badge */}
@@ -292,23 +378,206 @@ export default function Home() {
                 )}
               </div>
               {/* End of Moved Advertisers Section */}
-
-              <Link href="/advertise">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="btn-primary text-lg flex items-center gap-2 mx-auto mt-12" /* Added margin top */
-                >
-                  <span>أعلن معنا</span>
-                  <FaArrowRight />
-                </motion.button>
-              </Link>
             </motion.div>
           </div>
         </section>
 
-        {/* Services Features */}
-        <section className="py-16 bg-white/50 backdrop-blur-sm">
+        {/* قسم الضمانات */}
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                <span className="text-gradient">ضماناتنا لك</span>
+              </h2>
+              <p className="text-xl text-gray-600">نضمن لك خدمة استثنائية وراحة بال كاملة</p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <FaCheckCircle className="text-green-500 text-2xl" />
+                  <h3 className="font-bold text-lg">ضمان عدم الخدش أو الكسر</h3>
+                </div>
+                <p className="text-gray-600 text-sm">تعويض فوري عن أي ضرر يحدث لأثاثك أثناء النقل</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <FaUsers className="text-blue-500 text-2xl" />
+                  <h3 className="font-bold text-lg">فريق محترف ومدرب</h3>
+                </div>
+                <p className="text-gray-600 text-sm">عمال مدربون على أعلى مستوى للتعامل مع جميع أنواع الأثاث</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <FaPercent className="text-purple-500 text-2xl" />
+                  <h3 className="font-bold text-lg">أسعار شفافة بدون رسوم مخفية</h3>
+                </div>
+                <p className="text-gray-600 text-sm">عرض سعر واضح وثابت دون أي مفاجآت</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-orange-500"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <FaClock className="text-orange-500 text-2xl" />
+                  <h3 className="font-bold text-lg">التزام بالمواعيد أو خصم 20%</h3>
+                </div>
+                <p className="text-gray-600 text-sm">نضمن الوصول في الوقت المحدد أو تحصل على خصم فوري</p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* دليل المستخدم */}
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                <span className="text-gradient">دليلك لنقل آمن وسليم</span>
+              </h2>
+              <p className="text-xl text-gray-600">نصائح مهمة لضمان نقل أثاثك بأمان</p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-6"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-primary-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">1</div>
+                  <h3 className="font-bold text-lg">كيف تختار شركة النقل المناسبة؟</h3>
+                </div>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
+                    <span>تحقق من التراخيص والتأمينات</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
+                    <span>اقرأ تقييمات العملاء السابقين</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
+                    <span>قارن بين عروض الأسعار</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
+                    <span>اسأل عن خبرتهم ومعداتهم</span>
+                  </li>
+                </ul>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-gradient-to-br from-secondary-50 to-secondary-100 rounded-xl p-6"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-secondary-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">2</div>
+                  <h3 className="font-bold text-lg">نصائح لحماية أثاثك أثناء النقل</h3>
+                </div>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
+                    <span>استخدم مواد تغليف عالية الجودة</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
+                    <span>قم بتفكيك القطع الكبيرة</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
+                    <span>ضع علامات على الصناديق الهشة</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
+                    <span>احتفظ بالأشياء الثمينة معك</span>
+                  </li>
+                </ul>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-gradient-to-br from-accent-50 to-accent-100 rounded-xl p-6"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-accent-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">3</div>
+                  <h3 className="font-bold text-lg">قائمة التحقق قبل النقل</h3>
+                </div>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
+                    <span>جرد جميع الأغراض وتصويرها</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
+                    <span>تنظيف الأثاث قبل التغليف</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
+                    <span>فصل الأجهزة الكهربائية</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
+                    <span>تجهيز المنزل الجديد</span>
+                  </li>
+                </ul>
+              </motion.div>
+            </div>
+
+            {/* نصيحة إضافية */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-12 bg-yellow-50 border-2 border-yellow-300 rounded-xl p-6 text-center"
+            >
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <FaInfoCircle className="text-yellow-600 text-2xl" />
+                <h3 className="font-bold text-xl text-yellow-800">نصيحة ذهبية</h3>
+              </div>
+              <p className="text-yellow-700">
+                احجز موعد النقل مسبقاً بأسبوع على الأقل لضمان توفر أفضل الفرق والمعدات
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Services Features - Updated */}
+        <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <motion.div
