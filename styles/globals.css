@@ -12,6 +12,67 @@
     @apply font-arabic;
     direction: rtl;
   }
+  
+  /* Dark mode styles */
+  .dark {
+    color-scheme: dark;
+  }
+  
+  .dark body {
+    @apply bg-gray-900 text-gray-100;
+  }
+  
+  .dark .bg-gradient-to-br {
+    @apply bg-gray-900;
+  }
+  
+  .dark .text-gray-700 {
+    @apply text-gray-300;
+  }
+  
+  .dark .text-gray-600 {
+    @apply text-gray-400;
+  }
+  
+  .dark .bg-white {
+    @apply bg-gray-800;
+  }
+  
+  .dark .bg-gray-50 {
+    @apply bg-gray-900;
+  }
+  
+  .dark .border-gray-200 {
+    @apply border-gray-700;
+  }
+  
+  .dark .hover\:bg-gray-50:hover {
+    @apply hover:bg-gray-700;
+  }
+  
+  .dark .hover\:bg-gray-100:hover {
+    @apply hover:bg-gray-700;
+  }
+  
+  .dark .shadow-lg {
+    @apply shadow-gray-900/50;
+  }
+  
+  .dark .shadow-sm {
+    @apply shadow-gray-900/30;
+  }
+  
+  .dark .border-gray-100 {
+    @apply border-gray-700;
+  }
+  
+  .dark .bg-white\/95 {
+    @apply bg-gray-900/95;
+  }
+  
+  .dark .bg-gradient-to-r {
+    @apply opacity-90;
+  }
 }
 
 @layer components {
@@ -98,4 +159,40 @@
 
 .animate-gradient {
   animation: gradient 8s ease infinite;
+}
+
+/* Mobile Menu Styles */
+body.menu-open {
+  overflow: hidden;
+}
+
+/* Mobile navigation header shadow */
+.header-shadow {
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,.1);
+}
+
+/* Smooth transitions for mobile menu */
+.mobile-menu-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Prevent text selection on menu items during animation */
+.mobile-menu-item {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Mobile menu backdrop for better UX */
+@media (max-width: 768px) {
+  .mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
 }

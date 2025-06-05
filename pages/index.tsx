@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence, useInView, useSpring, useTransform } from 'framer-motion';
-import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaCertificate, FaBolt, FaGift, FaBell, FaExclamationTriangle, FaInfoCircle, FaUsers, FaPercent, FaUndoAlt, FaChevronLeft, FaChevronRight, FaCalculator, FaArrowLeft } from 'react-icons/fa';
+import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaCertificate, FaBolt, FaGift, FaBell, FaExclamationTriangle, FaInfoCircle, FaUsers, FaPercent, FaUndoAlt, FaChevronLeft, FaChevronRight, FaCalculator, FaArrowLeft, FaBars, FaTimes, FaMoon, FaSun } from 'react-icons/fa';
 import { MdVerified, MdLocalOffer, MdSecurity } from 'react-icons/md';
 import { AiFillSafetyCertificate } from 'react-icons/ai';
 import axios from 'axios';
@@ -497,6 +497,9 @@ export default function Home() {
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
   const [loading, setLoading] = useState(true);
   const [shuffledAdvertisers, setShuffledAdvertisers] = useState<Advertiser[]>([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // تعريف الأيقونات المتاحة
   const iconComponents: { [key: string]: any } = {
@@ -547,7 +550,35 @@ export default function Home() {
 
   useEffect(() => {
     fetchAdvertisers();
+    
+    // Load dark mode preference from localStorage
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode === 'true') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    }
+    
+    // Handle scroll event
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   const fetchAdvertisers = async () => {
     try {
@@ -595,7 +626,201 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50'}`}>
+        {/* Mobile Navigation Header */}
+        <header className={`sticky top-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'bg-white/10 backdrop-blur-md shadow-lg'
+            : isDarkMode
+              ? 'bg-gray-900/95 backdrop-blur-sm shadow-sm'
+              : 'bg-white/95 backdrop-blur-sm shadow-sm'
+        }`}>
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between h-16">
+              {/* Logo */}
+              <Link href="/">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
+                    <FaTruck className="text-white text-xl" />
+                  </div>
+                  <span className={`font-bold text-lg hidden sm:block ${isDarkMode || scrolled ? 'text-white' : 'text-gray-900'}`}>دليل نقل العفش</span>
+                </motion.div>
+              </Link>
+
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center gap-6">
+                <Link href="/" className={`hover:text-primary-400 transition-colors font-medium ${isDarkMode || scrolled ? 'text-gray-300' : 'text-gray-700'}`}>
+                  الرئيسية
+                </Link>
+                <Link href="/calculator" className={`hover:text-primary-400 transition-colors font-medium ${isDarkMode || scrolled ? 'text-gray-300' : 'text-gray-700'}`}>
+                  حاسبة التكلفة
+                </Link>
+                <Link href="/advertise" className={`hover:text-primary-400 transition-colors font-medium ${isDarkMode || scrolled ? 'text-gray-300' : 'text-gray-700'}`}>
+                  أعلن معنا
+                </Link>
+                <a href="#reviews" className={`hover:text-primary-400 transition-colors font-medium ${isDarkMode || scrolled ? 'text-gray-300' : 'text-gray-700'}`}>
+                  آراء العملاء
+                </a>
+                <a href="#contact" className={`hover:text-primary-400 transition-colors font-medium ${isDarkMode || scrolled ? 'text-gray-300' : 'text-gray-700'}`}>
+                  اتصل بنا
+                </a>
+                
+                {/* Dark Mode Toggle for Desktop */}
+                <button
+                  onClick={toggleDarkMode}
+                  className={`p-2 rounded-lg transition-all ${
+                    isDarkMode || scrolled
+                      ? 'hover:bg-white/10 text-yellow-400'
+                      : 'hover:bg-gray-100 text-gray-700'
+                  }`}
+                  aria-label="Toggle dark mode"
+                >
+                  {isDarkMode ? <FaSun className="text-xl" /> : <FaMoon className="text-xl" />}
+                </button>
+              </nav>
+
+              {/* Mobile Controls */}
+              <div className="flex items-center gap-2 md:hidden">
+                {/* Dark Mode Toggle for Mobile */}
+                <button
+                  onClick={toggleDarkMode}
+                  className={`p-2 rounded-lg transition-all ${
+                    isDarkMode || scrolled
+                      ? 'hover:bg-white/10 text-yellow-400'
+                      : 'hover:bg-gray-100 text-gray-700'
+                  }`}
+                  aria-label="Toggle dark mode"
+                >
+                  {isDarkMode ? <FaSun className="text-xl" /> : <FaMoon className="text-xl" />}
+                </button>
+                
+                {/* Mobile Menu Button */}
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className={`p-2 rounded-lg transition-colors ${
+                    isDarkMode || scrolled
+                      ? 'hover:bg-white/10'
+                      : 'hover:bg-gray-100'
+                  }`}
+                  aria-label="Toggle mobile menu"
+                >
+                  {isMobileMenuOpen ? (
+                    <FaTimes className={`text-2xl ${isDarkMode || scrolled ? 'text-white' : 'text-gray-700'}`} />
+                  ) : (
+                    <FaBars className={`text-2xl ${isDarkMode || scrolled ? 'text-white' : 'text-gray-700'}`} />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Menu */}
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`md:hidden border-t ${
+                  isDarkMode
+                    ? 'bg-gray-800 border-gray-700'
+                    : 'bg-white border-gray-100'
+                }`}
+              >
+                <nav className="container mx-auto px-4 py-4">
+                  <Link href="/">
+                    <motion.a
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                        isDarkMode
+                          ? 'hover:bg-gray-700 text-gray-300'
+                          : 'hover:bg-gray-50 text-gray-700'
+                      }`}
+                    >
+                      <FaHome className="inline-block ml-2" />
+                      الرئيسية
+                    </motion.a>
+                  </Link>
+                  
+                  <Link href="/calculator">
+                    <motion.a
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                        isDarkMode
+                          ? 'hover:bg-gray-700 text-gray-300'
+                          : 'hover:bg-gray-50 text-gray-700'
+                      }`}
+                    >
+                      <FaCalculator className="inline-block ml-2" />
+                      حاسبة تكلفة النقل
+                    </motion.a>
+                  </Link>
+                  
+                  <Link href="/advertise">
+                    <motion.a
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                        isDarkMode
+                          ? 'hover:bg-gray-700 text-gray-300'
+                          : 'hover:bg-gray-50 text-gray-700'
+                      }`}
+                    >
+                      <FaBell className="inline-block ml-2" />
+                      أعلن معنا
+                    </motion.a>
+                  </Link>
+                  
+                  <motion.a
+                    href="#reviews"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                      isDarkMode
+                        ? 'hover:bg-gray-700 text-gray-300'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <FaStar className="inline-block ml-2" />
+                    آراء العملاء
+                  </motion.a>
+                  
+                  <motion.a
+                    href="#contact"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                      isDarkMode
+                        ? 'hover:bg-gray-700 text-gray-300'
+                        : 'hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    <FaPhone className="inline-block ml-2" />
+                    اتصل بنا
+                  </motion.a>
+
+                  {/* CTA Button in Mobile */}
+                  <Link href="/calculator">
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full mt-4 bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all"
+                    >
+                      احسب تكلفة النقل الآن
+                    </motion.button>
+                  </Link>
+                </nav>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </header>
+
         {/* Hero Section */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 via-secondary-600/20 to-accent-600/20 animate-gradient"></div>
@@ -1008,7 +1233,9 @@ export default function Home() {
         </section>
 
         {/* قسم التقييمات الاحترافي - Ultra Professional Reviews Section */}
-        <ReviewsSection />
+        <section id="reviews">
+          <ReviewsSection />
+        </section>
 
         {/* CTA Section */}
         <section className="py-20 bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600 text-white">
@@ -1037,16 +1264,58 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-12">
+        <footer id="contact" className="bg-gray-900 text-white py-12">
           <div className="container mx-auto px-4">
-            <div className="text-center">
-              <p className="mb-4">جميع الحقوق محفوظة © 2025 دليل شركات نقل العفش في جدة</p>
-              <div className="flex justify-center gap-6">
-                <Link href="/calculator" legacyBehavior><a className="hover:text-primary-400 transition-colors">حاسبة تكلفة النقل</a></Link>
-                <Link href="/privacy" legacyBehavior><a className="hover:text-primary-400 transition-colors">سياسة الخصوصية</a></Link>
-                <Link href="/terms" legacyBehavior><a className="hover:text-primary-400 transition-colors">الشروط والأحكام</a></Link>
-                {/* Admin login link removed for public view */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+              {/* About Section */}
+              <div className="text-center md:text-right">
+                <h3 className="font-bold text-xl mb-4">عن الدليل</h3>
+                <p className="text-gray-300 mb-4">
+                  دليل شامل لأفضل شركات نقل العفش في جدة، نساعدك في العثور على الشركة المناسبة لاحتياجاتك.
+                </p>
               </div>
+              
+              {/* Quick Links */}
+              <div className="text-center">
+                <h3 className="font-bold text-xl mb-4">روابط سريعة</h3>
+                <div className="space-y-2">
+                  <Link href="/calculator" legacyBehavior>
+                    <a className="block hover:text-primary-400 transition-colors">حاسبة تكلفة النقل</a>
+                  </Link>
+                  <Link href="/advertise" legacyBehavior>
+                    <a className="block hover:text-primary-400 transition-colors">أعلن معنا</a>
+                  </Link>
+                  <Link href="/privacy" legacyBehavior>
+                    <a className="block hover:text-primary-400 transition-colors">سياسة الخصوصية</a>
+                  </Link>
+                  <Link href="/terms" legacyBehavior>
+                    <a className="block hover:text-primary-400 transition-colors">الشروط والأحكام</a>
+                  </Link>
+                </div>
+              </div>
+              
+              {/* Contact Info */}
+              <div className="text-center md:text-left">
+                <h3 className="font-bold text-xl mb-4">تواصل معنا</h3>
+                <div className="space-y-3">
+                  <a href="tel:+966548923300" className="flex items-center justify-center md:justify-start gap-2 hover:text-primary-400 transition-colors">
+                    <FaPhone className="text-primary-400" />
+                    <span dir="ltr">+966 54 892 3300</span>
+                  </a>
+                  <a href="https://wa.me/966548923300" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center md:justify-start gap-2 hover:text-primary-400 transition-colors">
+                    <FaWhatsapp className="text-green-400 text-xl" />
+                    <span>واتساب</span>
+                  </a>
+                  <div className="flex items-center justify-center md:justify-start gap-2">
+                    <FaClock className="text-primary-400" />
+                    <span>متاحون 24/7</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="border-t border-gray-800 pt-8 text-center">
+              <p className="text-gray-400">جميع الحقوق محفوظة © 2025 دليل شركات نقل العفش في جدة</p>
             </div>
           </div>
         </footer>
