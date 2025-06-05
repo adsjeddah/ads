@@ -42,37 +42,40 @@ function AnimatedCounter({ value, duration = 2, isPercentage = false }: { value:
 // Counter Section Component
 function CounterSection() {
   return (
-    <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-yellow-500/20 max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+    <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-4 md:p-6 mb-8 border border-yellow-500/20 max-w-4xl mx-auto">
+      <div className="grid grid-cols-3 gap-2 md:gap-6 text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
+          className="flex flex-col items-center justify-center"
         >
-          <div className="text-3xl md:text-4xl font-bold text-orange-600 mb-2">
+          <div className="text-xl sm:text-2xl md:text-4xl font-bold text-orange-600 mb-1 md:mb-2">
             +<AnimatedCounter value={15000} duration={2.5} />
           </div>
-          <div className="text-gray-700 font-semibold">عملية نقل ناجحة</div>
+          <div className="text-gray-700 font-semibold text-xs sm:text-sm md:text-base leading-tight">عملية نقل<br className="sm:hidden" /> ناجحة</div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
+          className="flex flex-col items-center justify-center"
         >
-          <div className="text-3xl md:text-4xl font-bold text-yellow-600 mb-2">
+          <div className="text-xl sm:text-2xl md:text-4xl font-bold text-yellow-600 mb-1 md:mb-2">
             <AnimatedCounter value={98} duration={2} isPercentage={true} />
           </div>
-          <div className="text-gray-700 font-semibold">نسبة رضا العملاء</div>
+          <div className="text-gray-700 font-semibold text-xs sm:text-sm md:text-base leading-tight">نسبة رضا<br className="sm:hidden" /> العملاء</div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4 }}
+          className="flex flex-col items-center justify-center"
         >
-          <div className="text-3xl md:text-4xl font-bold text-red-600 mb-2">
+          <div className="text-xl sm:text-2xl md:text-4xl font-bold text-red-600 mb-1 md:mb-2">
             <AnimatedCounter value={24} duration={1.5} />/7
           </div>
-          <div className="text-gray-700 font-semibold">خدمة طوارئ متاحة</div>
+          <div className="text-gray-700 font-semibold text-xs sm:text-sm md:text-base leading-tight">خدمة طوارئ<br className="sm:hidden" /> متاحة</div>
         </motion.div>
       </div>
     </div>
