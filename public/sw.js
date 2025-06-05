@@ -21,14 +21,56 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+      .then(cache => {
+        // Cache each URL individually to handle failures gracefully
+        return Promise.all(
+          urlsToCache.map(url => {
+            return cache.add(url).catch(err => {
+              console.warn('Failed to cache:', url, err);
+            });
+          })
+        );
+      })
   );
 });
 
 self.addEventListener('fetch', event => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
-      .then(response => response || fetch(event.request))
+      .then(response => {
+        // Return cached response if found
+        if (response) {
+          return response;
+        }
+        
+        // Clone the request for caching
+        const fetchRequest = event.request.clone();
+        
+        return fetch(fetchRequest).then(response => {
+          // Check if valid response
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response;
+          }
+          
+          // Clone the response for caching
+          const responseToCache = response.clone();
+          
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          
+          return response;
+        });
+      })
+      .catch(err => {
+        console.error('Fetch failed:', err);
+      })
   );
 });
 
