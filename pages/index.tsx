@@ -1,11 +1,83 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useInView, useSpring, useTransform } from 'framer-motion';
 import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaCertificate, FaBolt, FaGift, FaBell, FaExclamationTriangle, FaInfoCircle, FaUsers, FaPercent, FaUndoAlt } from 'react-icons/fa';
 import { MdVerified, MdLocalOffer, MdSecurity } from 'react-icons/md';
 import { AiFillSafetyCertificate } from 'react-icons/ai';
 import axios from 'axios';
 import Link from 'next/link';
+
+// Component for animated counter
+function AnimatedCounter({ value, duration = 2, isPercentage = false }: { value: number; duration?: number; isPercentage?: boolean }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  
+  useEffect(() => {
+    if (!isInView) return;
+    
+    const steps = 60; // 60 FPS
+    const increment = value / (duration * steps);
+    let current = 0;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= value) {
+        current = value;
+        clearInterval(timer);
+      }
+      setDisplayValue(Math.round(current));
+    }, 1000 / steps);
+    
+    return () => clearInterval(timer);
+  }, [isInView, value, duration]);
+  
+  const formattedValue = isPercentage
+    ? `${displayValue}%`
+    : displayValue.toLocaleString('en-US');
+  
+  return <span ref={ref}>{formattedValue}</span>;
+}
+
+// Counter Section Component
+function CounterSection() {
+  return (
+    <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-yellow-500/20 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="text-3xl md:text-4xl font-bold text-orange-600 mb-2">
+            +<AnimatedCounter value={15000} duration={2.5} />
+          </div>
+          <div className="text-gray-700 font-semibold">عملية نقل ناجحة</div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="text-3xl md:text-4xl font-bold text-yellow-600 mb-2">
+            <AnimatedCounter value={98} duration={2} isPercentage={true} />
+          </div>
+          <div className="text-gray-700 font-semibold">نسبة رضا العملاء</div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className="text-3xl md:text-4xl font-bold text-red-600 mb-2">
+            <AnimatedCounter value={24} duration={1.5} />/7
+          </div>
+          <div className="text-gray-700 font-semibold">خدمة طوارئ متاحة</div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
 
 interface Advertiser {
   id: string;
@@ -176,34 +248,7 @@ export default function Home() {
               </div>
 
               {/* عداد الإنجازات */}
-              <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-yellow-500/20 max-w-4xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <div className="text-3xl md:text-4xl font-bold text-orange-600 mb-2">+15,000</div>
-                    <div className="text-gray-700 font-semibold">عملية نقل ناجحة</div>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <div className="text-3xl md:text-4xl font-bold text-yellow-600 mb-2">98%</div>
-                    <div className="text-gray-700 font-semibold">نسبة رضا العملاء</div>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <div className="text-3xl md:text-4xl font-bold text-red-600 mb-2">24/7</div>
-                    <div className="text-gray-700 font-semibold">خدمة طوارئ متاحة</div>
-                  </motion.div>
-                </div>
-              </div>
+              <CounterSection />
 
               {/* الخدمات المميزة */}
               <div className="flex flex-wrap justify-center gap-3 mb-12">
