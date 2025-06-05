@@ -426,47 +426,6 @@ function ReviewsSection() {
           ))}
         </motion.div>
 
-        {/* Bottom Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: 1.5 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8"
-        >
-          {[
-            { icon: FaUsers, value: 2847, label: "عميل سعيد", color: "from-blue-500 to-blue-600" },
-            { icon: FaStar, value: 4.9, label: "متوسط التقييم", color: "from-yellow-500 to-orange-500", decimal: true },
-            { icon: FaCheckCircle, value: 98, label: "نسبة الرضا", color: "from-green-500 to-green-600", percentage: true },
-            { icon: FaTruck, value: 15000, label: "عملية نقل", color: "from-purple-500 to-purple-600" }
-          ].map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ delay: 1.7 + index * 0.1, type: "spring" }}
-              whileHover={{ scale: 1.05 }}
-              className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-center border border-gray-700"
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-r ${stat.color} rounded-full flex items-center justify-center`}
-              >
-                <stat.icon className="text-white text-2xl" />
-              </motion.div>
-              <div className="text-3xl font-bold text-white mb-2">
-                {stat.decimal ? (
-                  stat.value
-                ) : stat.percentage ? (
-                  <><AnimatedCounter value={stat.value} isPercentage={true} /></>
-                ) : (
-                  <><AnimatedCounter value={stat.value} />+</>
-                )}
-              </div>
-              <p className="text-gray-400">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.div>
       </div>
     </section>
   );
@@ -686,37 +645,6 @@ export default function Home() {
               {/* عداد الإنجازات */}
               <CounterSection />
 
-              {/* الخدمات المميزة */}
-              <div className="flex flex-wrap justify-center gap-3 mb-12">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
-                >
-                  <FaShieldAlt className="text-primary-500" />
-                  <span className="font-semibold text-sm">شركات مرخصة</span>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
-                >
-                  <FaClock className="text-secondary-500" />
-                  <span className="font-semibold text-sm">خدمة 24/7</span>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
-                >
-                  <FaStar className="text-accent-500" />
-                  <span className="font-semibold text-sm">ضمان الجودة</span>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md"
-                >
-                  <FaCheckCircle className="text-green-500" />
-                  <span className="font-semibold text-sm">فك وتركيب مجاني</span>
-                </motion.div>
-              </div>
 
               {/* Advertisers Section - MOVED HERE */}
               <div className="mt-12"> {/* Added margin top for spacing */}
