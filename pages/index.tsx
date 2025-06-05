@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence, useInView, useSpring, useTransform } from 'framer-motion';
-import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaCertificate, FaBolt, FaGift, FaBell, FaExclamationTriangle, FaInfoCircle, FaUsers, FaPercent, FaUndoAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaCertificate, FaBolt, FaGift, FaBell, FaExclamationTriangle, FaInfoCircle, FaUsers, FaPercent, FaUndoAlt, FaChevronLeft, FaChevronRight, FaCalculator, FaArrowLeft } from 'react-icons/fa';
 import { MdVerified, MdLocalOffer, MdSecurity } from 'react-icons/md';
 import { AiFillSafetyCertificate } from 'react-icons/ai';
 import axios from 'axios';
 import Link from 'next/link';
+
 
 // Component for animated counter
 function AnimatedCounter({ value, duration = 2, isPercentage = false }: { value: number; duration?: number; isPercentage?: boolean }) {
@@ -334,15 +337,22 @@ function ReviewsSection() {
                     index === currentSlide ? 'z-20 scale-110' : 'z-10 hover:z-20 hover:scale-105'
                   }`}
                 >
-                  <img
-                    src={review.image}
-                    alt={review.name}
-                    className={`w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border-3 transition-all duration-300 ${
-                      index === currentSlide
-                        ? 'border-primary-400 ring-4 ring-primary-400/30'
-                        : 'border-gray-700 hover:border-gray-600'
-                    }`}
-                  />
+                  <div className={`relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-3 transition-all duration-300 ${
+                    index === currentSlide
+                      ? 'border-primary-400 ring-4 ring-primary-400/30'
+                      : 'border-gray-700 hover:border-gray-600'
+                  }`}>
+                    <Image
+                      src={review.image}
+                      alt={review.name}
+                      width={56}
+                      height={56}
+                      className="object-cover"
+                      loading="lazy"
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJalmRDtvfEREJh3EhQp4CjzjpJAJG/qzcjEpbCvdd2yHjLSR4BPaGHsVbnZ3xqtRgOIZ//2Q=="
+                    />
+                  </div>
                   {index === currentSlide && (
                     <motion.div
                       animate={{ scale: [1, 1.3, 1] }}
@@ -640,17 +650,6 @@ export default function Home() {
 
               {/* Advertisers Section - MOVED HERE */}
               <div className="mt-12"> {/* Added margin top for spacing */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  className="text-center mb-12"
-                >
-                  <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                    <span className="text-gradient">شركات نقل العفش المميزة</span>
-                  </h2>
-                  <p className="text-xl text-gray-600">اختر الشركة المناسبة لاحتياجاتك</p>
-                </motion.div>
-
                 {loading ? (
                   <div className="flex justify-center items-center py-10"> {/* Reduced py for hero section */}
                     <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary-500"></div> {/* Adjusted spinner size */}
@@ -780,6 +779,37 @@ export default function Home() {
               </div>
               {/* End of Moved Advertisers Section */}
             </motion.div>
+          </div>
+        </section>
+
+        {/* قسم حاسبة التكلفة - أيقونة احترافية */}
+        <section className="py-12">
+          <div className="container mx-auto px-4">
+            <Link href="/calculator">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-md mx-auto cursor-pointer"
+              >
+                <div className="bg-gradient-to-br from-primary-600 to-secondary-600 rounded-3xl shadow-2xl p-8 text-center text-white hover:shadow-3xl transition-all">
+                  <motion.div
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    className="inline-flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur rounded-full mb-4"
+                  >
+                    <FaCalculator className="text-5xl text-white" />
+                  </motion.div>
+                  <h3 className="text-2xl font-bold mb-2">احسب تكلفة نقل عفشك</h3>
+                  <p className="text-white/90 mb-4">حاسبة ذكية ودقيقة لتقدير التكلفة</p>
+                  <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-6 py-3 rounded-full">
+                    <span className="font-semibold">ابدأ الحساب الآن</span>
+                    <FaArrowLeft />
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
           </div>
         </section>
 
@@ -980,52 +1010,6 @@ export default function Home() {
         {/* قسم التقييمات الاحترافي - Ultra Professional Reviews Section */}
         <ReviewsSection />
 
-        {/* Services Features - Updated */}
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-center"
-              >
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white text-3xl">
-                  <FaTruck />
-                </div>
-                <h3 className="text-xl font-bold mb-2">نقل آمن ومضمون</h3>
-                <p className="text-gray-600">جميع الشركات المعتمدة لدينا توفر ضمان كامل على سلامة أثاثك</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-center"
-              >
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full flex items-center justify-center text-white text-3xl">
-                  <FaBoxes />
-                </div>
-                <h3 className="text-xl font-bold mb-2">تغليف احترافي</h3>
-                <p className="text-gray-600">استخدام أفضل مواد التغليف لحماية الأثاث من الخدوش والكسر</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-center"
-              >
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-accent-400 to-accent-600 rounded-full flex items-center justify-center text-white text-3xl">
-                  <FaClock />
-                </div>
-                <h3 className="text-xl font-bold mb-2">دقة في المواعيد</h3>
-                <p className="text-gray-600">الالتزام بالمواعيد المحددة مع العملاء دون تأخير</p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section className="py-20 bg-gradient-to-br from-primary-600 via-secondary-600 to-accent-600 text-white">
           <div className="container mx-auto px-4 text-center">
@@ -1058,6 +1042,7 @@ export default function Home() {
             <div className="text-center">
               <p className="mb-4">جميع الحقوق محفوظة © 2025 دليل شركات نقل العفش في جدة</p>
               <div className="flex justify-center gap-6">
+                <Link href="/calculator" legacyBehavior><a className="hover:text-primary-400 transition-colors">حاسبة تكلفة النقل</a></Link>
                 <Link href="/privacy" legacyBehavior><a className="hover:text-primary-400 transition-colors">سياسة الخصوصية</a></Link>
                 <Link href="/terms" legacyBehavior><a className="hover:text-primary-400 transition-colors">الشروط والأحكام</a></Link>
                 {/* Admin login link removed for public view */}
