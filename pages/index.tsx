@@ -486,7 +486,7 @@ interface Advertiser {
 export default function Home() {
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [rotationKey, setRotationKey] = useState(0);
+  const [shuffledAdvertisers, setShuffledAdvertisers] = useState<Advertiser[]>([]);
 
   // تعريف الأيقونات المتاحة
   const iconComponents: { [key: string]: any } = {
@@ -539,19 +539,13 @@ export default function Home() {
     fetchAdvertisers();
   }, []);
 
-  useEffect(() => {
-    // تدوير الإعلانات كل 10 ثواني
-    const interval = setInterval(() => {
-      setRotationKey(prev => prev + 1);
-    }, 10000);
-    
-    return () => clearInterval(interval);
-  }, []);
-
   const fetchAdvertisers = async () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers?status=active`);
       setAdvertisers(response.data);
+      // خلط الإعلانات مرة واحدة عند تحميل البيانات
+      const shuffled = shuffleAdvertisers(response.data);
+      setShuffledAdvertisers(shuffled);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching advertisers:', error);
@@ -569,11 +563,9 @@ export default function Home() {
     return shuffled;
   };
 
-  // الحصول على المعلنين بترتيب عشوائي
+  // الحصول على المعلنين بالترتيب المخلوط
   const getRotatedAdvertisers = () => {
-    if (advertisers.length === 0) return [];
-    // استخدام rotationKey كـ seed للحصول على ترتيب مختلف في كل دورة
-    return shuffleAdvertisers(advertisers);
+    return shuffledAdvertisers;
   };
 
   const handleCall = (phone: string) => {
@@ -666,7 +658,7 @@ export default function Home() {
                 ) : (
                   <AnimatePresence mode="wait">
                     <motion.div
-                      key={rotationKey}
+                      key="advertisers-grid"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
