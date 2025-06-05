@@ -226,27 +226,29 @@ export default function NewAdvertiser() {
       endDate = formData.custom_end_date;
     }
 
-    const data = new FormData();
-    data.append('company_name', formData.company_name);
-    data.append('phone', formData.phone);
-    data.append('whatsapp', formData.whatsapp);
-    data.append('services', formData.services);
-    data.append('selected_icon', formData.selected_icon);
-    data.append('plan_id', formData.plan_id || '1');
-    data.append('start_date', startDate);
-    data.append('end_date', endDate);
-    data.append('base_price', formData.base_price.toString());
-    data.append('discount_type', formData.discount_type);
-    data.append('discount_amount', formData.discount_amount.toString());
-    data.append('total_amount', formData.total_amount.toString());
-    data.append('paid_amount', formData.paid_amount.toString());
+    const advertiserData = {
+      company_name: formData.company_name,
+      phone: formData.phone,
+      whatsapp: formData.whatsapp || null,
+      services: formData.services || null,
+      selected_icon: formData.selected_icon || null,
+      plan_id: formData.plan_id || '1',
+      start_date: startDate,
+      end_date: endDate,
+      base_price: formData.base_price,
+      discount_type: formData.discount_type,
+      discount_amount: formData.discount_amount,
+      total_amount: formData.total_amount,
+      paid_amount: formData.paid_amount,
+      status: 'active'
+    };
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, data, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, advertiserData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
       toast.success('تم إضافة المعلن بنجاح');

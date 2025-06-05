@@ -1,14 +1,14 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
   orderBy,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase';
 import { Plan } from '../../types/models';

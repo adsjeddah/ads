@@ -108,14 +108,25 @@ export class AdvertiserService {
 
   // إنشاء معلن جديد
   static async create(data: Omit<Advertiser, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
-    const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : undefined;
-    
-    const advertiserData = {
-      ...data,
-      password: hashedPassword,
+    // إعداد بيانات المعلن مع استبعاد القيم undefined
+    const advertiserData: any = {
+      company_name: data.company_name,
+      phone: data.phone,
+      status: data.status || 'active',
       created_at: serverTimestamp(),
       updated_at: serverTimestamp()
     };
+    
+    // إضافة الحقول الاختيارية فقط إذا كانت موجودة
+    if (data.whatsapp) advertiserData.whatsapp = data.whatsapp;
+    if (data.services) advertiserData.services = data.services;
+    if (data.icon_url) advertiserData.icon_url = data.icon_url;
+    if (data.email) advertiserData.email = data.email;
+    
+    // تشفير كلمة المرور إذا كانت موجودة
+    if (data.password) {
+      advertiserData.password = await bcrypt.hash(data.password, 10);
+    }
     
     const docRef = await addDoc(collection(db, COLLECTIONS.ADVERTISERS), advertiserData);
     

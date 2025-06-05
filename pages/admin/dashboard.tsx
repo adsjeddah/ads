@@ -21,28 +21,28 @@ interface Statistics {
 }
 
 interface Advertiser {
-  id: number;
+  id: string;
   company_name: string;
   phone: string;
-  email: string;
+  email?: string;
   status: string;
   created_at: string;
-  total_subscriptions: number;
-  active_subscriptions: number;
+  total_subscriptions?: number;
+  active_subscriptions?: number;
   total_amount?: number;
   paid_amount?: number;
   remaining_amount?: number;
 }
 
 interface AdRequest {
-  id: number;
+  id: string;
   company_name: string;
   contact_name: string;
   phone: string;
   email?: string;
   whatsapp?: string;
-  plan_name: string;
-  price: number;
+  plan_name?: string;
+  price?: number;
   status: string;
   created_at: string;
 }
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
     router.push('/admin/login');
   };
 
-  const handleDeleteAdvertiser = async (id: number) => {
+  const handleDeleteAdvertiser = async (id: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا المعلن؟')) return;
 
     try {
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateRequestStatus = async (id: number, status: string) => {
+  const handleUpdateRequestStatus = async (id: string, status: string) => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests/${id}`,
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            {advertiser.active_subscriptions} / {advertiser.total_subscriptions}
+                            {advertiser.active_subscriptions || 0} / {advertiser.total_subscriptions || 0}
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex gap-2">

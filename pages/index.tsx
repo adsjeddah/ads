@@ -6,7 +6,7 @@ import axios from 'axios';
 import Link from 'next/link';
 
 interface Advertiser {
-  id: number;
+  id: string;
   company_name: string;
   phone: string;
   whatsapp?: string;
@@ -17,6 +17,7 @@ interface Advertiser {
 export default function Home() {
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rotationKey, setRotationKey] = useState(0);
 
   // تعريف الأيقونات المتاحة
   const iconComponents: { [key: string]: any } = {
@@ -67,8 +68,14 @@ export default function Home() {
 
   useEffect(() => {
     fetchAdvertisers();
-    // إعادة ترتيب الإعلانات كل 30 ثانية
-    const interval = setInterval(fetchAdvertisers, 30000);
+  }, []);
+
+  useEffect(() => {
+    // تدوير الإعلانات كل 10 ثواني
+    const interval = setInterval(() => {
+      setRotationKey(prev => prev + 1);
+    }, 10000);
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -81,6 +88,23 @@ export default function Home() {
       console.error('Error fetching advertisers:', error);
       setLoading(false);
     }
+  };
+
+  // دالة لخلط ترتيب المعلنين بشكل عشوائي
+  const shuffleAdvertisers = (ads: Advertiser[]) => {
+    const shuffled = [...ads];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // الحصول على المعلنين بترتيب عشوائي
+  const getRotatedAdvertisers = () => {
+    if (advertisers.length === 0) return [];
+    // استخدام rotationKey كـ seed للحصول على ترتيب مختلف في كل دورة
+    return shuffleAdvertisers(advertisers);
   };
 
   const handleCall = (phone: string) => {
@@ -168,13 +192,14 @@ export default function Home() {
                 ) : (
                   <AnimatePresence mode="wait">
                     <motion.div
-                      key={advertisers.map(a => a.id).join('-')}
+                      key={rotationKey}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
                       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                     >
-                      {advertisers.map((advertiser, index) => (
+                      {getRotatedAdvertisers().map((advertiser, index) => (
                         <motion.div
                           key={advertiser.id}
                           initial={{ opacity: 0, y: 20 }}
