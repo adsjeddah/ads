@@ -624,6 +624,243 @@ export default function Home() {
           </div>
         </section>
 
+        {/* قسم التقييمات - Reviews Section */}
+        <section className="py-20 bg-gradient-to-br from-primary-50 via-white to-secondary-50">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                <span className="text-gradient">آراء عملائنا الكرام</span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                تجارب حقيقية من عملاء استخدموا دليلنا للوصول إلى أفضل شركات نقل العفش في جدة
+              </p>
+              <div className="flex items-center justify-center gap-4 mt-6">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <FaStar key={i} className="text-yellow-400 text-2xl" />
+                  ))}
+                </div>
+                <span className="text-2xl font-bold text-gray-800">4.9</span>
+                <span className="text-gray-600">من 2,847 تقييم</span>
+              </div>
+            </motion.div>
+
+            {/* Reviews Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Review 1 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-bl-full opacity-20"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src="/images/reviews/mohamed.jpg"
+                    alt="محمد الغامدي"
+                    className="w-16 h-16 rounded-full object-cover border-3 border-yellow-400"
+                  />
+                  <div>
+                    <h4 className="font-bold text-lg">محمد الغامدي</h4>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className="text-yellow-400 text-sm" />
+                      ))}
+                    </div>
+                  </div>
+                  <MdVerified className="text-blue-500 text-2xl mr-auto" />
+                </div>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  "دليل ممتاز! ساعدني في العثور على شركة نقل محترفة بسرعة. الشركة اللي اخترتها من الدليل كانت دقيقة في المواعيد والتعامل راقي جداً. أنصح الجميع بالاستفادة من هذا الدليل"
+                </p>
+                <div className="text-sm text-gray-500">منذ أسبوع</div>
+              </motion.div>
+
+              {/* Review 2 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-300 to-green-500 rounded-bl-full opacity-20"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src="/images/reviews/asmaa.webp"
+                    alt="أسماء العتيبي"
+                    className="w-16 h-16 rounded-full object-cover border-3 border-green-400"
+                  />
+                  <div>
+                    <h4 className="font-bold text-lg">أسماء العتيبي</h4>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className="text-yellow-400 text-sm" />
+                      ))}
+                    </div>
+                  </div>
+                  <MdVerified className="text-blue-500 text-2xl mr-auto" />
+                </div>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  "تجربة رائعة! كنت خايفة على أثاثي لأنه غالي، بس الحمدلله الشركة اللي حصلتها من الدليل كانت محترفة جداً. غلفوا كل شيء بعناية ووصل كله سليم. شكراً لكم على هذا الدليل المفيد"
+                </p>
+                <div className="text-sm text-gray-500">منذ 3 أيام</div>
+              </motion.div>
+
+              {/* Review 3 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-300 to-purple-500 rounded-bl-full opacity-20"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src="/images/reviews/khaled.jpg"
+                    alt="خالد الحربي"
+                    className="w-16 h-16 rounded-full object-cover border-3 border-purple-400"
+                  />
+                  <div>
+                    <h4 className="font-bold text-lg">خالد الحربي</h4>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className="text-yellow-400 text-sm" />
+                      ))}
+                    </div>
+                  </div>
+                  <MdVerified className="text-blue-500 text-2xl mr-auto" />
+                </div>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  "أفضل دليل لشركات النقل! وفر علي وقت البحث والمقارنة. كل الشركات الموجودة موثوقة ومرخصة. نقلت عفشي من جدة للرياض والحمدلله كل شيء تمام"
+                </p>
+                <div className="text-sm text-gray-500">منذ أسبوعين</div>
+              </motion.div>
+
+              {/* Review 4 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden lg:col-span-1 md:col-span-2"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-red-300 to-red-500 rounded-bl-full opacity-20"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src="/images/reviews/doha.jpg"
+                    alt="ضحى السالم"
+                    className="w-16 h-16 rounded-full object-cover border-3 border-red-400"
+                  />
+                  <div>
+                    <h4 className="font-bold text-lg">ضحى السالم</h4>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className="text-yellow-400 text-sm" />
+                      ))}
+                    </div>
+                  </div>
+                  <MdVerified className="text-blue-500 text-2xl mr-auto" />
+                </div>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  "خدمة ممتازة! الدليل سهل الاستخدام وكل المعلومات واضحة. اتصلت على شركة من الدليل وجاوني بنفس اليوم. الأسعار معقولة والشغل نظيف. ما قصروا والله"
+                </p>
+                <div className="text-sm text-gray-500">منذ 5 أيام</div>
+              </motion.div>
+
+              {/* Review 5 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-300 to-indigo-500 rounded-bl-full opacity-20"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src="/images/reviews/abdallah.png"
+                    alt="عبدالله الشمري"
+                    className="w-16 h-16 rounded-full object-cover border-3 border-indigo-400"
+                  />
+                  <div>
+                    <h4 className="font-bold text-lg">عبدالله الشمري</h4>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className="text-yellow-400 text-sm" />
+                      ))}
+                    </div>
+                  </div>
+                  <MdVerified className="text-blue-500 text-2xl mr-auto" />
+                </div>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  "تجربتي كانت ممتازة! الدليل وفر علي عناء البحث. الشركة جات في الوقت المحدد وعندهم معدات حديثة. حتى ساعدوني في الفك والتركيب. يعطيكم العافية"
+                </p>
+                <div className="text-sm text-gray-500">منذ يومين</div>
+              </motion.div>
+
+              {/* Review 6 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-teal-300 to-teal-500 rounded-bl-full opacity-20"></div>
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src="/images/reviews/hagar.jpg"
+                    alt="هاجر القحطاني"
+                    className="w-16 h-16 rounded-full object-cover border-3 border-teal-400"
+                  />
+                  <div>
+                    <h4 className="font-bold text-lg">هاجر القحطاني</h4>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className={`text-sm ${i === 4 ? 'text-gray-300' : 'text-yellow-400'}`} />
+                      ))}
+                    </div>
+                  </div>
+                  <MdVerified className="text-blue-500 text-2xl mr-auto" />
+                </div>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  "الدليل مفيد جداً والشركات كلها محترمة. بس تأخروا علي شوي عن الموعد المحدد، غير كذا كل شيء كان ممتاز. أنصح بالتواصل مع أكثر من شركة للمقارنة"
+                </p>
+                <div className="text-sm text-gray-500">منذ شهر</div>
+              </motion.div>
+            </div>
+
+            {/* Trust Indicators */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="mt-16 bg-gradient-to-r from-primary-100 to-secondary-100 rounded-2xl p-8"
+            >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-primary-600 mb-2">2,847+</div>
+                  <p className="text-gray-700">تقييم إيجابي</p>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-secondary-600 mb-2">4.9/5</div>
+                  <p className="text-gray-700">متوسط التقييم</p>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-accent-600 mb-2">98%</div>
+                  <p className="text-gray-700">نسبة الرضا</p>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-green-600 mb-2">100%</div>
+                  <p className="text-gray-700">عملاء حقيقيون</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Services Features - Updated */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
