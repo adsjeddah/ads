@@ -1,0 +1,43 @@
+{
+  "name": "jeddah-moving-ads",
+  "version": "1.0.0",
+  "description": "نظام إعلاني احترافي لشركات نقل العفش في جدة",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "export": "next build && next export -o out",
+    "start": "next start",
+    "check-env": "node scripts/check-env.js",
+    "setup": "node scripts/check-env.js && npm run dev"
+  },
+  "dependencies": {
+    "@firebase/functions": "^0.12.8",
+    "@types/react-dom": "18.2.18",
+    "autoprefixer": "10.4.16",
+    "axios": "1.6.2",
+    "bcryptjs": "2.4.3",
+    "date-fns": "3.0.6",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "firebase": "^11.8.1",
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "framer-motion": "10.16.16",
+    "jsonwebtoken": "9.0.2",
+    "next": "14.0.4",
+    "postcss": "8.4.32",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hot-toast": "2.4.1",
+    "react-icons": "4.12.0",
+    "recharts": "2.10.3",
+    "tailwindcss": "3.4.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/jsonwebtoken": "9.0.5",
+    "@types/node": "22.15.29",
+    "@types/react": "18.2.45",
+    "typescript": "5.8.3"
+  }
+}
