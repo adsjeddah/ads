@@ -12,67 +12,6 @@
     @apply font-arabic;
     direction: rtl;
   }
-  
-  /* Dark mode styles */
-  .dark {
-    color-scheme: dark;
-  }
-  
-  .dark body {
-    @apply bg-gray-900 text-gray-100;
-  }
-  
-  .dark .bg-gradient-to-br {
-    @apply bg-gray-900;
-  }
-  
-  .dark .text-gray-700 {
-    @apply text-gray-300;
-  }
-  
-  .dark .text-gray-600 {
-    @apply text-gray-400;
-  }
-  
-  .dark .bg-white {
-    @apply bg-gray-800;
-  }
-  
-  .dark .bg-gray-50 {
-    @apply bg-gray-900;
-  }
-  
-  .dark .border-gray-200 {
-    @apply border-gray-700;
-  }
-  
-  .dark .hover\:bg-gray-50:hover {
-    @apply hover:bg-gray-700;
-  }
-  
-  .dark .hover\:bg-gray-100:hover {
-    @apply hover:bg-gray-700;
-  }
-  
-  .dark .shadow-lg {
-    @apply shadow-gray-900/50;
-  }
-  
-  .dark .shadow-sm {
-    @apply shadow-gray-900/30;
-  }
-  
-  .dark .border-gray-100 {
-    @apply border-gray-700;
-  }
-  
-  .dark .bg-white\/95 {
-    @apply bg-gray-900/95;
-  }
-  
-  .dark .bg-gradient-to-r {
-    @apply opacity-90;
-  }
 }
 
 @layer components {
