@@ -920,14 +920,14 @@ export default function Home() {
                               </div>
     
                               {/* Company Name */}
-                              <h3 className="text-xs md:text-lg font-bold text-center mb-1.5 md:mb-2 text-gray-800 leading-tight">
+                              <h3 className="text-base md:text-2xl font-bold text-center mb-1.5 md:mb-2 text-gray-800 leading-tight">
                                 {advertiser.company_name}
                               </h3>
     
                               {/* Services */}
                               {advertiser.services && (
                                 <div className="mb-2 text-center hidden md:block"> {/* إخفاء الخدمات على الموبايل */}
-                                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                                  <p className="text-base text-gray-600 leading-relaxed line-clamp-2">
                                     {advertiser.services.split('،').map(s => s.trim()).join(' • ')}
                                   </p>
                                 </div>
@@ -936,8 +936,8 @@ export default function Home() {
                               {/* عروض خاصة */}
                               {index % 3 === 0 && (
                                 <div className="mb-1 md:mb-2">
-                                  <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full text-[9px] md:text-xs font-bold inline-flex items-center gap-0.5 md:gap-1">
-                                    <FaGift className="text-[7px] md:text-xs" />
+                                  <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full text-[12px] md:text-base font-bold inline-flex items-center gap-0.5 md:gap-1">
+                                    <FaGift className="text-[10px] md:text-base" />
                                     <span className="hidden md:inline">خصم 15% للحجز اليوم</span>
                                     <span className="md:hidden">خصم 15%</span>
                                   </div>
@@ -950,21 +950,21 @@ export default function Home() {
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleCall(advertiser.phone, advertiser.id)}
-                                  className="w-full flex items-center justify-center gap-1 md:gap-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white py-1.5 md:py-2.5 px-2 md:px-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden text-[10px] md:text-sm"
+                                  className="w-full flex items-center justify-center gap-1 md:gap-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white py-1.5 md:py-2.5 px-2 md:px-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden text-[13px] md:text-lg"
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
-                                  <FaPhone className="relative animate-bounce text-[9px] md:text-sm" />
+                                  <FaPhone className="relative animate-bounce text-[12px] md:text-lg" />
                                   <span className="relative font-bold tracking-wider" dir="ltr">
                                     {advertiser.phone}
                                   </span>
-                                  <FaBolt className="relative text-yellow-300 animate-pulse text-[9px] md:text-sm" />
+                                  <FaBolt className="relative text-yellow-300 animate-pulse text-[12px] md:text-lg" />
                                 </motion.button>
                               </div>
 
                               {/* شارة الطوارئ */}
                               {index % 2 === 0 && (
-                                <div className="mt-1 md:mt-2 flex items-center justify-center gap-0.5 md:gap-1 text-[9px] md:text-xs text-red-600 font-bold">
-                                  <FaExclamationTriangle className="animate-pulse text-[8px] md:text-xs" />
+                                <div className="mt-1 md:mt-2 flex items-center justify-center gap-0.5 md:gap-1 text-[12px] md:text-base text-red-600 font-bold">
+                                  <FaExclamationTriangle className="animate-pulse text-[11px] md:text-base" />
                                   <span>طوارئ 24/7</span>
                                 </div>
                               )}
@@ -972,8 +972,8 @@ export default function Home() {
 
                             {/* Premium Badge */}
                             {index === 0 && (
-                              <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-1.5 py-0.5 rounded-full text-[8px] md:text-sm font-semibold shadow-lg flex items-center gap-0.5 md:gap-1">
-                                <FaStar className="text-[7px] md:text-xs" />
+                              <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-1.5 py-0.5 rounded-full text-[11px] md:text-lg font-semibold shadow-lg flex items-center gap-0.5 md:gap-1">
+                                <FaStar className="text-[10px] md:text-base" />
                                 <span>مميز</span>
                               </div>
                             )}
