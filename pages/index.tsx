@@ -887,7 +887,7 @@ export default function Home() {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6"
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6"
                     >
                       {getRotatedAdvertisers().map((advertiser, index) => (
                         <motion.div
@@ -898,29 +898,29 @@ export default function Home() {
                           whileHover={{ y: -10 }}
                           className="relative group"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-secondary-500/20 to-accent-500/20 rounded-xl md:rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-                          <div className="relative bg-white rounded-xl md:rounded-2xl shadow-xl overflow-hidden card-hover">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-secondary-500/20 to-accent-500/20 rounded-lg md:rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                          <div className="relative bg-white rounded-lg md:rounded-2xl shadow-xl overflow-hidden card-hover">
                             {/* Header with gradient */}
-                            <div className="h-1 md:h-2 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500"></div>
+                            <div className="h-0.5 md:h-2 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500"></div>
                             
-                            <div className="p-2 md:p-4"> {/* تقليل padding للموبايل */}
+                            <div className="p-2 md:p-4">
                               {/* Company Icon/Logo */}
-                              <div className="flex justify-center mb-2"> {/* تقليل margin */}
+                              <div className="flex justify-center mb-1.5 md:mb-2">
                                 {advertiser.icon_url && iconComponents[advertiser.icon_url] ? (
-                                  <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100"> {/* تقليل الحجم */}
+                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100">
                                     {React.createElement(iconComponents[advertiser.icon_url], {
-                                      className: `text-xl md:text-3xl ${iconColors[advertiser.icon_url] || 'text-primary-600'}` // تقليل حجم الأيقونة
+                                      className: `text-lg md:text-3xl ${iconColors[advertiser.icon_url] || 'text-primary-600'}`
                                     })}
                                   </div>
                                 ) : (
-                                  <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white text-lg md:text-2xl font-bold shadow-md"> {/* تقليل الحجم */}
+                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white text-base md:text-2xl font-bold shadow-md">
                                     {advertiser.company_name.charAt(0)}
                                   </div>
                                 )}
                               </div>
     
                               {/* Company Name */}
-                              <h3 className="text-xs md:text-lg font-bold text-center mb-2 text-gray-800 leading-tight"> {/* تقليل حجم الخط */}
+                              <h3 className="text-xs md:text-lg font-bold text-center mb-1.5 md:mb-2 text-gray-800 leading-tight">
                                 {advertiser.company_name}
                               </h3>
     
@@ -935,9 +935,9 @@ export default function Home() {
     
                               {/* عروض خاصة */}
                               {index % 3 === 0 && (
-                                <div className="mb-2">
-                                  <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-2 py-0.5 rounded-full text-[10px] md:text-xs font-bold inline-flex items-center gap-1">
-                                    <FaGift className="text-[8px] md:text-xs" />
+                                <div className="mb-1 md:mb-2">
+                                  <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full text-[9px] md:text-xs font-bold inline-flex items-center gap-0.5 md:gap-1">
+                                    <FaGift className="text-[7px] md:text-xs" />
                                     <span className="hidden md:inline">خصم 15% للحجز اليوم</span>
                                     <span className="md:hidden">خصم 15%</span>
                                   </div>
@@ -945,33 +945,33 @@ export default function Home() {
                               )}
 
                               {/* Contact Buttons */}
-                              <div className="space-y-2">
+                              <div className="space-y-1.5 md:space-y-2">
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleCall(advertiser.phone, advertiser.id)}
-                                  className="w-full flex items-center justify-center gap-1 md:gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white py-1.5 md:py-2.5 px-2 md:px-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden text-[11px] md:text-sm"
+                                  className="w-full flex items-center justify-center gap-1 md:gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white py-1.5 md:py-2.5 px-2 md:px-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden text-[10px] md:text-sm"
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
-                                  <FaPhone className="animate-bounce text-[10px] md:text-sm" />
+                                  <FaPhone className="animate-bounce text-[9px] md:text-sm" />
                                   <span className="relative">اتصل الآن</span>
-                                  <FaBolt className="text-yellow-300 animate-pulse text-[10px] md:text-sm" />
+                                  <FaBolt className="text-yellow-300 animate-pulse text-[9px] md:text-sm" />
                                 </motion.button>
                               </div>
 
                               {/* شارة الطوارئ */}
                               {index % 2 === 0 && (
-                                <div className="mt-2 flex items-center justify-center gap-1 text-[10px] md:text-xs text-red-600 font-bold">
-                                  <FaExclamationTriangle className="animate-pulse text-[10px] md:text-xs" />
+                                <div className="mt-1 md:mt-2 flex items-center justify-center gap-0.5 md:gap-1 text-[9px] md:text-xs text-red-600 font-bold">
+                                  <FaExclamationTriangle className="animate-pulse text-[8px] md:text-xs" />
                                   <span>طوارئ 24/7</span>
                                 </div>
                               )}
                             </div>
 
                             {/* Premium Badge */}
-                            {index === 0 && ( // Assuming the first advertiser is premium or apply other logic
-                              <div className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-2 py-0.5 rounded-full text-[10px] md:text-sm font-semibold shadow-lg flex items-center gap-1">
-                                <FaStar className="text-[8px] md:text-xs" />
+                            {index === 0 && (
+                              <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-1.5 py-0.5 rounded-full text-[8px] md:text-sm font-semibold shadow-lg flex items-center gap-0.5 md:gap-1">
+                                <FaStar className="text-[7px] md:text-xs" />
                                 <span>مميز</span>
                               </div>
                             )}
