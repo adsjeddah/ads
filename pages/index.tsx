@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence, useInView, useSpring, useTransform } from 'framer-motion';
-import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaCertificate, FaBolt, FaGift, FaBell, FaExclamationTriangle, FaInfoCircle, FaUsers, FaPercent, FaUndoAlt, FaChevronLeft, FaChevronRight, FaCalculator, FaArrowLeft, FaBars, FaTimes, FaMoon, FaSun } from 'react-icons/fa';
+import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaArrowRight, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaCertificate, FaBolt, FaGift, FaBell, FaExclamationTriangle, FaInfoCircle, FaUsers, FaPercent, FaUndoAlt, FaChevronLeft, FaChevronRight, FaArrowLeft, FaBars, FaTimes, FaMoon, FaSun } from 'react-icons/fa';
 import { MdVerified, MdLocalOffer, MdSecurity } from 'react-icons/md';
 import { AiFillSafetyCertificate } from 'react-icons/ai';
 import axios from 'axios';
@@ -715,9 +715,6 @@ export default function Home() {
                 <Link href="/" className={`hover:text-primary-400 transition-colors font-medium ${isDarkMode || scrolled ? 'text-gray-300' : 'text-gray-700'}`}>
                   الرئيسية
                 </Link>
-                <Link href="/calculator" className={`hover:text-primary-400 transition-colors font-medium ${isDarkMode || scrolled ? 'text-gray-300' : 'text-gray-700'}`}>
-                  حاسبة التكلفة
-                </Link>
                 <Link href="/advertise" className={`hover:text-primary-400 transition-colors font-medium ${isDarkMode || scrolled ? 'text-gray-300' : 'text-gray-700'}`}>
                   أعلن معنا
                 </Link>
@@ -807,21 +804,6 @@ export default function Home() {
                     </motion.a>
                   </Link>
                   
-                  <Link href="/calculator">
-                    <motion.a
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
-                        isDarkMode
-                          ? 'hover:bg-gray-700 text-gray-300'
-                          : 'hover:bg-gray-50 text-gray-700'
-                      }`}
-                    >
-                      <FaCalculator className="inline-block ml-2" />
-                      حاسبة تكلفة النقل
-                    </motion.a>
-                  </Link>
-                  
                   <Link href="/advertise">
                     <motion.a
                       whileTap={{ scale: 0.95 }}
@@ -864,17 +846,6 @@ export default function Home() {
                     <FaPhone className="inline-block ml-2" />
                     اتصل بنا
                   </motion.a>
-
-                  {/* CTA Button in Mobile */}
-                  <Link href="/calculator">
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full mt-4 bg-gradient-to-r from-primary-600 to-secondary-600 text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all"
-                    >
-                      احسب تكلفة النقل الآن
-                    </motion.button>
-                  </Link>
                 </nav>
               </motion.div>
             )}
@@ -1019,37 +990,6 @@ export default function Home() {
               </div>
               {/* End of Moved Advertisers Section */}
             </motion.div>
-          </div>
-        </section>
-
-        {/* قسم حاسبة التكلفة - أيقونة احترافية */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            <Link href="/calculator">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.3 }}
-                className="max-w-md mx-auto cursor-pointer"
-              >
-                <div className="bg-gradient-to-br from-primary-600 to-secondary-600 rounded-3xl shadow-2xl p-8 text-center text-white hover:shadow-3xl transition-all">
-                  <motion.div
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    className="inline-flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur rounded-full mb-4"
-                  >
-                    <FaCalculator className="text-5xl text-white" />
-                  </motion.div>
-                  <h3 className="text-2xl font-bold mb-2">احسب تكلفة نقل عفشك</h3>
-                  <p className="text-white/90 mb-4">حاسبة ذكية ودقيقة لتقدير التكلفة</p>
-                  <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-6 py-3 rounded-full">
-                    <span className="font-semibold">ابدأ الحساب الآن</span>
-                    <FaArrowLeft />
-                  </div>
-                </div>
-              </motion.div>
-            </Link>
           </div>
         </section>
 
@@ -1294,9 +1234,6 @@ export default function Home() {
               <div className="text-center">
                 <h3 className="font-bold text-xl mb-4">روابط سريعة</h3>
                 <div className="space-y-2">
-                  <Link href="/calculator" legacyBehavior>
-                    <a className="block hover:text-primary-400 transition-colors">حاسبة تكلفة النقل</a>
-                  </Link>
                   <Link href="/advertise" legacyBehavior>
                     <a className="block hover:text-primary-400 transition-colors">أعلن معنا</a>
                   </Link>
