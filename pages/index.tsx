@@ -950,17 +950,14 @@ export default function Home() {
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleCall(advertiser.phone, advertiser.id)}
-                                  className="w-full flex flex-col items-center justify-center gap-0.5 bg-gradient-to-r from-green-500 to-green-600 text-white py-1.5 md:py-2.5 px-2 md:px-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden"
+                                  className="w-full flex items-center justify-center gap-1 md:gap-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white py-1.5 md:py-2.5 px-2 md:px-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden text-[10px] md:text-sm"
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
-                                  <div className="relative flex items-center gap-1">
-                                    <FaPhone className="animate-bounce text-[9px] md:text-sm" />
-                                    <span className="text-[10px] md:text-sm">اتصل الآن</span>
-                                    <FaBolt className="text-yellow-300 animate-pulse text-[9px] md:text-sm" />
-                                  </div>
-                                  <span className="relative text-[11px] md:text-base font-bold tracking-wider" dir="ltr">
+                                  <FaPhone className="relative animate-bounce text-[9px] md:text-sm" />
+                                  <span className="relative font-bold tracking-wider" dir="ltr">
                                     {advertiser.phone}
                                   </span>
+                                  <FaBolt className="relative text-yellow-300 animate-pulse text-[9px] md:text-sm" />
                                 </motion.button>
                               </div>
 
