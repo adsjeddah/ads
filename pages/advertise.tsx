@@ -201,6 +201,48 @@ export default function Advertise() {
           </div>
         </section>
 
+        {/* Contact Info Section */}
+        <section className="py-12 bg-gradient-to-br from-green-50 to-blue-50">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="max-w-2xl mx-auto text-center"
+            >
+              <div className="bg-white rounded-2xl p-8 shadow-2xl border-2 border-green-200">
+                <motion.div
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="inline-block mb-4"
+                >
+                  <FaWhatsapp className="text-6xl text-green-500" />
+                </motion.div>
+                <h3 className="text-3xl font-bold text-gray-800 mb-3">
+                  تواصل معنا مباشرة
+                </h3>
+                <p className="text-lg text-gray-600 mb-6">
+                  لأي استفسار أو مساعدة، تواصل معنا عبر الواتساب
+                </p>
+                <motion.a
+                  href="https://wa.me/966548923300"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-10 py-5 rounded-full text-2xl font-bold shadow-lg hover:shadow-2xl transition-all"
+                >
+                  <FaWhatsapp className="text-3xl animate-pulse" />
+                  <span dir="ltr">+966 54 892 3300</span>
+                </motion.a>
+                <p className="text-sm text-gray-500 mt-4 font-semibold">
+                  ⚡ نرد على استفساراتك خلال دقائق
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Pricing Plans */}
         <section className="py-20 bg-white/80 backdrop-blur-sm">
           <div className="container mx-auto px-4">
@@ -393,40 +435,6 @@ export default function Advertise() {
                     {loading ? 'جاري الإرسال...' : 'إرسال الطلب'}
                   </motion.button>
                 </form>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Contact Info Section */}
-        <section className="py-12 bg-white">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className="max-w-2xl mx-auto text-center"
-            >
-              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8 shadow-lg border border-green-200">
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                  تواصل معنا مباشرة
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  لأي استفسار أو مساعدة، يمكنك التواصل معنا عبر الواتساب
-                </p>
-                <motion.a
-                  href="https://wa.me/966548923300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:shadow-xl transition-all"
-                >
-                  <FaWhatsapp className="text-2xl" />
-                  <span dir="ltr">+966 54 892 3300</span>
-                </motion.a>
-                <p className="text-sm text-gray-500 mt-4">
-                  نرد على استفساراتك خلال دقائق
-                </p>
               </div>
             </motion.div>
           </div>
