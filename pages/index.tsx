@@ -932,17 +932,6 @@ export default function Home() {
                                 </div>
                               )}
     
-                              {/* عروض خاصة */}
-                              {index % 3 === 0 && (
-                                <div className="mb-1 md:mb-2">
-                                  <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-1.5 py-0.5 rounded-full text-[12px] md:text-base font-bold inline-flex items-center gap-0.5 md:gap-1">
-                                    <FaGift className="text-[10px] md:text-base" />
-                                    <span className="hidden md:inline">خصم 15% للحجز اليوم</span>
-                                    <span className="md:hidden">خصم 15%</span>
-                                  </div>
-                                </div>
-                              )}
-
                               {/* Contact Buttons */}
                               <div className="space-y-1.5 md:space-y-2">
                                 <motion.button
@@ -960,14 +949,6 @@ export default function Home() {
                                 </motion.button>
                               </div>
                             </div>
-
-                            {/* Premium Badge */}
-                            {index === 0 && (
-                              <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-1.5 py-0.5 rounded-full text-[11px] md:text-lg font-semibold shadow-lg flex items-center gap-0.5 md:gap-1">
-                                <FaStar className="text-[10px] md:text-base" />
-                                <span>مميز</span>
-                              </div>
-                            )}
                           </div>
                         </motion.div>
                       ))}
