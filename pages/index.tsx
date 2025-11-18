@@ -960,14 +960,6 @@ export default function Home() {
                                   <FaBolt className="relative text-yellow-300 animate-pulse text-[12px] md:text-lg" />
                                 </motion.button>
                               </div>
-
-                              {/* شارة الطوارئ */}
-                              {index % 2 === 0 && (
-                                <div className="mt-1 md:mt-2 flex items-center justify-center gap-0.5 md:gap-1 text-[12px] md:text-base text-red-600 font-bold">
-                                  <FaExclamationTriangle className="animate-pulse text-[11px] md:text-base" />
-                                  <span>طوارئ 24/7</span>
-                                </div>
-                              )}
                             </div>
 
                             {/* Premium Badge */}
