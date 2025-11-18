@@ -954,7 +954,7 @@ export default function Home() {
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
                                   <FaPhone className="relative animate-bounce text-[12px] md:text-lg" />
-                                  <span className="relative font-bold tracking-wider" dir="ltr">
+                                  <span className="relative font-bold tracking-wider text-[16px] md:text-xl" dir="ltr">
                                     {advertiser.phone}
                                   </span>
                                   <FaBolt className="relative text-yellow-300 animate-pulse text-[12px] md:text-lg" />
