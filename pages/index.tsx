@@ -895,11 +895,10 @@ export default function Home() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          whileHover={{ y: -10 }}
-                          className="relative group"
+                          className="relative"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-secondary-500/20 to-accent-500/20 rounded-lg md:rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-                          <div className="relative bg-white rounded-lg md:rounded-2xl shadow-xl overflow-hidden card-hover">
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-secondary-500/20 to-accent-500/20 rounded-lg md:rounded-2xl blur-xl"></div>
+                          <div className="relative bg-white rounded-lg md:rounded-2xl shadow-xl overflow-hidden">
                             {/* Header with gradient */}
                             <div className="h-0.5 md:h-2 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500"></div>
                             
