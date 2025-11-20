@@ -23,6 +23,7 @@ import CreateSubscriptionForm from '../../../../components/admin/CreateSubscript
 import RecordPaymentForm from '../../../../components/admin/RecordPaymentForm';
 import SubscriptionsList from '../../../../components/admin/SubscriptionsList';
 import PaymentHistoryTable from '../../../../components/admin/PaymentHistoryTable';
+import InvoicesTable from '../../../../components/admin/InvoicesTable';
 
 interface Advertiser {
   id: string;
@@ -68,13 +69,18 @@ export default function AdvertiserFinancial() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
+      // Fetch initial data
       await Promise.all([
         fetchAdvertiser(),
         fetchFinancialSummary(),
-        fetchSubscriptions(),
-        fetchPlans(),
-        fetchInvoices()
+        fetchPlans()
       ]);
+      
+      // Fetch subscriptions first
+      await fetchSubscriptions();
+      
+      // Then fetch invoices (depends on subscriptions)
+      await fetchInvoices();
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('فشل تحميل البيانات');
@@ -110,8 +116,10 @@ export default function AdvertiserFinancial() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       const response = await axios.get(`${apiUrl}/subscriptions?advertiser_id=${id}`);
       setSubscriptions(response.data);
+      return response.data; // Return subscriptions for use in fetchInvoices
     } catch (error) {
       console.error('Error fetching subscriptions:', error);
+      return [];
     }
   };
 
@@ -129,12 +137,18 @@ export default function AdvertiserFinancial() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       const response = await axios.get(`${apiUrl}/invoices`);
+      
+      // Get current subscriptions (either from state or fetch again)
+      const currentSubscriptions = subscriptions.length > 0 ? subscriptions : await fetchSubscriptions();
+      
       // Filter invoices for this advertiser's subscriptions
-      const subscriptionIds = subscriptions.map(s => s.id);
+      const subscriptionIds = currentSubscriptions.map((s: any) => s.id);
       const filteredInvoices = response.data.filter((inv: any) => 
         subscriptionIds.includes(inv.subscription_id)
       );
+      
       setInvoices(filteredInvoices);
+      console.log('Fetched invoices:', filteredInvoices.length);
     } catch (error) {
       console.error('Error fetching invoices:', error);
     }
@@ -286,6 +300,17 @@ export default function AdvertiserFinancial() {
                 loading={false}
               />
             </div>
+
+            {/* Invoices Table */}
+            {invoices.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">الفواتير</h2>
+                <InvoicesTable
+                  invoices={invoices}
+                  loading={false}
+                />
+              </div>
+            )}
 
             {/* Payment History */}
             {financialSummary && financialSummary.payment_history.length > 0 && (
