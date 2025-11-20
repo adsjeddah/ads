@@ -70,9 +70,11 @@ export interface AdRequest {
 export interface Payment {
   id?: string;
   subscription_id: string;
+  invoice_id?: string; // الفاتورة المرتبطة بالدفعة
   amount: number;
   payment_date: Date;
   payment_method?: string;
+  transaction_id?: string; // معرف المعاملة المصرفية
   notes?: string;
   created_at: Date;
 }
