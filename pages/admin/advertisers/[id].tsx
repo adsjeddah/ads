@@ -323,9 +323,17 @@ export default function AdvertiserDetails() {
                 </div>
               </InfoCard>
 
-              <InfoCard title="إضافة اشتراك جديد" icon={FaPlus}>
-                {/* TODO: Add New Subscription Form Here */}
-                <p className="text-gray-500">سيتم إضافة نموذج إضافة اشتراك هنا قريباً.</p>
+              <InfoCard title="الإدارة المالية المتكاملة" icon={FaMoneyBillWave}>
+                <p className="text-gray-600 mb-4">إدارة كاملة للاشتراكات والفواتير والمدفوعات</p>
+                <Link href={`/admin/advertisers/${advertiser.id}/financial`}>
+                  <motion.button 
+                    whileHover={{scale: 1.05}} 
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <FaMoneyBillWave />
+                    فتح النظام المالي
+                  </motion.button>
+                </Link>
               </InfoCard>
             </div>
 
