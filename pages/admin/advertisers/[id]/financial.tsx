@@ -40,14 +40,14 @@ interface Advertiser {
 }
 
 interface FinancialSummary {
-  total_subscriptions: number;
-  active_subscriptions: number;
-  total_revenue: number;
-  total_paid: number;
-  total_pending: number;
-  total_invoices: number;
-  paid_invoices: number;
-  unpaid_invoices: number;
+  total_subscriptions?: number;
+  active_subscriptions?: number;
+  total_revenue?: number;
+  total_paid?: number;
+  total_pending?: number;
+  total_invoices?: number;
+  paid_invoices?: number;
+  unpaid_invoices?: number;
 }
 
 interface Subscription {
@@ -296,29 +296,29 @@ export default function AdvertiserFinancial() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <StatCard
                 title="إجمالي الاشتراكات"
-                value={summary.total_subscriptions}
-                subtitle={`نشط: ${summary.active_subscriptions}`}
+                value={summary.total_subscriptions || 0}
+                subtitle={`نشط: ${summary.active_subscriptions || 0}`}
                 icon={FaCalendarAlt}
                 color="blue"
               />
               <StatCard
                 title="إجمالي الإيرادات"
-                value={`${summary.total_revenue} ريال`}
-                subtitle={`مدفوع: ${summary.total_paid} ريال`}
+                value={`${summary.total_revenue || 0} ريال`}
+                subtitle={`مدفوع: ${summary.total_paid || 0} ريال`}
                 icon={FaChartLine}
                 color="green"
               />
               <StatCard
                 title="المبلغ المتبقي"
-                value={`${summary.total_pending} ريال`}
-                subtitle={`من ${summary.total_revenue} ريال`}
+                value={`${summary.total_pending || 0} ريال`}
+                subtitle={`من ${summary.total_revenue || 0} ريال`}
                 icon={FaHourglassHalf}
                 color="orange"
               />
               <StatCard
                 title="الفواتير"
-                value={summary.total_invoices}
-                subtitle={`مدفوعة: ${summary.paid_invoices} | معلقة: ${summary.unpaid_invoices}`}
+                value={summary.total_invoices || 0}
+                subtitle={`مدفوعة: ${summary.paid_invoices || 0} | معلقة: ${summary.unpaid_invoices || 0}`}
                 icon={FaFileInvoice}
                 color="purple"
               />

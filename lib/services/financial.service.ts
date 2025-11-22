@@ -377,11 +377,15 @@ export class FinancialService {
     total_subscriptions: number;
     active_subscriptions: number;
     expired_subscriptions: number;
+    total_revenue: number;
     total_spent: number;
     total_pending: number;
     total_paid: number;
+    total_invoices: number;
+    paid_invoices: number;
+    unpaid_invoices: number;
     payment_history: Payment[];
-    unpaid_invoices: Invoice[];
+    unpaid_invoices_list: Invoice[];
   }> {
     // 1. جلب جميع الاشتراكات
     const subscriptions = await SubscriptionAdminService.getByAdvertiserId(advertiserId);
@@ -390,9 +394,9 @@ export class FinancialService {
     const activeCount = subscriptions.filter(s => s.status === 'active').length;
     const expiredCount = subscriptions.filter(s => s.status === 'expired').length;
     
-    const totalSpent = subscriptions.reduce((sum, s) => sum + s.total_amount, 0);
-    const totalPaid = subscriptions.reduce((sum, s) => sum + s.paid_amount, 0);
-    const totalPending = subscriptions.reduce((sum, s) => sum + s.remaining_amount, 0);
+    const totalSpent = subscriptions.reduce((sum, s) => sum + (s.total_amount || 0), 0);
+    const totalPaid = subscriptions.reduce((sum, s) => sum + (s.paid_amount || 0), 0);
+    const totalPending = subscriptions.reduce((sum, s) => sum + (s.remaining_amount || 0), 0);
 
     // 3. جلب سجل المدفوعات
     let allPayments: Payment[] = [];
@@ -410,25 +414,35 @@ export class FinancialService {
       return dateB - dateA;
     });
 
-    // 4. جلب الفواتير غير المدفوعة
-    let unpaidInvoices: Invoice[] = [];
+    // 4. جلب جميع الفواتير
+    let allInvoices: Invoice[] = [];
+    let unpaidInvoicesList: Invoice[] = [];
     for (const sub of subscriptions) {
       if (sub.id) {
         const invoices = await InvoiceAdminService.getBySubscriptionId(sub.id);
+        allInvoices = allInvoices.concat(invoices);
         const unpaid = invoices.filter(inv => inv.status === 'unpaid');
-        unpaidInvoices = unpaidInvoices.concat(unpaid);
+        unpaidInvoicesList = unpaidInvoicesList.concat(unpaid);
       }
     }
+
+    // 5. حساب إحصائيات الفواتير
+    const paidInvoicesCount = allInvoices.filter(inv => inv.status === 'paid').length;
+    const unpaidInvoicesCount = allInvoices.filter(inv => inv.status !== 'paid').length;
 
     return {
       total_subscriptions: subscriptions.length,
       active_subscriptions: activeCount,
       expired_subscriptions: expiredCount,
-      total_spent: Math.round(totalSpent * 100) / 100,
+      total_revenue: Math.round(totalSpent * 100) / 100, // إجمالي الإيرادات (مجموع قيمة الاشتراكات)
+      total_spent: Math.round(totalSpent * 100) / 100, // للتوافق مع الكود القديم
       total_pending: Math.round(totalPending * 100) / 100,
       total_paid: Math.round(totalPaid * 100) / 100,
+      total_invoices: allInvoices.length,
+      paid_invoices: paidInvoicesCount,
+      unpaid_invoices: unpaidInvoicesCount,
       payment_history: allPayments,
-      unpaid_invoices: unpaidInvoices
+      unpaid_invoices_list: unpaidInvoicesList
     };
   }
 
