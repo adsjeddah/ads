@@ -21,6 +21,13 @@ export interface DiscountCalculation {
   total_amount: number; // السعر النهائي بعد الخصم
 }
 
+export interface VATCalculation {
+  subtotal: number;            // المبلغ قبل الضريبة
+  vat_percentage: number;      // نسبة الضريبة
+  vat_amount: number;          // مبلغ الضريبة
+  total_with_vat: number;      // الإجمالي شامل الضريبة
+}
+
 export interface PaymentAllocation {
   subscription_id: string;
   invoice_id?: string;
@@ -32,6 +39,32 @@ export interface PaymentAllocation {
 }
 
 export class FinancialService {
+  
+  /**
+   * حساب ضريبة القيمة المضافة (VAT)
+   */
+  static calculateVAT(
+    subtotal: number,
+    vatPercentage: number = 15
+  ): VATCalculation {
+    // التحقق من صحة المدخلات
+    if (subtotal < 0) {
+      throw new Error('Subtotal cannot be negative');
+    }
+    if (vatPercentage < 0 || vatPercentage > 100) {
+      throw new Error('VAT percentage must be between 0 and 100');
+    }
+    
+    const vatAmount = Math.round((subtotal * vatPercentage / 100) * 100) / 100;
+    const totalWithVat = subtotal + vatAmount;
+    
+    return {
+      subtotal,
+      vat_percentage: vatPercentage,
+      vat_amount: vatAmount,
+      total_with_vat: totalWithVat
+    };
+  }
   
   /**
    * حساب الخصومات بدقة
@@ -85,7 +118,7 @@ export class FinancialService {
   }
 
   /**
-   * إنشاء اشتراك مع فاتورة تلقائياً
+   * إنشاء اشتراك مع فاتورة تلقائياً (مع دعم VAT)
    */
   static async createSubscriptionWithInvoice(data: {
     advertiser_id: string;
@@ -96,6 +129,9 @@ export class FinancialService {
     initial_payment?: number;
     payment_method?: string;
     notes?: string;
+    vat_percentage?: number;
+    user_id?: string;
+    ip_address?: string;
   }): Promise<{
     subscription_id: string;
     invoice_id: string;
@@ -120,20 +156,25 @@ export class FinancialService {
       data.discount_amount || 0
     );
 
-    // 4. حساب المبالغ
+    // 4. حساب VAT على المبلغ بعد الخصم
+    const vatPercentage = data.vat_percentage || 15;
+    const vat = this.calculateVAT(discount.total_amount, vatPercentage);
+    
+    // 5. حساب المبالغ النهائية
+    const totalWithVAT = vat.total_with_vat;
     const initialPayment = data.initial_payment || 0;
     const paidAmount = initialPayment;
-    const remainingAmount = discount.total_amount - paidAmount;
+    const remainingAmount = totalWithVAT - paidAmount;
 
     // تحديد حالة الدفع
     let paymentStatus: 'paid' | 'partial' | 'pending' = 'pending';
-    if (paidAmount >= discount.total_amount) {
+    if (paidAmount >= totalWithVAT) {
       paymentStatus = 'paid';
     } else if (paidAmount > 0) {
       paymentStatus = 'partial';
     }
 
-    // 5. إنشاء الاشتراك
+    // 6. إنشاء الاشتراك
     const subscriptionData: Omit<Subscription, 'id' | 'created_at'> = {
       advertiser_id: data.advertiser_id,
       plan_id: data.plan_id,
@@ -142,7 +183,7 @@ export class FinancialService {
       base_price: plan.price,
       discount_type: discount.discount_type,
       discount_amount: discount.discount_amount,
-      total_amount: discount.total_amount,
+      total_amount: totalWithVAT, // المبلغ شامل الضريبة
       paid_amount: paidAmount,
       remaining_amount: remainingAmount,
       status: 'active',
@@ -151,21 +192,31 @@ export class FinancialService {
 
     const subscriptionId = await SubscriptionAdminService.create(subscriptionData);
 
-    // 6. إنشاء الفاتورة
+    // 7. إنشاء الفاتورة مع VAT
     const invoiceNumber = await this.generateInvoiceNumber();
     const invoiceData: Omit<Invoice, 'id' | 'created_at'> = {
       subscription_id: subscriptionId,
       invoice_number: invoiceNumber,
-      amount: discount.total_amount,
+      
+      // حقول VAT
+      subtotal: vat.subtotal,
+      vat_percentage: vat.vat_percentage,
+      vat_amount: vat.vat_amount,
+      amount: vat.total_with_vat,
+      
       status: paymentStatus === 'paid' ? 'paid' : 'unpaid',
       issued_date: startDate,
       due_date: endDate,
       paid_date: paymentStatus === 'paid' ? new Date() : undefined
     };
 
-    const invoiceId = await InvoiceAdminService.create(invoiceData);
+    const invoiceId = await InvoiceAdminService.create(
+      invoiceData,
+      data.user_id || 'system',
+      data.ip_address
+    );
 
-    // 7. إنشاء سجل الدفعة إذا كان هناك دفعة أولية
+    // 8. إنشاء سجل الدفعة إذا كان هناك دفعة أولية
     let paymentId: string | undefined;
     if (initialPayment > 0) {
       const paymentData: Omit<Payment, 'id' | 'created_at'> = {

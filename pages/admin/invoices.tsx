@@ -123,8 +123,83 @@ export default function InvoicesManagement() {
           </div>
         </header>
 
-        {/* Filters and Search */}
+        {/* Statistics Cards */}
         <div className="container mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {/* عدد الفواتير */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-blue-50 rounded-xl shadow-lg p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-600 text-sm font-medium mb-1">عدد الفواتير</p>
+                  <p className="text-3xl font-bold text-blue-900">{invoices.length}</p>
+                </div>
+                <div className="bg-blue-100 p-4 rounded-lg">
+                  <FaFileInvoice className="text-blue-600 text-2xl" />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* المبالغ المعلقة */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-yellow-50 rounded-xl shadow-lg p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-yellow-600 text-sm font-medium mb-1">المبالغ المعلقة</p>
+                  <p className="text-3xl font-bold text-yellow-900">
+                    {invoices.reduce((sum, inv) => sum + (inv.subscription_remaining || 0), 0).toFixed(0)} ريال
+                  </p>
+                </div>
+                <div className="bg-yellow-100 p-4 rounded-lg">
+                  <FaClock className="text-yellow-600 text-2xl" />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* إجمالي المدفوعات */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-green-50 rounded-xl shadow-lg p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-600 text-sm font-medium mb-1">إجمالي المدفوعات</p>
+                  <p className="text-3xl font-bold text-green-900">
+                    {invoices.reduce((sum, inv) => sum + (inv.subscription_paid || 0), 0).toFixed(0)} ريال
+                  </p>
+                </div>
+                <div className="bg-green-100 p-4 rounded-lg">
+                  <FaMoneyBillWave className="text-green-600 text-2xl" />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Button to view all invoices */}
+          <div className="text-center mb-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={fetchAllInvoices}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 mx-auto"
+            >
+              <FaFileInvoice />
+              عرض جميع الفواتير
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Filters and Search */}
+        <div className="container mx-auto px-4 pb-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Search */}

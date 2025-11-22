@@ -4,26 +4,61 @@ import {
 } from 'firebase-admin/firestore';
 import { adminDb } from '../firebase-admin';
 import { Invoice } from '../../types/models';
+import { AuditService } from './audit.service';
 
 export class InvoiceAdminService {
   // إنشاء فاتورة جديدة
-  static async create(data: Omit<Invoice, 'id' | 'created_at'>): Promise<string> {
+  static async create(
+    data: Omit<Invoice, 'id' | 'created_at'>,
+    userId: string = 'system',
+    ipAddress?: string
+  ): Promise<string> {
     const invoiceData: any = {
       subscription_id: data.subscription_id,
       invoice_number: data.invoice_number,
+      
+      // دعم VAT
+      subtotal: data.subtotal || data.amount,
+      vat_percentage: data.vat_percentage || 15,
+      vat_amount: data.vat_amount || 0,
       amount: data.amount,
+      
       status: data.status || 'unpaid',
       issued_date: data.issued_date ? Timestamp.fromDate(new Date(data.issued_date)) : FieldValue.serverTimestamp(),
       due_date: data.due_date ? Timestamp.fromDate(new Date(data.due_date)) : FieldValue.serverTimestamp(),
-      created_at: FieldValue.serverTimestamp()
+      
+      // الحقول الجديدة
+      sent_to_customer: false,
+      payment_link: data.payment_link || null,
+      payment_gateway_id: data.payment_gateway_id || null,
+      
+      created_at: FieldValue.serverTimestamp(),
+      updated_at: FieldValue.serverTimestamp()
     };
     
     // إضافة paid_date إذا كان موجوداً
     if (data.paid_date) {
       invoiceData.paid_date = Timestamp.fromDate(new Date(data.paid_date));
     }
+    if (data.sent_date) {
+      invoiceData.sent_date = Timestamp.fromDate(new Date(data.sent_date));
+    }
     
     const docRef = await adminDb.collection('invoices').add(invoiceData);
+    
+    // تسجيل في سجل التدقيق
+    try {
+      await AuditService.logInvoiceAction({
+        invoice_id: docRef.id,
+        action: 'created',
+        performed_by: userId,
+        ip_address: ipAddress,
+        notes: `Invoice created with amount ${data.amount} SAR (incl. VAT ${data.vat_amount || 0} SAR)`
+      });
+    } catch (auditError) {
+      console.error('Failed to log audit:', auditError);
+      // لا نفشل العملية الأساسية إذا فشل التدقيق
+    }
     
     return docRef.id;
   }
@@ -76,10 +111,21 @@ export class InvoiceAdminService {
   }
 
   // تحديث فاتورة
-  static async update(id: string, data: Partial<Invoice>): Promise<void> {
-    const updateData: any = { ...data };
+  static async update(
+    id: string, 
+    data: Partial<Invoice>,
+    userId: string = 'system',
+    ipAddress?: string
+  ): Promise<void> {
     
-    // إزالة الحقول التي لا يجب تحديثها
+    // 1. جلب الفاتورة القديمة للمقارنة
+    const oldInvoice = await this.getById(id);
+    if (!oldInvoice) {
+      throw new Error('Invoice not found');
+    }
+    
+    // 2. إعداد البيانات للتحديث
+    const updateData: any = { ...data };
     delete updateData.id;
     delete updateData.created_at;
     
@@ -93,8 +139,32 @@ export class InvoiceAdminService {
     if (data.paid_date) {
       updateData.paid_date = Timestamp.fromDate(new Date(data.paid_date));
     }
+    if (data.sent_date) {
+      updateData.sent_date = Timestamp.fromDate(new Date(data.sent_date));
+    }
     
+    updateData.updated_at = FieldValue.serverTimestamp();
+    
+    // 3. تحديث الفاتورة
     await adminDb.collection('invoices').doc(id).update(updateData);
+    
+    // 4. تسجيل في سجل التدقيق
+    try {
+      const changes = AuditService.compareObjects(oldInvoice, data);
+      
+      if (Object.keys(changes).length > 0) {
+        await AuditService.logInvoiceAction({
+          invoice_id: id,
+          action: 'updated',
+          changed_fields: changes,
+          performed_by: userId,
+          ip_address: ipAddress,
+          notes: `Updated ${Object.keys(changes).length} field(s)`
+        });
+      }
+    } catch (auditError) {
+      console.error('Failed to log audit:', auditError);
+    }
   }
 
   // حذف فاتورة

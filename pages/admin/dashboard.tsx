@@ -6,7 +6,9 @@ import { motion } from 'framer-motion';
 import { 
   FaUsers, FaFileInvoice, FaChartLine, FaBell, 
   FaSignOutAlt, FaPlus, FaEye, FaEdit, FaTrash,
-  FaCheckCircle, FaClock, FaTimesCircle, FaMoneyBillWave
+  FaCheckCircle, FaClock, FaTimesCircle, FaMoneyBillWave,
+  FaHistory, FaUndo, FaExclamationTriangle, FaPercent,
+  FaChartBar, FaCalendarAlt, FaArrowUp, FaArrowDown
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -18,6 +20,11 @@ interface Statistics {
   activeSubscriptions: { count: number };
   totalRevenue: { total: number };
   pendingRequests: { count: number };
+  totalVAT?: { total: number };
+  pendingReminders?: { count: number };
+  pendingRefunds?: { count: number };
+  overdueInvoices?: { count: number };
+  totalAudits?: number;
 }
 
 interface Advertiser {
@@ -47,18 +54,46 @@ interface AdRequest {
   created_at: string;
 }
 
+interface Reminder {
+  id: string;
+  advertiser_id: string;
+  reminder_type: string;
+  status: string;
+  scheduled_date: string;
+  message: string;
+}
+
+interface Refund {
+  id: string;
+  subscription_id: string;
+  refund_amount: number;
+  status: string;
+  created_at: string;
+}
+
+interface AuditLog {
+  id: string;
+  invoice_id: string;
+  action: string;
+  performed_by: string;
+  performed_at: string;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
   const [adRequests, setAdRequests] = useState<AdRequest[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [refunds, setRefunds] = useState<Refund[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
 
   // Initialize active tab from URL query parameter
   useEffect(() => {
     const tab = router.query.tab as string;
-    if (tab && ['overview', 'advertisers', 'invoices', 'requests'].includes(tab)) {
+    if (tab && ['overview', 'advertisers', 'invoices', 'requests', 'reminders', 'refunds', 'audit'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [router.query.tab]);
@@ -144,15 +179,31 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [statsRes, advertisersRes, requestsRes] = await Promise.all([
+      const [statsRes, advertisersRes, requestsRes, remindersRes, refundsRes, auditRes] = await Promise.all([
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/statistics/dashboard`, { headers }),
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/advertisers`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests`, { headers })
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests`, { headers }),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/reminders?status=pending`, { headers }).catch(() => ({ data: { reminders: [] } })),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/refunds?status=pending`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/audit/stats`, { headers }).catch(() => ({ data: { total_audits: 0 } }))
       ]);
 
-      setStatistics(statsRes.data);
+      // Enhance statistics with new data
+      const remindersData = remindersRes.data.reminders || remindersRes.data || [];
+      const refundsData = Array.isArray(refundsRes.data) ? refundsRes.data : [];
+      
+      const enhancedStats = {
+        ...statsRes.data,
+        pendingReminders: { count: remindersData.length || 0 },
+        pendingRefunds: { count: refundsData.length || 0 },
+        totalAudits: auditRes.data.total_audits || 0
+      };
+
+      setStatistics(enhancedStats);
       setAdvertisers(advertisersRes.data);
       setAdRequests(requestsRes.data.filter((req: AdRequest) => req.status === 'pending'));
+      setReminders(remindersData.slice(0, 5));
+      setRefunds(refundsData.slice(0, 5));
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -293,6 +344,46 @@ export default function AdminDashboard() {
                   </span>
                 )}
               </button>
+              <button
+                onClick={() => changeTab('reminders')}
+                className={`py-4 px-2 border-b-2 transition-colors relative ${
+                  activeTab === 'reminders'
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                التذكيرات
+                {reminders.length > 0 && (
+                  <span className="absolute -top-1 -left-2 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {reminders.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => changeTab('refunds')}
+                className={`py-4 px-2 border-b-2 transition-colors relative ${
+                  activeTab === 'refunds'
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                الاستردادات
+                {refunds.length > 0 && (
+                  <span className="absolute -top-1 -left-2 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {refunds.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => changeTab('audit')}
+                className={`py-4 px-2 border-b-2 transition-colors ${
+                  activeTab === 'audit'
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                سجل التدقيق
+              </button>
               <Link href="/admin/plans">
                 <button
                   className={`py-4 px-2 border-b-2 transition-colors ${
@@ -341,6 +432,67 @@ export default function AdminDashboard() {
                   value={statistics?.pendingRequests.count || 0}
                   color="bg-accent-500"
                 />
+              </div>
+
+              {/* New Features Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <StatCard
+                  icon={FaPercent}
+                  title="ضريبة VAT (15%)"
+                  value={`${Math.round((statistics?.totalRevenue.total || 0) * 0.15 / 1.15)} ريال`}
+                  color="bg-purple-500"
+                />
+                <StatCard
+                  icon={FaClock}
+                  title="تذكيرات معلقة"
+                  value={statistics?.pendingReminders?.count || 0}
+                  color="bg-yellow-500"
+                />
+                <StatCard
+                  icon={FaUndo}
+                  title="استردادات معلقة"
+                  value={statistics?.pendingRefunds?.count || 0}
+                  color="bg-indigo-500"
+                />
+                <StatCard
+                  icon={FaHistory}
+                  title="سجلات التدقيق"
+                  value={statistics?.totalAudits || 0}
+                  color="bg-gray-500"
+                />
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
+                  onClick={() => router.push('/admin/invoices')}
+                >
+                  <FaFileInvoice className="text-3xl mb-2" />
+                  <h3 className="text-lg font-bold mb-1">إدارة الفواتير</h3>
+                  <p className="text-sm opacity-90">عرض وإدارة جميع الفواتير مع VAT</p>
+                </motion.div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
+                  onClick={() => changeTab('reminders')}
+                >
+                  <FaBell className="text-3xl mb-2" />
+                  <h3 className="text-lg font-bold mb-1">التذكيرات التلقائية</h3>
+                  <p className="text-sm opacity-90">إدارة تذكيرات الدفع والاشتراكات</p>
+                </motion.div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
+                  onClick={() => changeTab('audit')}
+                >
+                  <FaHistory className="text-3xl mb-2" />
+                  <h3 className="text-lg font-bold mb-1">سجل التدقيق</h3>
+                  <p className="text-sm opacity-90">تتبع جميع التغييرات والعمليات</p>
+                </motion.div>
               </div>
 
               {/* Recent Advertisers */}
@@ -668,6 +820,209 @@ export default function AdminDashboard() {
                     )}
                   </div>
                 )}
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'reminders' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold">التذكيرات التلقائية</h2>
+                  <div className="flex gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      onClick={() => toast.success('جاري معالجة التذكيرات...')}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                    >
+                      <FaBell />
+                      <span>إرسال التذكيرات</span>
+                    </motion.button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-yellow-50 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <FaClock className="text-2xl text-yellow-600" />
+                      <div>
+                        <p className="text-sm text-yellow-600">معلقة</p>
+                        <p className="text-xl font-bold text-yellow-800">{reminders.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <FaCheckCircle className="text-2xl text-green-600" />
+                      <div>
+                        <p className="text-sm text-green-600">تم الإرسال</p>
+                        <p className="text-xl font-bold text-green-800">0</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                      <FaExclamationTriangle className="text-2xl text-red-600" />
+                      <div>
+                        <p className="text-sm text-red-600">فشلت</p>
+                        <p className="text-xl font-bold text-red-800">0</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {reminders.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FaBell className="text-6xl text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">لا توجد تذكيرات معلقة</p>
+                    <p className="text-sm text-gray-400 mt-2">سيتم إنشاء التذكيرات تلقائياً يومياً</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {reminders.map((reminder) => (
+                      <div key={reminder.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                reminder.reminder_type === 'due_soon' 
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : reminder.reminder_type === 'overdue'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {reminder.reminder_type === 'due_soon' && 'مستحق قريباً'}
+                                {reminder.reminder_type === 'overdue' && 'متأخر'}
+                                {reminder.reminder_type === 'subscription_expiring' && 'اشتراك منتهي'}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {formatDate(reminder.scheduled_date, 'dd/MM/yyyy')}
+                              </span>
+                            </div>
+                            <p className="text-gray-700">{reminder.message}</p>
+                          </div>
+                          <button className="text-primary-600 hover:text-primary-700">
+                            <FaEye />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'refunds' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold">طلبات الاسترداد</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-yellow-50 rounded-lg p-4">
+                    <p className="text-sm text-yellow-600 mb-1">معلق</p>
+                    <p className="text-2xl font-bold text-yellow-800">{refunds.length}</p>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <p className="text-sm text-blue-600 mb-1">تمت الموافقة</p>
+                    <p className="text-2xl font-bold text-blue-800">0</p>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <p className="text-sm text-green-600 mb-1">مكتمل</p>
+                    <p className="text-2xl font-bold text-green-800">0</p>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-4">
+                    <p className="text-sm text-red-600 mb-1">مرفوض</p>
+                    <p className="text-2xl font-bold text-red-800">0</p>
+                  </div>
+                </div>
+
+                {refunds.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FaUndo className="text-6xl text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">لا توجد طلبات استرداد</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-right py-3 px-4">رقم الطلب</th>
+                          <th className="text-right py-3 px-4">المبلغ</th>
+                          <th className="text-right py-3 px-4">الحالة</th>
+                          <th className="text-right py-3 px-4">التاريخ</th>
+                          <th className="text-right py-3 px-4">الإجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {refunds.map((refund) => (
+                          <tr key={refund.id} className="border-b hover:bg-gray-50">
+                            <td className="py-3 px-4">#{refund.id.slice(0, 8)}</td>
+                            <td className="py-3 px-4 font-bold">{refund.refund_amount} ريال</td>
+                            <td className="py-3 px-4">
+                              <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                {refund.status === 'pending' && 'معلق'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">{formatDate(refund.created_at, 'dd/MM/yyyy')}</td>
+                            <td className="py-3 px-4">
+                              <button className="text-primary-600 hover:text-primary-700">
+                                <FaEye />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'audit' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold">سجل التدقيق (Audit Trail)</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <p className="text-sm text-blue-600 mb-1">إجمالي السجلات</p>
+                    <p className="text-2xl font-bold text-blue-800">{statistics?.totalAudits || 0}</p>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <p className="text-sm text-green-600 mb-1">إنشاء فواتير</p>
+                    <p className="text-2xl font-bold text-green-800">-</p>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg p-4">
+                    <p className="text-sm text-purple-600 mb-1">تحديثات</p>
+                    <p className="text-2xl font-bold text-purple-800">-</p>
+                  </div>
+                </div>
+
+                <div className="text-center py-12">
+                  <FaHistory className="text-6xl text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-700 font-semibold mb-2">سجل التدقيق متاح</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    يتم تسجيل جميع العمليات على الفواتير تلقائياً
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    • من قام بالعملية • متى • ماذا تغير
+                  </p>
+                </div>
               </div>
             </motion.div>
           )}

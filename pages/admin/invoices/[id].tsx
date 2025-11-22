@@ -46,6 +46,31 @@ export default function InvoiceDetailPage() {
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to safely format numbers
+  const formatPrice = (price: number | null | undefined): string => {
+    if (price === null || price === undefined || isNaN(price)) {
+      return '0.00';
+    }
+    return price.toFixed(2);
+  };
+
+  // Helper function to safely format dates
+  const formatDate = (date: any): string => {
+    if (!date) return '-';
+    try {
+      const dateObj = date instanceof Date ? date : new Date(date);
+      if (isNaN(dateObj.getTime())) return '-';
+      return dateObj.toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '-';
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -161,7 +186,9 @@ export default function InvoiceDetailPage() {
                 <p className="text-gray-500">رقم الفاتورة: {invoice.invoice_number}</p>
               </div>
               <div className="text-left sm:text-right mt-4 sm:mt-0">
-                <img src="/logo.png" alt="Jeddah Ads Logo" className="h-12 mb-2 inline-block" /> 
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg mb-2">
+                  <span className="text-white text-xl font-bold">JA</span>
+                </div>
                 <p className="text-lg font-semibold text-gray-700">إعلانات جدة</p>
                 <p className="text-sm text-gray-500">jeddah-ads.com</p>
               </div>
@@ -177,8 +204,8 @@ export default function InvoiceDetailPage() {
               </div>
               <div className="sm:text-right">
                 <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">التفاصيل:</h3>
-                <p className="text-gray-700"><span className="font-semibold">تاريخ الإصدار:</span> {new Date(invoice.issued_date).toLocaleDateString('ar-SA')}</p>
-                <p className="text-gray-700"><span className="font-semibold">تاريخ الاستحقاق:</span> {new Date(invoice.due_date).toLocaleDateString('ar-SA')}</p>
+                <p className="text-gray-700"><span className="font-semibold">تاريخ الإصدار:</span> {formatDate(invoice.issued_date)}</p>
+                <p className="text-gray-700"><span className="font-semibold">تاريخ الاستحقاق:</span> {formatDate(invoice.due_date)}</p>
                 <div className="mt-2">{getStatusBadge(invoice.status)}</div>
               </div>
             </div>
@@ -199,13 +226,13 @@ export default function InvoiceDetailPage() {
                   <tr>
                     <td className="px-4 py-4 text-gray-700">{invoice.plan_name}</td>
                     <td className="px-4 py-4 text-gray-700">{invoice.duration_days} يوم</td>
-                    <td className="px-4 py-4 text-gray-700">{invoice.base_price?.toFixed(2) || invoice.subscription_total.toFixed(2)} ريال</td>
+                    <td className="px-4 py-4 text-gray-700">{formatPrice(invoice.base_price || invoice.subscription_total)} ريال</td>
                     <td className="px-4 py-4 text-gray-700">
                       {invoice.discount_amount && invoice.discount_amount > 0 
-                        ? `${invoice.discount_amount.toFixed(2)} ريال (${invoice.discount_type === 'percentage' ? '%' : 'مبلغ ثابت'})`
+                        ? `${formatPrice(invoice.discount_amount)} ريال (${invoice.discount_type === 'percentage' ? '%' : 'مبلغ ثابت'})`
                         : 'لا يوجد'}
                     </td>
-                    <td className="px-4 py-4 text-gray-700 font-semibold">{invoice.subscription_total.toFixed(2)} ريال</td>
+                    <td className="px-4 py-4 text-gray-700 font-semibold">{formatPrice(invoice.subscription_total)} ريال</td>
                   </tr>
                 </tbody>
               </table>
@@ -217,24 +244,24 @@ export default function InvoiceDetailPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-gray-700">
                     <span>الإجمالي الفرعي:</span>
-                    <span>{invoice.subscription_total.toFixed(2)} ريال</span>
+                    <span>{formatPrice(invoice.subscription_total)} ريال</span>
                   </div>
                   {/* VAT/Tax can be added here if needed */}
                   {/* <div className="flex justify-between text-gray-700">
                     <span>ضريبة القيمة المضافة (15%):</span>
-                    <span>{(invoice.subscription_total * 0.15).toFixed(2)} ريال</span>
+                    <span>{formatPrice((invoice.subscription_total || 0) * 0.15)} ريال</span>
                   </div> */}
                   <div className="flex justify-between text-xl font-bold text-gray-800 pt-2 border-t border-gray-200">
                     <span>الإجمالي الكلي:</span>
-                    <span>{invoice.subscription_total.toFixed(2)} ريال</span>
+                    <span>{formatPrice(invoice.subscription_total)} ريال</span>
                   </div>
                   <div className="flex justify-between text-green-600 font-semibold">
                     <span>المدفوع:</span>
-                    <span>{invoice.subscription_paid.toFixed(2)} ريال</span>
+                    <span>{formatPrice(invoice.subscription_paid)} ريال</span>
                   </div>
                   <div className="flex justify-between text-red-600 font-bold">
                     <span>المتبقي:</span>
-                    <span>{invoice.subscription_remaining.toFixed(2)} ريال</span>
+                    <span>{formatPrice(invoice.subscription_remaining)} ريال</span>
                   </div>
                 </div>
               </div>
@@ -257,8 +284,8 @@ export default function InvoiceDetailPage() {
                     <tbody className="divide-y divide-gray-200">
                       {invoice.payments.map(payment => (
                         <tr key={payment.id}>
-                          <td className="px-4 py-3 text-gray-600 text-sm">{new Date(payment.payment_date).toLocaleDateString('ar-SA')}</td>
-                          <td className="px-4 py-3 text-gray-600 text-sm">{payment.amount.toFixed(2)} ريال</td>
+                          <td className="px-4 py-3 text-gray-600 text-sm">{formatDate(payment.payment_date)}</td>
+                          <td className="px-4 py-3 text-gray-600 text-sm">{formatPrice(payment.amount)} ريال</td>
                           <td className="px-4 py-3 text-gray-600 text-sm">{payment.payment_method}</td>
                           <td className="px-4 py-3 text-gray-600 text-sm">{payment.notes || '-'}</td>
                         </tr>

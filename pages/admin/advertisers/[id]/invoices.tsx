@@ -70,12 +70,19 @@ export default function AdvertiserInvoices() {
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/admin/login');
-    } else if (id) {
+    } else if (router.isReady && id) {
       fetchData();
     }
-  }, [router, id]);
+  }, [router, router.isReady, id]);
 
   const fetchData = async () => {
+    // Double check id is available
+    if (!id || id === 'undefined') {
+      console.warn('No valid advertiser ID available');
+      setLoading(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
       

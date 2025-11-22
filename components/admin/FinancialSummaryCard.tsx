@@ -19,7 +19,7 @@ interface FinancialSummaryCardProps {
 }
 
 export default function FinancialSummaryCard({ summary, loading }: FinancialSummaryCardProps) {
-  if (loading) {
+  if (loading || !summary) {
     return (
       <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-xl shadow-lg p-6 animate-pulse">
         <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
@@ -32,10 +32,20 @@ export default function FinancialSummaryCard({ summary, loading }: FinancialSumm
     );
   }
 
+  // Provide default values to prevent errors
+  const safeSummary = {
+    total_subscriptions: summary.total_subscriptions || 0,
+    active_subscriptions: summary.active_subscriptions || 0,
+    expired_subscriptions: summary.expired_subscriptions || 0,
+    total_spent: summary.total_spent || 0,
+    total_paid: summary.total_paid || 0,
+    total_pending: summary.total_pending || 0,
+  };
+
   const stats = [
     {
       label: 'إجمالي المبلغ',
-      value: `${summary.total_spent.toLocaleString('ar-SA')} ريال`,
+      value: `${safeSummary.total_spent.toLocaleString('ar-SA')} ريال`,
       icon: FaChartLine,
       color: 'blue',
       bgColor: 'bg-blue-100',
@@ -44,26 +54,26 @@ export default function FinancialSummaryCard({ summary, loading }: FinancialSumm
     },
     {
       label: 'المبلغ المدفوع',
-      value: `${summary.total_paid.toLocaleString('ar-SA')} ريال`,
+      value: `${safeSummary.total_paid.toLocaleString('ar-SA')} ريال`,
       icon: FaCheckCircle,
       color: 'green',
       bgColor: 'bg-green-100',
       textColor: 'text-green-600',
       iconColor: 'text-green-500',
-      percentage: summary.total_spent > 0 ? ((summary.total_paid / summary.total_spent) * 100).toFixed(1) : '0'
+      percentage: safeSummary.total_spent > 0 ? ((safeSummary.total_paid / safeSummary.total_spent) * 100).toFixed(1) : '0'
     },
     {
       label: 'المبلغ المتبقي',
-      value: `${summary.total_pending.toLocaleString('ar-SA')} ريال`,
+      value: `${safeSummary.total_pending.toLocaleString('ar-SA')} ريال`,
       icon: FaExclamationCircle,
-      color: summary.total_pending > 0 ? 'red' : 'gray',
-      bgColor: summary.total_pending > 0 ? 'bg-red-100' : 'bg-gray-100',
-      textColor: summary.total_pending > 0 ? 'text-red-600' : 'text-gray-600',
-      iconColor: summary.total_pending > 0 ? 'text-red-500' : 'text-gray-500'
+      color: safeSummary.total_pending > 0 ? 'red' : 'gray',
+      bgColor: safeSummary.total_pending > 0 ? 'bg-red-100' : 'bg-gray-100',
+      textColor: safeSummary.total_pending > 0 ? 'text-red-600' : 'text-gray-600',
+      iconColor: safeSummary.total_pending > 0 ? 'text-red-500' : 'text-gray-500'
     },
     {
       label: 'الاشتراكات النشطة',
-      value: `${summary.active_subscriptions} / ${summary.total_subscriptions}`,
+      value: `${safeSummary.active_subscriptions} / ${safeSummary.total_subscriptions}`,
       icon: FaMoneyBillWave,
       color: 'purple',
       bgColor: 'bg-purple-100',
@@ -83,12 +93,12 @@ export default function FinancialSummaryCard({ summary, loading }: FinancialSumm
           <FaMoneyBillWave className="text-primary-500" />
           الملخص المالي
         </h3>
-        {summary.total_pending > 0 && (
+        {safeSummary.total_pending > 0 && (
           <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-semibold animate-pulse">
             يوجد مستحقات
           </span>
         )}
-        {summary.total_pending === 0 && summary.total_paid > 0 && (
+        {safeSummary.total_pending === 0 && safeSummary.total_paid > 0 && (
           <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">
             ✓ مدفوع بالكامل
           </span>
@@ -135,23 +145,23 @@ export default function FinancialSummaryCard({ summary, loading }: FinancialSumm
       </div>
 
       {/* Payment Progress */}
-      {summary.total_spent > 0 && (
+      {safeSummary.total_spent > 0 && (
         <div className="mt-6">
           <div className="flex items-center justify-between text-sm mb-2">
             <span className="text-gray-600">نسبة الدفع الإجمالية</span>
             <span className="font-bold text-gray-800">
-              {((summary.total_paid / summary.total_spent) * 100).toFixed(1)}%
+              {((safeSummary.total_paid / safeSummary.total_spent) * 100).toFixed(1)}%
             </span>
           </div>
           <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${(summary.total_paid / summary.total_spent) * 100}%` }}
+              animate={{ width: `${(safeSummary.total_paid / safeSummary.total_spent) * 100}%` }}
               transition={{ duration: 1.5, ease: 'easeOut' }}
               className={`h-full bg-gradient-to-r ${
-                summary.total_pending === 0 
+                safeSummary.total_pending === 0 
                   ? 'from-green-400 to-green-600'
-                  : summary.total_paid > summary.total_spent / 2
+                  : safeSummary.total_paid > safeSummary.total_spent / 2
                   ? 'from-yellow-400 to-yellow-600'
                   : 'from-red-400 to-red-600'
               }`}

@@ -46,8 +46,21 @@ export default function RecordPaymentForm({
   const [transactionId, setTransactionId] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Safety check - return loading state if subscription is not available
+  if (!subscription) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
+        <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+        <div className="space-y-3">
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
   const unpaidInvoices = invoices.filter(inv => inv.status === 'unpaid');
-  const maxAmount = subscription.remaining_amount;
+  const maxAmount = subscription.remaining_amount || 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

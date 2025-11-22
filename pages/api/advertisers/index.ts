@@ -1,12 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { AdvertiserService } from '../../../lib/services/advertiser.service';
 import { AdvertiserAdminService } from '../../../lib/services/advertiser-admin.service';
+import { FinancialService } from '../../../lib/services/financial.service';
 import { Advertiser } from '../../../types/models';
 import { verifyAdminToken } from '../../../lib/firebase-admin'; // Assuming admin-only access for POST
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Advertiser[] | Advertiser | { error: string } | { id: string }>
+  res: NextApiResponse<Advertiser[] | Advertiser | { error: string } | { id: string; message?: string }>
 ) {
   if (req.method === 'GET') {
     try {
@@ -61,30 +62,34 @@ export default async function handler(
       // Use Admin service to create advertiser (bypasses client permissions)
       const newAdvertiserId = await AdvertiserAdminService.create(advertiserData);
       
-      // If subscription data is provided, create a subscription too
-      if (plan_id && start_date && end_date) {
+      // If subscription data is provided, use FinancialService to create subscription + invoice + payment
+      if (plan_id && start_date) {
         try {
-          const { SubscriptionAdminService } = await import('../../../lib/services/subscription-admin.service');
-          await SubscriptionAdminService.create({
+          // استخدام النظام المالي المتكامل لإنشاء اشتراك + فاتورة + دفعة (إن وجدت)
+          const financialResult = await FinancialService.createSubscriptionWithInvoice({
             advertiser_id: newAdvertiserId,
             plan_id,
             start_date: new Date(start_date),
-            end_date: new Date(end_date),
-            base_price: base_price || 0,
             discount_type: discount_type || 'amount',
             discount_amount: discount_amount || 0,
-            total_amount: total_amount || 0,
-            paid_amount: paid_amount || 0,
-            remaining_amount: (total_amount || 0) - (paid_amount || 0),
-            status: 'active',
-            payment_status: paid_amount >= total_amount ? 'paid' : paid_amount > 0 ? 'partial' : 'pending'
+            initial_payment: paid_amount || 0,
+            payment_method: 'cash', // يمكن تمريره من الفرونت إند
+            notes: 'إنشاء اشتراك مع إضافة المعلن',
+            vat_percentage: 15 // نسبة VAT الافتراضية
           });
-        } catch (subError) {
-          console.error('Error creating subscription:', subError);
-          // Continue even if subscription creation fails
+          
+          console.log('✅ Subscription + Invoice + Payment created:', financialResult);
+        } catch (subError: any) {
+          console.error('❌ Error creating subscription with invoice:', subError);
+          // لا نفشل العملية بالكامل إذا فشل إنشاء الاشتراك
+          // لكن نسجل الخطأ
         }
       }
-      res.status(201).json({ id: newAdvertiserId });
+      
+      res.status(201).json({ 
+        id: newAdvertiserId,
+        message: plan_id ? 'تم إنشاء المعلن والاشتراك والفاتورة بنجاح' : 'تم إنشاء المعلن بنجاح'
+      });
     } catch (error: any) {
       console.error('Error creating advertiser:', error);
       if (error.message.includes('Unauthorized') || error.message.includes('admin')) {

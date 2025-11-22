@@ -42,7 +42,7 @@ const toDate = (timestamp: any): Date => {
 };
 
 export default function InvoicesTable({ invoices, loading }: InvoicesTableProps) {
-  if (loading) {
+  if (loading || !invoices) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
@@ -55,7 +55,7 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
     );
   }
 
-  if (invoices.length === 0) {
+  if (!Array.isArray(invoices) || invoices.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-12 text-center">
         <FaFileInvoiceDollar className="text-6xl text-gray-300 mx-auto mb-4" />

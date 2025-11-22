@@ -61,7 +61,7 @@ export default function SubscriptionsList({
   onAddPayment,
   loading
 }: SubscriptionsListProps) {
-  if (loading) {
+  if (loading || !subscriptions || !plans) {
     return (
       <div className="space-y-4">
         {[1, 2, 3].map(i => (
@@ -77,7 +77,7 @@ export default function SubscriptionsList({
     );
   }
 
-  if (subscriptions.length === 0) {
+  if (!Array.isArray(subscriptions) || subscriptions.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-12 text-center">
         <FaBox className="text-6xl text-gray-300 mx-auto mb-4" />
