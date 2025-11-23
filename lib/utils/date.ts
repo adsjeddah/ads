@@ -5,6 +5,7 @@
 
 import { format as dateFnsFormat, parseISO } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { toEnglishNumerals } from './numbers';
 
 // التوقيت السعودي
 export const SAUDI_TIMEZONE = 'Asia/Riyadh';
@@ -113,25 +114,6 @@ export function formatDateForInput(
   date: Date | string | number | null | undefined
 ): string {
   return formatDate(date, 'yyyy-MM-dd');
-}
-
-/**
- * تحويل الأرقام العربية إلى إنجليزية
- */
-export function toEnglishNumerals(str: string): string {
-  if (typeof str !== 'string') return str;
-  
-  // تحويل الأرقام العربية (٠-٩)
-  str = str.replace(/[٠-٩]/g, (d) => {
-    return String.fromCharCode(d.charCodeAt(0) - 1584);
-  });
-  
-  // تحويل الأرقام الفارسية (۰-۹)
-  str = str.replace(/[۰-۹]/g, (d) => {
-    return String.fromCharCode(d.charCodeAt(0) - 1728);
-  });
-  
-  return str;
 }
 
 /**
