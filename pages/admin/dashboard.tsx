@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { format } from 'date-fns';
+import { formatDate as formatDateUtil, formatPrice, firestoreTimestampToDate } from '@/lib/utils';
 import { ar } from 'date-fns/locale';
 
 interface Statistics {
@@ -160,14 +160,13 @@ export default function AdminDashboard() {
   };
 
   // Helper function to safely format dates
-  const formatDate = (timestamp: any, formatString: string): string => {
+  const formatDate = (timestamp: any, formatString: string = 'dd/MM/yyyy'): string => {
     try {
-      const date = toDate(timestamp);
-      // Double check the date is valid before formatting
-      if (isNaN(date.getTime())) {
+      const date = firestoreTimestampToDate(timestamp);
+      if (!date || isNaN(date.getTime())) {
         return '-';
       }
-      return format(date, formatString, { locale: ar });
+      return formatDateUtil(date, formatString);
     } catch (error) {
       console.error('Error formatting date:', timestamp, error);
       return '-';
