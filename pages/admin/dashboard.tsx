@@ -239,7 +239,13 @@ export default function AdminDashboard() {
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success('تم تحديث حالة الطلب');
+      
+      if (status === 'rejected') {
+        toast.success('تم رفض الطلب ونقله إلى الطلبات المرفوضة');
+      } else {
+        toast.success('تم تحديث حالة الطلب');
+      }
+      
       fetchData();
     } catch (error) {
       toast.error('خطأ في تحديث الطلب');

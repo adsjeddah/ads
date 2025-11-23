@@ -66,6 +66,9 @@ export default function AdRequestDetails() {
       if (newStatus === 'approved') {
         // Navigate to create advertiser page with pre-filled data
         router.push(`/admin/ad-requests/${id}/convert`);
+      } else if (newStatus === 'rejected') {
+        toast.success('تم رفض الطلب ونقله إلى الطلبات المرفوضة');
+        router.push('/admin/ad-requests');
       } else {
         toast.success('تم تحديث حالة الطلب');
         fetchRequest();

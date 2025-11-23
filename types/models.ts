@@ -81,6 +81,10 @@ export interface AdRequest {
   message?: string;
   status: 'pending' | 'contacted' | 'converted' | 'rejected';
   created_at: Date;
+  // For rejected requests
+  original_id?: string;
+  rejected_at?: Date;
+  rejection_reason?: string;
 }
 
 export interface Payment {

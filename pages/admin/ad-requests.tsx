@@ -62,6 +62,9 @@ export default function AdRequests() {
       if (newStatus === 'approved') {
         // Navigate to create advertiser page with pre-filled data
         router.push(`/admin/ad-requests/${requestId}/convert`);
+      } else if (newStatus === 'rejected') {
+        toast.success('تم رفض الطلب ونقله إلى الطلبات المرفوضة');
+        fetchRequests();
       } else {
         toast.success('تم تحديث حالة الطلب');
         fetchRequests();
@@ -120,16 +123,28 @@ export default function AdRequests() {
                 <h1 className="text-3xl font-bold text-gray-800">طلبات المعلنين</h1>
                 <p className="text-gray-600 mt-2">إدارة طلبات الإعلان الواردة من العملاء</p>
               </div>
-              <Link href="/admin/dashboard">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  <FaArrowRight className="rotate-180" />
-                  العودة للوحة التحكم
-                </motion.button>
-              </Link>
+              <div className="flex gap-3">
+                <Link href="/admin/ad-requests/rejected">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    <FaTimes />
+                    الطلبات المرفوضة
+                  </motion.button>
+                </Link>
+                <Link href="/admin/dashboard">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <FaArrowRight className="rotate-180" />
+                    العودة للوحة التحكم
+                  </motion.button>
+                </Link>
+              </div>
             </div>
           </div>
 

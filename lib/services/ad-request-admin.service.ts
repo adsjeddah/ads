@@ -8,6 +8,7 @@ import { AdRequest } from '../../types/models';
 
 export class AdRequestAdminService {
   private static collection = 'ad_requests';
+  private static rejectedCollection = 'rejected_requests';
 
   /**
    * Get all ad requests
@@ -110,18 +111,74 @@ export class AdRequestAdminService {
   }
 
   /**
+   * Reject ad request and move to rejected collection
+   * حذف من ad_requests ونقل إلى rejected_requests
+   */
+  static async rejectAndMove(id: string, rejectionReason?: string): Promise<void> {
+    try {
+      // 1. Get the original request
+      const request = await this.getById(id);
+      
+      if (!request) {
+        throw new Error('Ad request not found');
+      }
+      
+      // 2. Prepare rejected request data
+      const rejectedData = {
+        ...request,
+        original_id: id,
+        status: 'rejected',
+        rejected_at: new Date(),
+        rejection_reason: rejectionReason || 'تم رفض الطلب',
+      };
+      
+      // 3. Add to rejected_requests collection
+      await adminDb.collection(this.rejectedCollection).doc(id).set(rejectedData);
+      
+      // 4. Delete from ad_requests collection
+      await this.delete(id);
+      
+      console.log(`Ad request ${id} moved to rejected_requests`);
+    } catch (error) {
+      console.error(`Error rejecting and moving ad request ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get rejected requests
+   */
+  static async getRejectedRequests(): Promise<AdRequest[]> {
+    try {
+      const snapshot = await adminDb
+        .collection(this.rejectedCollection)
+        .orderBy('rejected_at', 'desc')
+        .get();
+      
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as AdRequest));
+    } catch (error) {
+      console.error('Error getting rejected requests:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get ad requests statistics
    */
   static async getStatistics() {
     try {
       const allRequests = await this.getAll();
+      const rejectedRequests = await this.getRejectedRequests();
       
       const stats = {
         total: allRequests.length,
         pending: allRequests.filter(r => r.status === 'pending').length,
         contacted: allRequests.filter(r => r.status === 'contacted').length,
         converted: allRequests.filter(r => r.status === 'converted').length,
-        rejected: allRequests.filter(r => r.status === 'rejected').length
+        rejected: rejectedRequests.length
       };
       
       return stats;

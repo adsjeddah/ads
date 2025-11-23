@@ -37,12 +37,20 @@ export default async function handler(
   } else if (req.method === 'PUT') {
     try {
       const adRequestData = req.body as Partial<AdRequest>;
-      await AdRequestAdminService.update(id, adRequestData);
-      const updatedAdRequest = await AdRequestAdminService.getById(id);
-      if (updatedAdRequest) {
-        res.status(200).json(updatedAdRequest);
+      
+      // إذا كانت الحالة "rejected" - نحذف من ad_requests وننقل إلى rejected_requests
+      if (adRequestData.status === 'rejected') {
+        await AdRequestAdminService.rejectAndMove(id, adRequestData.rejection_reason);
+        res.status(200).json({ message: 'Ad request rejected and moved to rejected collection' });
       } else {
-        res.status(404).json({ error: 'Ad request not found after update' });
+        // تحديث عادي للحالات الأخرى
+        await AdRequestAdminService.update(id, adRequestData);
+        const updatedAdRequest = await AdRequestAdminService.getById(id);
+        if (updatedAdRequest) {
+          res.status(200).json(updatedAdRequest);
+        } else {
+          res.status(404).json({ error: 'Ad request not found after update' });
+        }
       }
     } catch (error: any) {
       console.error(`Error updating ad request ${id}:`, error);
