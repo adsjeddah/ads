@@ -10,6 +10,8 @@ export interface Advertiser {
   email?: string;
   password?: string; // Hashed
   status: 'active' | 'inactive' | 'pending';
+  include_vat?: boolean; // خيار إضافة ضريبة القيمة المضافة (15%)
+  vat_percentage?: number; // نسبة الضريبة (افتراضياً 15%)
   created_at: Date;
   updated_at: Date;
 }

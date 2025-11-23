@@ -39,6 +39,7 @@ export default function NewAdvertiser() {
     base_price: 0,
     discount_amount: 0,
     discount_type: 'amount', // 'amount' or 'percentage'
+    include_vat: false, // إضافة ضريبة القيمة المضافة (15%)
     total_amount: 0,
     paid_amount: 0,
   });
@@ -169,7 +170,15 @@ export default function NewAdvertiser() {
       discountValue = (basePrice * formData.discount_amount) / 100;
     }
     
-    const totalAmount = Math.max(0, basePrice - discountValue);
+    let totalAmount = Math.max(0, basePrice - discountValue);
+    
+    // إضافة ضريبة القيمة المضافة إذا تم تفعيلها
+    if (formData.include_vat) {
+      const vatAmount = totalAmount * 0.15; // 15%
+      totalAmount = totalAmount + vatAmount;
+    }
+    
+    totalAmount = Math.round(totalAmount * 100) / 100; // تقريب إلى منزلتين عشريتين
     
     setFormData(prev => ({
       ...prev,
@@ -180,7 +189,7 @@ export default function NewAdvertiser() {
 
   useEffect(() => {
     calculateTotalAmount();
-  }, [formData.duration_type, formData.plan_id, formData.custom_start_date, formData.custom_end_date, formData.discount_amount, formData.discount_type, plans]);
+  }, [formData.duration_type, formData.plan_id, formData.custom_start_date, formData.custom_end_date, formData.discount_amount, formData.discount_type, formData.include_vat, plans]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name } = e.target;
@@ -238,6 +247,7 @@ export default function NewAdvertiser() {
       base_price: formData.base_price,
       discount_type: formData.discount_type,
       discount_amount: formData.discount_amount,
+      include_vat: formData.include_vat,
       total_amount: formData.total_amount,
       paid_amount: formData.paid_amount,
       status: 'active'
@@ -582,6 +592,35 @@ export default function NewAdvertiser() {
                 )}
               </div>
 
+              {/* VAT Section */}
+              <div className="bg-purple-50 rounded-lg p-6 space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <FaMoneyBillWave className="ml-2 text-purple-600" /> ضريبة القيمة المضافة (اختياري)
+                </h3>
+                
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="include_vat"
+                    checked={formData.include_vat}
+                    onChange={(e) => setFormData({ ...formData, include_vat: e.target.checked })}
+                    className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 ml-3"
+                  />
+                  <span className="text-gray-700">
+                    إضافة ضريبة القيمة المضافة (15%)
+                  </span>
+                </label>
+                
+                {formData.include_vat && (
+                  <div className="mt-4 p-3 bg-purple-100 rounded-lg">
+                    <p className="text-sm text-gray-700">
+                      <span className="font-semibold">قيمة الضريبة: </span>
+                      {Math.round((formData.total_amount / 1.15) * 0.15 * 100) / 100} ريال (15%)
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Payment Information */}
               <div className="bg-blue-50 rounded-lg p-6 space-y-4">
                 <h3 className="text-lg font-semibold text-gray-800 flex items-center">
@@ -607,8 +646,25 @@ export default function NewAdvertiser() {
                     </div>
                   )}
                   
+                  {formData.include_vat && (
+                    <>
+                      <div className="flex justify-between items-center pb-3 border-b">
+                        <span className="text-gray-600">المبلغ قبل الضريبة:</span>
+                        <span className="font-semibold text-gray-800">
+                          {Math.round((formData.total_amount / 1.15) * 100) / 100} ريال
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pb-3 border-b text-purple-600">
+                        <span>ضريبة القيمة المضافة (15%):</span>
+                        <span className="font-semibold">
+                          +{Math.round((formData.total_amount / 1.15) * 0.15 * 100) / 100} ريال
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  
                   <div className="flex justify-between items-center text-lg font-bold">
-                    <span className="text-gray-800">المجموع:</span>
+                    <span className="text-gray-800">المجموع {formData.include_vat ? 'شامل الضريبة' : ''}:</span>
                     <span className="text-primary-600">{formData.total_amount} ريال</span>
                   </div>
                 </div>

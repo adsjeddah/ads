@@ -35,6 +35,7 @@ export default async function handler(
         services,
         selected_icon,
         status = 'active',
+        include_vat = false,
         plan_id,
         start_date,
         end_date,
@@ -56,6 +57,8 @@ export default async function handler(
         whatsapp: whatsapp || undefined,
         services: services || undefined,
         icon_url: selected_icon || undefined, // Map selected_icon to icon_url
+        include_vat: include_vat, // خيار ضريبة القيمة المضافة
+        vat_percentage: include_vat ? 15 : undefined, // نسبة الضريبة الافتراضية
         status: status as 'active' | 'inactive' | 'pending'
       };
       
@@ -74,8 +77,8 @@ export default async function handler(
             discount_amount: discount_amount || 0,
             initial_payment: paid_amount || 0,
             payment_method: 'cash', // يمكن تمريره من الفرونت إند
-            notes: 'إنشاء اشتراك مع إضافة المعلن',
-            vat_percentage: 15 // نسبة VAT الافتراضية
+            notes: 'إنشاء اشتراك مع إضافة المعلن'
+            // VAT سيتم قراءته تلقائياً من إعدادات المعلن
           });
           
           console.log('✅ Subscription + Invoice + Payment created:', financialResult);

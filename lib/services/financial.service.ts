@@ -137,44 +137,59 @@ export class FinancialService {
     invoice_id: string;
     payment_id?: string;
   }> {
-    // 1. جلب معلومات الخطة
+    // 1. جلب معلومات المعلن للتحقق من إعدادات VAT
+    const advertiserDoc = await adminDb.collection('advertisers').doc(data.advertiser_id).get();
+    if (!advertiserDoc.exists) {
+      throw new Error('Advertiser not found');
+    }
+    const advertiser = { id: advertiserDoc.id, ...advertiserDoc.data() } as any;
+    const includeVAT = advertiser.include_vat || false;
+    
+    // 2. جلب معلومات الخطة
     const planDoc = await adminDb.collection('plans').doc(data.plan_id).get();
     if (!planDoc.exists) {
       throw new Error('Plan not found');
     }
     const plan = { id: planDoc.id, ...planDoc.data() } as Plan;
 
-    // 2. حساب تاريخ النهاية
+    // 3. حساب تاريخ النهاية
     const startDate = new Date(data.start_date);
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + plan.duration_days);
 
-    // 3. حساب الخصومات
+    // 4. حساب الخصومات
     const discount = this.calculateDiscount(
       plan.price,
       data.discount_type || 'amount',
       data.discount_amount || 0
     );
 
-    // 4. حساب VAT على المبلغ بعد الخصم
-    const vatPercentage = data.vat_percentage || 15;
-    const vat = this.calculateVAT(discount.total_amount, vatPercentage);
+    // 5. حساب VAT على المبلغ بعد الخصم (فقط إذا كان المعلن يطلبه)
+    let totalFinal = discount.total_amount;
+    let vatAmount = 0;
+    let vatPercentage = 0;
     
-    // 5. حساب المبالغ النهائية
-    const totalWithVAT = vat.total_with_vat;
+    if (includeVAT) {
+      vatPercentage = data.vat_percentage || advertiser.vat_percentage || 15;
+      const vat = this.calculateVAT(discount.total_amount, vatPercentage);
+      totalFinal = vat.total_with_vat;
+      vatAmount = vat.vat_amount;
+    }
+    
+    // 6. حساب المبالغ النهائية
     const initialPayment = data.initial_payment || 0;
     const paidAmount = initialPayment;
-    const remainingAmount = totalWithVAT - paidAmount;
+    const remainingAmount = totalFinal - paidAmount;
 
     // تحديد حالة الدفع
     let paymentStatus: 'paid' | 'partial' | 'pending' = 'pending';
-    if (paidAmount >= totalWithVAT) {
+    if (paidAmount >= totalFinal) {
       paymentStatus = 'paid';
     } else if (paidAmount > 0) {
       paymentStatus = 'partial';
     }
 
-    // 6. إنشاء الاشتراك
+    // 7. إنشاء الاشتراك
     const subscriptionData: Omit<Subscription, 'id' | 'created_at'> = {
       advertiser_id: data.advertiser_id,
       plan_id: data.plan_id,
@@ -183,7 +198,7 @@ export class FinancialService {
       base_price: plan.price,
       discount_type: discount.discount_type,
       discount_amount: discount.discount_amount,
-      total_amount: totalWithVAT, // المبلغ شامل الضريبة
+      total_amount: totalFinal, // المبلغ النهائي (مع أو بدون ضريبة)
       paid_amount: paidAmount,
       remaining_amount: remainingAmount,
       status: 'active',
@@ -192,17 +207,17 @@ export class FinancialService {
 
     const subscriptionId = await SubscriptionAdminService.create(subscriptionData);
 
-    // 7. إنشاء الفاتورة مع VAT
+    // 8. إنشاء الفاتورة (مع أو بدون VAT حسب إعدادات المعلن)
     const invoiceNumber = await this.generateInvoiceNumber();
     const invoiceData: Omit<Invoice, 'id' | 'created_at'> = {
       subscription_id: subscriptionId,
       invoice_number: invoiceNumber,
       
-      // حقول VAT
-      subtotal: vat.subtotal,
-      vat_percentage: vat.vat_percentage,
-      vat_amount: vat.vat_amount,
-      amount: vat.total_with_vat,
+      // حقول VAT (إذا كان المعلن يطلبها)
+      subtotal: includeVAT ? discount.total_amount : totalFinal,
+      vat_percentage: includeVAT ? vatPercentage : 0,
+      vat_amount: includeVAT ? vatAmount : 0,
+      amount: totalFinal,
       
       status: paymentStatus === 'paid' ? 'paid' : 'unpaid',
       issued_date: startDate,
@@ -216,7 +231,7 @@ export class FinancialService {
       data.ip_address
     );
 
-    // 8. إنشاء سجل الدفعة إذا كان هناك دفعة أولية
+    // 9. إنشاء سجل الدفعة إذا كان هناك دفعة أولية
     let paymentId: string | undefined;
     if (initialPayment > 0) {
       const paymentData: Omit<Payment, 'id' | 'created_at'> = {

@@ -23,6 +23,8 @@ export class AdvertiserAdminService {
     if (data.services) advertiserData.services = data.services;
     if (data.icon_url) advertiserData.icon_url = data.icon_url;
     if (data.email) advertiserData.email = data.email;
+    if (data.include_vat !== undefined) advertiserData.include_vat = data.include_vat;
+    if (data.vat_percentage !== undefined) advertiserData.vat_percentage = data.vat_percentage;
     
     // تشفير كلمة المرور إذا كانت موجودة
     if (data.password) {
