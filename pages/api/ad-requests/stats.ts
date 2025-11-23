@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { AdRequestService } from '../../../lib/services/ad-request.service';
-import { verifyAdminToken } from '../../../lib/firebase-admin'; // For admin-only access
+import { AdRequestAdminService } from '../../../lib/services/ad-request-admin.service';
+import { verifyAdminToken } from '../../../lib/firebase-admin';
 
 interface AdRequestStats {
   total: number;
@@ -21,7 +21,7 @@ export default async function handler(
       // if (!token) return res.status(401).json({ error: 'Unauthorized' });
       // await verifyAdminToken(token);
 
-      const stats = await AdRequestService.getStatistics();
+      const stats = await AdRequestAdminService.getStatistics();
       res.status(200).json(stats);
     } catch (error: any) {
       console.error('Error fetching ad request statistics:', error);

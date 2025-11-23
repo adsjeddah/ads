@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { AdRequestService } from '../../../lib/services/ad-request.service';
+import { AdRequestAdminService } from '../../../lib/services/ad-request-admin.service';
 import { AdRequest } from '../../../types/models';
-import { verifyAdminToken } from '../../../lib/firebase-admin'; // For admin-only operations
+import { verifyAdminToken } from '../../../lib/firebase-admin';
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,7 +24,7 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const adRequest = await AdRequestService.getById(id);
+      const adRequest = await AdRequestAdminService.getById(id);
       if (adRequest) {
         res.status(200).json(adRequest);
       } else {
@@ -37,8 +37,8 @@ export default async function handler(
   } else if (req.method === 'PUT') {
     try {
       const adRequestData = req.body as Partial<AdRequest>;
-      await AdRequestService.update(id, adRequestData);
-      const updatedAdRequest = await AdRequestService.getById(id);
+      await AdRequestAdminService.update(id, adRequestData);
+      const updatedAdRequest = await AdRequestAdminService.getById(id);
       if (updatedAdRequest) {
         res.status(200).json(updatedAdRequest);
       } else {
@@ -50,7 +50,7 @@ export default async function handler(
     }
   } else if (req.method === 'DELETE') {
     try {
-      await AdRequestService.delete(id);
+      await AdRequestAdminService.delete(id);
       res.status(200).json({ message: 'Ad request deleted successfully' });
     } catch (error: any) {
       console.error(`Error deleting ad request ${id}:`, error);
