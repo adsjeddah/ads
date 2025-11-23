@@ -13,8 +13,7 @@ import {
   FaBox,
   FaTimes
 } from 'react-icons/fa';
-import { format, differenceInDays } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { formatDate, formatPrice, firestoreTimestampToDate, daysBetween } from '@/lib/utils';
 
 interface Subscription {
   id: string;
@@ -44,16 +43,6 @@ interface SubscriptionsListProps {
   onAddPayment?: (subscription: Subscription) => void;
   loading?: boolean;
 }
-
-// Helper function to convert Firestore Timestamp to Date
-const toDate = (timestamp: any): Date => {
-  if (!timestamp) return new Date();
-  if (timestamp instanceof Date) return timestamp;
-  if (timestamp.toDate) return timestamp.toDate();
-  if (timestamp.seconds) return new Date(timestamp.seconds * 1000);
-  if (timestamp._seconds) return new Date(timestamp._seconds * 1000);
-  return new Date(timestamp);
-};
 
 export default function SubscriptionsList({
   subscriptions,
@@ -145,9 +134,9 @@ export default function SubscriptionsList({
     <div className="space-y-6">
       {subscriptions.map((sub, index) => {
         const plan = plans.find(p => p.id === sub.plan_id);
-        const startDate = toDate(sub.start_date);
-        const endDate = toDate(sub.end_date);
-        const daysRemaining = differenceInDays(endDate, new Date());
+        const startDate = firestoreTimestampToDate(sub.start_date);
+        const endDate = firestoreTimestampToDate(sub.end_date);
+        const daysRemaining = startDate && endDate ? daysBetween(new Date(), endDate) : 0;
         const isExpiringSoon = daysRemaining <= 7 && daysRemaining > 0;
         const paymentPercentage = (sub.paid_amount / sub.total_amount) * 100;
 
@@ -191,7 +180,7 @@ export default function SubscriptionsList({
                   <div>
                     <p className="text-xs text-gray-500">تاريخ البداية</p>
                     <p className="font-semibold text-gray-800">
-                      {format(startDate, 'dd/MM/yyyy', { locale: ar })}
+                      {formatDate(startDate)}
                     </p>
                   </div>
                 </div>
@@ -200,7 +189,7 @@ export default function SubscriptionsList({
                   <div>
                     <p className="text-xs text-gray-500">تاريخ النهاية</p>
                     <p className="font-semibold text-gray-800">
-                      {format(endDate, 'dd/MM/yyyy', { locale: ar })}
+                      {formatDate(endDate)}
                     </p>
                   </div>
                 </div>
@@ -226,7 +215,7 @@ export default function SubscriptionsList({
                   <div>
                     <p className="text-xs text-gray-500 mb-1">السعر الأساسي</p>
                     <p className="font-bold text-gray-800">
-                      {sub.base_price.toLocaleString('ar-SA')} ريال
+                      {formatPrice(sub.base_price)}
                     </p>
                   </div>
                   
@@ -236,7 +225,7 @@ export default function SubscriptionsList({
                       <p className="font-bold text-red-600">
                         - {sub.discount_type === 'percentage' 
                           ? `${sub.discount_amount}%` 
-                          : `${sub.discount_amount.toLocaleString('ar-SA')} ريال`}
+                          : formatPrice(sub.discount_amount)}
                       </p>
                     </div>
                   )}
@@ -244,14 +233,14 @@ export default function SubscriptionsList({
                   <div>
                     <p className="text-xs text-gray-500 mb-1">الإجمالي</p>
                     <p className="font-bold text-primary-600">
-                      {sub.total_amount.toLocaleString('ar-SA')} ريال
+                      {formatPrice(sub.total_amount)}
                     </p>
                   </div>
                   
                   <div>
                     <p className="text-xs text-gray-500 mb-1">المدفوع</p>
                     <p className="font-bold text-green-600">
-                      {sub.paid_amount.toLocaleString('ar-SA')} ريال
+                      {formatPrice(sub.paid_amount)}
                     </p>
                   </div>
                   
@@ -259,7 +248,7 @@ export default function SubscriptionsList({
                     <div>
                       <p className="text-xs text-gray-500 mb-1">المتبقي</p>
                       <p className="font-bold text-red-600 animate-pulse">
-                        {sub.remaining_amount.toLocaleString('ar-SA')} ريال
+                        {formatPrice(sub.remaining_amount)}
                       </p>
                     </div>
                   )}

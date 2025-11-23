@@ -13,8 +13,7 @@ import {
   FaReceipt,
   FaFileInvoiceDollar
 } from 'react-icons/fa';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { formatDate, formatPrice, firestoreTimestampToDate } from '@/lib/utils';
 
 interface Payment {
   id: string;
@@ -32,16 +31,6 @@ interface PaymentHistoryTableProps {
   payments: Payment[];
   loading?: boolean;
 }
-
-// Helper function to convert Firestore Timestamp to Date
-const toDate = (timestamp: any): Date => {
-  if (!timestamp) return new Date();
-  if (timestamp instanceof Date) return timestamp;
-  if (timestamp.toDate) return timestamp.toDate();
-  if (timestamp.seconds) return new Date(timestamp.seconds * 1000);
-  if (timestamp._seconds) return new Date(timestamp._seconds * 1000);
-  return new Date(timestamp);
-};
 
 export default function PaymentHistoryTable({ payments, loading }: PaymentHistoryTableProps) {
   if (loading || !payments) {
@@ -109,7 +98,7 @@ export default function PaymentHistoryTable({ payments, loading }: PaymentHistor
           <div className="text-left">
             <p className="text-white/80 text-sm">إجمالي المدفوعات</p>
             <p className="text-white font-bold text-2xl">
-              {totalPayments.toLocaleString('ar-SA')} ريال
+              {formatPrice(totalPayments)}
             </p>
           </div>
         </div>
@@ -153,7 +142,7 @@ export default function PaymentHistoryTable({ payments, loading }: PaymentHistor
                   <div className="flex items-center gap-2">
                     <FaCalendarAlt className="text-blue-500" />
                     <span className="text-sm font-medium text-gray-900">
-                      {format(toDate(payment.payment_date), 'dd/MM/yyyy', { locale: ar })}
+                      {formatDate(firestoreTimestampToDate(payment.payment_date))}
                     </span>
                   </div>
                 </td>
@@ -161,7 +150,7 @@ export default function PaymentHistoryTable({ payments, loading }: PaymentHistor
                   <div className="flex items-center gap-2">
                     <FaMoneyBillWave className="text-green-500" />
                     <span className="text-sm font-bold text-green-600">
-                      {payment.amount.toLocaleString('ar-SA')} ريال
+                      {formatPrice(payment.amount)}
                     </span>
                   </div>
                 </td>
@@ -216,7 +205,7 @@ export default function PaymentHistoryTable({ payments, loading }: PaymentHistor
             عدد الدفعات: <span className="font-semibold text-gray-900">{payments.length}</span>
           </p>
           <p className="text-sm text-gray-600">
-            الإجمالي: <span className="font-bold text-green-600 text-lg">{totalPayments.toLocaleString('ar-SA')} ريال</span>
+            الإجمالي: <span className="font-bold text-green-600 text-lg">{formatPrice(totalPayments)}</span>
           </p>
         </div>
       </div>

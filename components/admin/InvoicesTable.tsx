@@ -11,8 +11,7 @@ import {
   FaCalendarAlt,
   FaMoneyBillWave
 } from 'react-icons/fa';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { formatDate, formatPrice, firestoreTimestampToDate } from '@/lib/utils';
 
 interface Invoice {
   id: string;
@@ -30,16 +29,6 @@ interface InvoicesTableProps {
   invoices: Invoice[];
   loading?: boolean;
 }
-
-// Helper function to convert Firestore Timestamp to Date
-const toDate = (timestamp: any): Date => {
-  if (!timestamp) return new Date();
-  if (timestamp instanceof Date) return timestamp;
-  if (timestamp.toDate) return timestamp.toDate();
-  if (timestamp.seconds) return new Date(timestamp.seconds * 1000);
-  if (timestamp._seconds) return new Date(timestamp._seconds * 1000);
-  return new Date(timestamp);
-};
 
 export default function InvoicesTable({ invoices, loading }: InvoicesTableProps) {
   if (loading || !invoices) {
@@ -118,15 +107,15 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="bg-white/20 rounded-lg p-3">
               <p className="text-white/80 text-xs">الإجمالي</p>
-              <p className="text-white font-bold">{totalAmount.toLocaleString('ar-SA')}</p>
+              <p className="text-white font-bold">{formatPrice(totalAmount)}</p>
             </div>
             <div className="bg-green-500/30 rounded-lg p-3">
               <p className="text-white/80 text-xs">المدفوع</p>
-              <p className="text-white font-bold">{paidAmount.toLocaleString('ar-SA')}</p>
+              <p className="text-white font-bold">{formatPrice(paidAmount)}</p>
             </div>
             <div className="bg-red-500/30 rounded-lg p-3">
               <p className="text-white/80 text-xs">المستحق</p>
-              <p className="text-white font-bold">{unpaidAmount.toLocaleString('ar-SA')}</p>
+              <p className="text-white font-bold">{formatPrice(unpaidAmount)}</p>
             </div>
           </div>
         </div>
@@ -178,7 +167,7 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
                   <div className="flex items-center gap-2">
                     <FaMoneyBillWave className="text-green-500" />
                     <span className="text-sm font-bold text-gray-900">
-                      {invoice.amount.toLocaleString('ar-SA')} ريال
+                      {formatPrice(invoice.amount)}
                     </span>
                   </div>
                 </td>
@@ -189,7 +178,7 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
                   <div className="flex items-center gap-2">
                     <FaCalendarAlt className="text-gray-400 text-xs" />
                     <span className="text-sm text-gray-700">
-                      {format(toDate(invoice.issued_date), 'dd/MM/yyyy', { locale: ar })}
+                      {formatDate(firestoreTimestampToDate(invoice.issued_date))}
                     </span>
                   </div>
                 </td>
@@ -198,7 +187,7 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
                     <div className="flex items-center gap-2">
                       <FaCalendarAlt className="text-orange-400 text-xs" />
                       <span className="text-sm text-gray-700">
-                        {format(toDate(invoice.due_date), 'dd/MM/yyyy', { locale: ar })}
+                        {formatDate(firestoreTimestampToDate(invoice.due_date))}
                       </span>
                     </div>
                   ) : (
@@ -210,7 +199,7 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
                     <div className="flex items-center gap-2">
                       <FaCheckCircle className="text-green-500 text-xs" />
                       <span className="text-sm text-green-600 font-semibold">
-                        {format(toDate(invoice.paid_date), 'dd/MM/yyyy', { locale: ar })}
+                        {formatDate(firestoreTimestampToDate(invoice.paid_date))}
                       </span>
                     </div>
                   ) : (
@@ -248,7 +237,7 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
           <div className="text-left">
             <p className="text-xs text-gray-500">إجمالي المبالغ</p>
             <p className="text-xl font-bold text-gray-900">
-              {totalAmount.toLocaleString('ar-SA')} ريال
+              {formatPrice(totalAmount)}
             </p>
           </div>
         </div>
