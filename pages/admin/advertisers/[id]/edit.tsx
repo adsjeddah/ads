@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -300,19 +300,41 @@ export default function EditAdvertiser() {
     
     newTotalAmount = Math.round(newTotalAmount * 100) / 100; // تقريب إلى منزلتين عشريتين
     
-    // Only update if values have actually changed to prevent infinite loops if not careful with useEffect
-    if (newBasePrice !== formData.base_price || newTotalAmount !== formData.total_amount) {
-      setFormData(prev => ({
+    // Only update if values have actually changed to prevent infinite loops
+    setFormData(prev => {
+      // If values haven't changed, return the same reference to prevent re-render
+      if (prev.base_price === newBasePrice && prev.total_amount === newTotalAmount) {
+        return prev;
+      }
+      return {
         ...prev,
         base_price: newBasePrice,
         total_amount: newTotalAmount,
-      }));
-    }
+      };
+    });
   };
 
+  // Use ref to track previous calculation inputs to prevent infinite loop
+  const prevCalculationInputs = useRef<string>('');
+  
   useEffect(() => {
     if (!loading && plans.length > 0) {
+      // Create a stable key from calculation inputs
+      const currentInputs = JSON.stringify({
+        duration_type: formData.duration_type,
+        plan_id: formData.plan_id,
+        custom_start_date: formData.custom_start_date,
+        custom_end_date: formData.custom_end_date,
+        discount_amount: formData.discount_amount,
+        discount_type: formData.discount_type,
+        include_vat: formData.include_vat
+      });
+      
+      // Only recalculate if inputs actually changed
+      if (currentInputs !== prevCalculationInputs.current) {
+        prevCalculationInputs.current = currentInputs;
         calculateTotalAmount();
+      }
     }
   }, [
     formData.duration_type,
@@ -322,7 +344,7 @@ export default function EditAdvertiser() {
     formData.discount_amount,
     formData.discount_type,
     formData.include_vat,
-    plans,
+    plans.length,
     loading
   ]);
 
