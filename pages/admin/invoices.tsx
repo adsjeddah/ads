@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FaArrowLeft, FaMoneyBillWave, FaSearch, FaPlus, FaEdit, FaEye, FaCheckCircle, FaClock, FaExclamationCircle, FaFileInvoice } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { formatDate, formatPrice } from '@/lib/utils';
 
 interface Invoice {
   id: number;
@@ -154,7 +155,7 @@ export default function InvoicesManagement() {
                 <div>
                   <p className="text-yellow-600 text-sm font-medium mb-1">المبالغ المعلقة</p>
                   <p className="text-3xl font-bold text-yellow-900">
-                    {invoices.reduce((sum, inv) => sum + (inv.subscription_remaining || 0), 0).toFixed(0)} ريال
+                    {formatPrice(invoices.reduce((sum, inv) => sum + (inv.subscription_remaining || 0), 0))}
                   </p>
                 </div>
                 <div className="bg-yellow-100 p-4 rounded-lg">
@@ -174,7 +175,7 @@ export default function InvoicesManagement() {
                 <div>
                   <p className="text-green-600 text-sm font-medium mb-1">إجمالي المدفوعات</p>
                   <p className="text-3xl font-bold text-green-900">
-                    {invoices.reduce((sum, inv) => sum + (inv.subscription_paid || 0), 0).toFixed(0)} ريال
+                    {formatPrice(invoices.reduce((sum, inv) => sum + (inv.subscription_paid || 0), 0))}
                   </p>
                 </div>
                 <div className="bg-green-100 p-4 rounded-lg">
@@ -271,10 +272,10 @@ export default function InvoicesManagement() {
                           <div className="text-xs text-gray-500">{invoice.phone}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.plan_name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{new Date(invoice.issued_date).toLocaleDateString('ar-SA')}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{invoice.amount.toFixed(2)} ريال</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">{invoice.subscription_paid.toFixed(2)} ريال</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">{invoice.subscription_remaining.toFixed(2)} ريال</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDate(invoice.issued_date)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{formatPrice(invoice.amount)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">{formatPrice(invoice.subscription_paid)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">{formatPrice(invoice.subscription_remaining)}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{getInvoiceStatusBadge(invoice)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <Link href={`/admin/invoices/${invoice.id}`}>

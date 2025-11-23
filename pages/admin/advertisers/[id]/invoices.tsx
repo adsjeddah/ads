@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FaArrowLeft, FaPlus, FaMoneyBillWave, FaCalendarAlt, FaCheckCircle, FaClock, FaExclamationCircle, FaFileInvoice, FaEdit } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { formatDate, formatPrice } from '@/lib/utils';
 
 interface Subscription {
   id: number;
@@ -254,8 +255,8 @@ export default function AdvertiserInvoices() {
                         <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
                           <span className="flex items-center">
                             <FaCalendarAlt className="ml-1" />
-                            {new Date(subscription.start_date).toLocaleDateString('ar-SA')} - 
-                            {new Date(subscription.end_date).toLocaleDateString('ar-SA')}
+                            {formatDate(subscription.start_date)} - 
+                            {formatDate(subscription.end_date)}
                           </span>
                           <span className={subscription.status === 'active' ? 'text-green-600' : 'text-gray-500'}>
                             {subscription.status === 'active' ? '● نشط' : '○ منتهي'}
@@ -338,10 +339,10 @@ export default function AdvertiserInvoices() {
                             {invoice.plan_name}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(invoice.issued_date).toLocaleDateString('ar-SA')}
+                            {formatDate(invoice.issued_date)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(invoice.due_date).toLocaleDateString('ar-SA')}
+                            {formatDate(invoice.due_date)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                             {invoice.amount} ريال
@@ -404,7 +405,7 @@ export default function AdvertiserInvoices() {
                       {payments.map((payment) => (
                         <tr key={payment.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(payment.payment_date).toLocaleDateString('ar-SA')}
+                            {formatDate(payment.payment_date)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {subscriptions.find(s => s.id === payment.subscription_id)?.plan_name || '-'}

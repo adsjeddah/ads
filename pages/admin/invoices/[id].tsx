@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FaArrowLeft, FaPrint, FaPaperPlane, FaCheckCircle, FaExclamationCircle, FaClock, FaMoneyBillWave, FaUserTie, FaBuilding, FaPhone, FaEnvelope, FaCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { formatDate as formatDateUtil, formatDateLong, formatPrice as formatPriceUtil, firestoreTimestampToDate } from '@/lib/utils';
 
 interface InvoiceDetail {
   id: number;
@@ -48,23 +49,16 @@ export default function InvoiceDetailPage() {
 
   // Helper function to safely format numbers
   const formatPrice = (price: number | null | undefined): string => {
-    if (price === null || price === undefined || isNaN(price)) {
-      return '0.00';
-    }
-    return price.toFixed(2);
+    return formatPriceUtil(price);
   };
 
-  // Helper function to safely format dates
+  // Helper function to safely format dates (Gregorian calendar, Saudi timezone, English numerals)
   const formatDate = (date: any): string => {
     if (!date) return '-';
     try {
-      const dateObj = date instanceof Date ? date : new Date(date);
-      if (isNaN(dateObj.getTime())) return '-';
-      return dateObj.toLocaleDateString('ar-SA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+      const dateObj = firestoreTimestampToDate(date);
+      if (!dateObj || isNaN(dateObj.getTime())) return '-';
+      return formatDateLong(dateObj); // e.g., "23 نوفمبر 2025"
     } catch (error) {
       console.error('Error formatting date:', error);
       return '-';
