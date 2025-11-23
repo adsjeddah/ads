@@ -1,5 +1,6 @@
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '../firebase-admin';
+import { getSaudiNow, startOfDay } from '../utils/date';
 import { Statistics } from '../../types/models';
 
 export class StatisticsAdminService {
@@ -98,8 +99,7 @@ export class StatisticsAdminService {
 
   // Record a view (server-side)
   static async recordView(advertiserId: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
     const statsRef = adminDb.collection('statistics');
@@ -127,8 +127,7 @@ export class StatisticsAdminService {
 
   // Record a click (server-side)
   static async recordClick(advertiserId: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
     const statsRef = adminDb.collection('statistics');
@@ -156,8 +155,7 @@ export class StatisticsAdminService {
 
   // Record a call (server-side)
   static async recordCall(advertiserId: string, phone?: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
     const statsRef = adminDb.collection('statistics');

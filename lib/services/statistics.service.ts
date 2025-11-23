@@ -14,14 +14,14 @@ import {
 } from 'firebase/firestore';
 import { db, COLLECTIONS } from '../firebase';
 import { Statistics } from '../../types/models';
+import { getSaudiNow, startOfDay } from '../utils/date';
 import { AdvertiserService } from './advertiser.service'; // Assuming this exists
 import { SubscriptionService } from './subscription.service'; // Assuming this exists
 
 export class StatisticsService {
   // تسجيل مشاهدة لإعلان
   static async recordView(advertiserId: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to start of day
+    const today = startOfDay(getSaudiNow());
     const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
 
     const statsRef = collection(db, COLLECTIONS.STATISTICS);
@@ -53,8 +53,7 @@ export class StatisticsService {
 
   // تسجيل نقرة على إعلان
   static async recordClick(advertiserId: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfDay(getSaudiNow());
     const dateStr = today.toISOString().split('T')[0];
 
     const statsRef = collection(db, COLLECTIONS.STATISTICS);
@@ -84,8 +83,7 @@ export class StatisticsService {
 
   // تسجيل مكالمة على إعلان
   static async recordCall(advertiserId: string, phone?: string) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfDay(getSaudiNow());
 
     const statsRef = collection(db, COLLECTIONS.STATISTICS);
     const q = query(

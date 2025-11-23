@@ -12,6 +12,7 @@ import { Subscription, Invoice, Payment, Plan } from '../../types/models';
 import { SubscriptionAdminService } from './subscription-admin.service';
 import { InvoiceAdminService } from './invoice-admin.service';
 import { PaymentAdminService } from './payment-admin.service';
+import { getSaudiNow, addDays, toSaudiTime } from '../utils/date';
 
 export interface DiscountCalculation {
   base_price: number;
@@ -152,10 +153,9 @@ export class FinancialService {
     }
     const plan = { id: planDoc.id, ...planDoc.data() } as Plan;
 
-    // 3. حساب تاريخ النهاية
-    const startDate = new Date(data.start_date);
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + plan.duration_days);
+    // 3. حساب تاريخ النهاية (بالتوقيت السعودي)
+    const startDate = toSaudiTime(data.start_date);
+    const endDate = addDays(startDate, plan.duration_days);
 
     // 4. حساب الخصومات
     const discount = this.calculateDiscount(
@@ -222,7 +222,7 @@ export class FinancialService {
       status: paymentStatus === 'paid' ? 'paid' : 'unpaid',
       issued_date: startDate,
       due_date: endDate,
-      paid_date: paymentStatus === 'paid' ? new Date() : undefined
+      paid_date: paymentStatus === 'paid' ? getSaudiNow() : undefined
     };
 
     const invoiceId = await InvoiceAdminService.create(
@@ -238,7 +238,7 @@ export class FinancialService {
         subscription_id: subscriptionId,
         invoice_id: invoiceId,
         amount: initialPayment,
-        payment_date: new Date(),
+        payment_date: getSaudiNow(),
         payment_method: data.payment_method || 'cash',
         notes: data.notes || 'دفعة أولية'
       };
@@ -315,7 +315,7 @@ export class FinancialService {
 
       // تحديث حالة الفاتورة
       if (totalAfterThisPayment >= invoice.amount) {
-        await InvoiceAdminService.updatePaymentStatus(data.invoice_id, 'paid', new Date());
+        await InvoiceAdminService.updatePaymentStatus(data.invoice_id, 'paid', getSaudiNow());
       }
     } else {
       // إذا لم يتم تحديد فاتورة، نبحث عن الفاتورة المرتبطة بالاشتراك
@@ -331,7 +331,7 @@ export class FinancialService {
           const totalAfterThisPayment = totalInvoicePayments + data.amount;
 
           if (totalAfterThisPayment >= unpaidInvoice.amount) {
-            await InvoiceAdminService.updatePaymentStatus(unpaidInvoice.id, 'paid', new Date());
+            await InvoiceAdminService.updatePaymentStatus(unpaidInvoice.id, 'paid', getSaudiNow());
           }
         }
       }
@@ -360,7 +360,7 @@ export class FinancialService {
     updated: number;
     expired_subscriptions: string[];
   }> {
-    const now = new Date();
+    const now = getSaudiNow();
     const activeSubscriptions = await SubscriptionAdminService.getActiveSubscriptions();
     
     const expiredSubscriptions: string[] = [];
@@ -465,7 +465,7 @@ export class FinancialService {
    * توليد رقم فاتورة فريد
    */
   private static async generateInvoiceNumber(): Promise<string> {
-    const now = new Date();
+    const now = getSaudiNow();
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const day = now.getDate().toString().padStart(2, '0');
@@ -509,8 +509,8 @@ export class FinancialService {
     }
 
     // حساب مبلغ الاسترداد (المبلغ المدفوع غير المستخدم)
-    const now = new Date();
-    const startDate = new Date(subscription.start_date);
+    const now = getSaudiNow();
+    const startDate = toSaudiTime(subscription.start_date);
     const endDate = new Date(subscription.end_date);
     
     const totalDays = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);

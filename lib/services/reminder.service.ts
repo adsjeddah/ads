@@ -4,6 +4,7 @@ import {
 } from 'firebase-admin/firestore';
 import { adminDb } from '../firebase-admin';
 import { Reminder } from '../../types/models';
+import { getSaudiNow, addDays, toSaudiTime } from '../utils/date';
 
 export class ReminderService {
   
@@ -66,8 +67,7 @@ export class ReminderService {
    * إنشاء تذكيرات تلقائية للفواتير المستحقة قريباً
    */
   static async createDueSoonReminders(): Promise<number> {
-    const threeDaysFromNow = new Date();
-    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+    const threeDaysFromNow = addDays(getSaudiNow(), 3);
     
     // جلب الفواتير المستحقة خلال 3 أيام
     const invoicesSnapshot = await adminDb

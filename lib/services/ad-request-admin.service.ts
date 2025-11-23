@@ -5,6 +5,7 @@
 
 import { adminDb } from '../firebase-admin';
 import { AdRequest } from '../../types/models';
+import { getSaudiNow } from '../utils/date';
 
 export class AdRequestAdminService {
   private static collection = 'ad_requests';
@@ -62,7 +63,7 @@ export class AdRequestAdminService {
       const requestData = {
         ...data,
         status: 'pending',
-        created_at: new Date()
+        created_at: getSaudiNow()
       };
       
       const docRef = await adminDb.collection(this.collection).add(requestData);
@@ -128,7 +129,7 @@ export class AdRequestAdminService {
         ...request,
         original_id: id,
         status: 'rejected',
-        rejected_at: new Date(),
+        rejected_at: getSaudiNow(),
         rejection_reason: rejectionReason || 'تم رفض الطلب',
       };
       
