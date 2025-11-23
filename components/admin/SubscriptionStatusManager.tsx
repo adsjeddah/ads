@@ -19,6 +19,7 @@ import {
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Subscription } from '@/types/models';
+import { formatDate, formatDateTime } from '@/lib/utils/date';
 
 interface SubscriptionStatusManagerProps {
   subscription: Subscription;
@@ -112,7 +113,7 @@ export default function SubscriptionStatusManager({
         toast.success(
           `تم إعادة التشغيل بنجاح!\n` +
           `مدة التوقف: ${data.pause_duration_days} يوم\n` +
-          `تاريخ النهاية الجديد: ${new Date(data.new_end_date).toLocaleDateString('ar-SA')}`
+          `تاريخ النهاية الجديد: ${formatDate(data.new_end_date, 'dd/MM/yyyy')}`
         );
         onStatusChanged();
       }
@@ -146,7 +147,7 @@ export default function SubscriptionStatusManager({
         toast.success(
           `تم إعادة التنشيط بنجاح!\n` +
           `المدة: ${data.total_days} يوم\n` +
-          `تاريخ النهاية: ${new Date(data.new_end_date).toLocaleDateString('ar-SA')}`
+          `تاريخ النهاية: ${formatDate(data.new_end_date, 'dd/MM/yyyy')}`
         );
         onStatusChanged();
       }
@@ -209,7 +210,7 @@ export default function SubscriptionStatusManager({
           <div className="bg-yellow-50 p-3 rounded-lg">
             <p className="text-xs text-yellow-600 mb-1">متوقف منذ</p>
             <p className="text-sm font-semibold text-yellow-800">
-              {new Date(subscription.paused_at).toLocaleDateString('ar-SA')}
+              {formatDate(subscription.paused_at, 'dd/MM/yyyy')}
             </p>
           </div>
         )}

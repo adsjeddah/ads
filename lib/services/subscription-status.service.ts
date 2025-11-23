@@ -12,7 +12,7 @@
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '../firebase-admin';
 import { Subscription, SubscriptionStatusHistory } from '../../types/models';
-import { getSaudiNow, daysBetween, addDays, toSaudiTime } from '../utils/date';
+import { getSaudiNow, daysBetween, addDays, toSaudiTime, firestoreTimestampToDate } from '../utils/date';
 import { SubscriptionAdminService } from './subscription-admin.service';
 
 export class SubscriptionStatusService {
@@ -53,7 +53,7 @@ export class SubscriptionStatusService {
       }
       
       const now = getSaudiNow();
-      const currentEndDate = toSaudiTime(subscription.end_date);
+      const currentEndDate = firestoreTimestampToDate(subscription.end_date) || now;
       
       // حساب الأيام المتبقية
       const daysRemaining = daysBetween(now, currentEndDate);
@@ -66,7 +66,7 @@ export class SubscriptionStatusService {
       }
       
       // حساب الأيام النشطة حتى الآن
-      const startDate = toSaudiTime(subscription.start_date);
+      const startDate = firestoreTimestampToDate(subscription.start_date) || now;
       const activeDaysSoFar = daysBetween(startDate, now);
       
       // تحديث الاشتراك
@@ -171,13 +171,20 @@ export class SubscriptionStatusService {
       }
       
       const now = getSaudiNow();
-      const pausedAt = toSaudiTime(subscription.paused_at);
+      const pausedAt = firestoreTimestampToDate(subscription.paused_at);
+      
+      if (!pausedAt) {
+        return { 
+          success: false, 
+          message: 'تاريخ الإيقاف غير صالح' 
+        };
+      }
       
       // حساب مدة التوقف (بالأيام)
       const pauseDurationDays = daysBetween(pausedAt, now);
       
       // حساب تاريخ النهاية الجديد (نضيف أيام التوقف)
-      const oldEndDate = toSaudiTime(subscription.end_date);
+      const oldEndDate = firestoreTimestampToDate(subscription.end_date) || now;
       const newEndDate = addDays(oldEndDate, pauseDurationDays);
       
       // حساب إجمالي أيام التوقف
@@ -277,8 +284,8 @@ export class SubscriptionStatusService {
       }
       
       const now = getSaudiNow();
-      const startDate = toSaudiTime(subscription.start_date);
-      const currentEndDate = toSaudiTime(subscription.end_date);
+      const startDate = firestoreTimestampToDate(subscription.start_date) || now;
+      const currentEndDate = firestoreTimestampToDate(subscription.end_date) || now;
       
       // حساب الأيام المستخدمة والمهدرة
       let daysUsed = 0;
@@ -381,13 +388,13 @@ export class SubscriptionStatusService {
       }
       
       const now = getSaudiNow();
-      const newStartDate = data.new_start_date ? toSaudiTime(data.new_start_date) : now;
+      const newStartDate = data.new_start_date ? (firestoreTimestampToDate(data.new_start_date) || now) : now;
       
       // المدة الأصلية من الباقة
       const plannedDays = subscription.planned_days || 
                           daysBetween(
-                            subscription.original_start_date || subscription.start_date, 
-                            subscription.original_end_date || subscription.end_date
+                            firestoreTimestampToDate(subscription.original_start_date || subscription.start_date) || now, 
+                            firestoreTimestampToDate(subscription.original_end_date || subscription.end_date) || now
                           );
       
       // حساب تاريخ النهاية الجديد
