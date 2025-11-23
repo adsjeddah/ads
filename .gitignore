@@ -46,6 +46,7 @@ next-env.d.ts
 # firebase service account
 firebase-service-account.json
 *-service-account.json
+serviceAccountKey.json
 
 # local scripts
 set-local-admin.js
