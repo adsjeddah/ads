@@ -8,7 +8,8 @@ import {
   FaSignOutAlt, FaPlus, FaEye, FaEdit, FaTrash,
   FaCheckCircle, FaClock, FaTimesCircle, FaMoneyBillWave,
   FaHistory, FaUndo, FaExclamationTriangle, FaPercent,
-  FaChartBar, FaCalendarAlt, FaArrowUp, FaArrowDown
+  FaChartBar, FaCalendarAlt, FaArrowUp, FaArrowDown,
+  FaPause, FaPlay, FaStop, FaBan, FaRedo
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -18,6 +19,8 @@ import { ar } from 'date-fns/locale';
 interface Statistics {
   totalAdvertisers: { count: number };
   activeSubscriptions: { count: number };
+  pausedSubscriptions?: { count: number };
+  stoppedSubscriptions?: { count: number };
   totalRevenue: { total: number };
   pendingRequests: { count: number };
   totalVAT?: { total: number };
@@ -36,6 +39,8 @@ interface Advertiser {
   created_at: string;
   total_subscriptions?: number;
   active_subscriptions?: number;
+  paused_subscriptions?: number;
+  stopped_subscriptions?: number;
   total_amount?: number;
   paid_amount?: number;
   remaining_amount?: number;
@@ -443,8 +448,20 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              {/* New Features Statistics */}
+              {/* Subscription Status Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <StatCard
+                  icon={FaPause}
+                  title="اشتراكات متوقفة مؤقتاً"
+                  value={statistics?.pausedSubscriptions?.count || 0}
+                  color="bg-yellow-500"
+                />
+                <StatCard
+                  icon={FaStop}
+                  title="اشتراكات متوقفة"
+                  value={statistics?.stoppedSubscriptions?.count || 0}
+                  color="bg-red-500"
+                />
                 <StatCard
                   icon={FaPercent}
                   title="ضريبة VAT (15%)"
@@ -545,7 +562,24 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            {advertiser.active_subscriptions || 0} / {advertiser.total_subscriptions || 0}
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-1">
+                                <FaCheckCircle className="text-green-500" />
+                                {advertiser.active_subscriptions || 0}
+                              </span>
+                              {advertiser.paused_subscriptions ? (
+                                <span className="flex items-center gap-1 text-yellow-600">
+                                  <FaPause className="text-xs" />
+                                  {advertiser.paused_subscriptions}
+                                </span>
+                              ) : null}
+                              {advertiser.stopped_subscriptions ? (
+                                <span className="flex items-center gap-1 text-red-600">
+                                  <FaStop className="text-xs" />
+                                  {advertiser.stopped_subscriptions}
+                                </span>
+                              ) : null}
+                            </div>
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex gap-2">
@@ -603,6 +637,7 @@ export default function AdminDashboard() {
                         <th className="text-right py-3 px-4">الهاتف</th>
                         <th className="text-right py-3 px-4">البريد</th>
                         <th className="text-right py-3 px-4">الحالة</th>
+                        <th className="text-right py-3 px-4">الاشتراكات</th>
                         <th className="text-right py-3 px-4">تاريخ التسجيل</th>
                         <th className="text-right py-3 px-4">الإجراءات</th>
                       </tr>
@@ -621,6 +656,26 @@ export default function AdminDashboard() {
                             }`}>
                               {advertiser.status === 'active' ? 'نشط' : 'غير نشط'}
                             </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex flex-wrap items-center gap-2 text-sm">
+                              <span className="flex items-center gap-1 text-green-600">
+                                <FaCheckCircle className="text-xs" />
+                                {advertiser.active_subscriptions || 0}
+                              </span>
+                              {advertiser.paused_subscriptions ? (
+                                <span className="flex items-center gap-1 text-yellow-600">
+                                  <FaPause className="text-xs" />
+                                  {advertiser.paused_subscriptions}
+                                </span>
+                              ) : null}
+                              {advertiser.stopped_subscriptions ? (
+                                <span className="flex items-center gap-1 text-red-600">
+                                  <FaStop className="text-xs" />
+                                  {advertiser.stopped_subscriptions}
+                                </span>
+                              ) : null}
+                            </div>
                           </td>
                           <td className="py-3 px-4">
                             {formatDate(advertiser.created_at, 'dd/MM/yyyy')}

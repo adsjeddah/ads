@@ -3,11 +3,12 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import SubscriptionStatusManager from '../../../components/admin/SubscriptionStatusManager';
 
 interface Advertiser {
   id: number;
@@ -341,17 +342,51 @@ export default function AdvertiserDetails() {
             <div className="lg:col-span-2 space-y-8">
               <InfoCard title="الاشتراكات" icon={FaCalendarAlt}>
                 {subscriptions.length > 0 ? (
-                  <ul className="space-y-4">
+                  <div className="space-y-6">
                     {subscriptions.map(sub => (
-                      <li key={sub.id} className="border rounded-lg p-4">
-                        <h4 className="font-semibold">{sub.plan_name} ({sub.price} ريال / {sub.duration_days} يوم)</h4>
-                        <p>من: {formatDate(sub.start_date, 'dd/MM/yyyy')} إلى: {formatDate(sub.end_date, 'dd/MM/yyyy')}</p>
-                        <p>الحالة: <span className={`px-2 py-1 rounded-full text-xs ${sub.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{sub.status === 'active' ? 'نشط' : 'غير نشط'}</span></p>
-                        <p>الدفع: <span className={`px-2 py-1 rounded-full text-xs ${sub.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{sub.payment_status === 'paid' ? 'مدفوع' : 'غير مدفوع'}</span></p>
-                        {/* TODO: Add actions like renew, cancel, view invoice */}
-                      </li>
+                      <div key={sub.id} className="border rounded-lg p-4 space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-semibold text-lg">{sub.plan_name}</h4>
+                            <p className="text-sm text-gray-600">{sub.price} ريال / {sub.duration_days} يوم</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              sub.status === 'active' ? 'bg-green-100 text-green-800' :
+                              sub.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+                              sub.status === 'stopped' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {sub.status === 'active' ? '🟢 نشط' :
+                               sub.status === 'paused' ? '🟡 متوقف مؤقتاً' :
+                               sub.status === 'stopped' ? '🔴 متوقف' :
+                               '⚫ منتهي'}
+                            </span>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              sub.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
+                              sub.payment_status === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {sub.payment_status === 'paid' ? 'مدفوع' :
+                               sub.payment_status === 'partial' ? 'جزئي' : 'غير مدفوع'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <p>من: {formatDate(sub.start_date, 'dd/MM/yyyy')} إلى: {formatDate(sub.end_date, 'dd/MM/yyyy')}</p>
+                          <p>المبلغ الإجمالي: {sub.total_amount} ريال | المدفوع: {sub.paid_amount} ريال | المتبقي: {sub.remaining_amount} ريال</p>
+                        </div>
+                        
+                        {/* Status Manager Component */}
+                        {(sub.status === 'active' || sub.status === 'paused' || sub.status === 'stopped') && (
+                          <SubscriptionStatusManager 
+                            subscription={sub as any}
+                            onStatusChanged={fetchAdvertiserDetails}
+                          />
+                        )}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : <p className="text-gray-500">لا توجد اشتراكات حالية.</p>}
               </InfoCard>
 
