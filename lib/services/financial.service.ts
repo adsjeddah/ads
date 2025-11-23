@@ -355,6 +355,7 @@ export class FinancialService {
 
   /**
    * التحقق من صلاحية الاشتراكات وتحديث الحالات
+   * ⚠️ تحديث: يأخذ في الاعتبار الاشتراكات المتوقفة مؤقتاً
    */
   static async checkAndUpdateSubscriptionStatuses(): Promise<{
     updated: number;
@@ -367,12 +368,19 @@ export class FinancialService {
     let updatedCount = 0;
 
     for (const subscription of activeSubscriptions) {
-      const endDate = new Date(subscription.end_date);
+      // ⚠️ تجاهل الاشتراكات المتوقفة مؤقتاً أو المتوقفة كلياً
+      // لأنها لا تحسب الأيام ولا تنتهي تلقائياً
+      if (subscription.status === 'paused' || subscription.status === 'stopped') {
+        continue;
+      }
       
-      // إذا انتهى تاريخ الاشتراك
-      if (endDate < now && subscription.id) {
+      const endDate = toSaudiTime(subscription.end_date);
+      
+      // إذا انتهى تاريخ الاشتراك (فقط للاشتراكات النشطة)
+      if (endDate < now && subscription.id && subscription.status === 'active') {
         await SubscriptionAdminService.update(subscription.id, {
-          status: 'expired'
+          status: 'expired',
+          actual_end_date: now
         });
         expiredSubscriptions.push(subscription.id);
         updatedCount++;

@@ -39,9 +39,34 @@ export interface Subscription {
   total_amount: number;
   paid_amount: number;
   remaining_amount: number;
-  status: 'active' | 'expired' | 'cancelled';
+  
+  // الحالات الموسعة
+  status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled';
   payment_status: 'paid' | 'partial' | 'pending';
+  
+  // نظام الإيقاف المؤقت (Pause System)
+  paused_at?: Date;                    // تاريخ الإيقاف المؤقت
+  resumed_at?: Date;                   // تاريخ إعادة التشغيل
+  total_paused_days?: number;          // إجمالي أيام التوقف
+  current_pause_days?: number;         // أيام التوقف الحالي
+  
+  // نظام الإيقاف الكامل (Stop System)
+  stopped_at?: Date;                   // تاريخ الإيقاف الكامل
+  stop_reason?: string;                // سبب الإيقاف
+  
+  // التواريخ الأصلية والمعدلة
+  original_start_date?: Date;          // تاريخ البداية الأصلي
+  original_end_date?: Date;            // تاريخ النهاية الأصلي
+  adjusted_end_date?: Date;            // تاريخ النهاية المعدل (بعد احتساب التوقفات)
+  actual_end_date?: Date;              // تاريخ النهاية الفعلي (عند الانتهاء)
+  
+  // الأيام الفعلية
+  planned_days?: number;               // الأيام المخططة (من الباقة)
+  active_days?: number;                // الأيام النشطة فعلياً
+  remaining_active_days?: number;      // الأيام النشطة المتبقية
+  
   created_at: Date;
+  updated_at?: Date;
 }
 
 export interface Invoice {
@@ -177,5 +202,45 @@ export interface Notification {
   status: 'sent' | 'failed' | 'pending';
   sent_at?: Date;
   error?: string;
+  created_at: Date;
+}
+
+// Subscription Status History - سجل تاريخ حالات الاشتراك
+export interface SubscriptionStatusHistory {
+  id?: string;
+  subscription_id: string;
+  advertiser_id: string;
+  
+  // تفاصيل التغيير
+  from_status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled';
+  to_status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled';
+  action_type: 'pause' | 'resume' | 'stop' | 'reactivate' | 'expire' | 'cancel';
+  
+  // تفاصيل التوقيت
+  changed_at: Date;                    // تاريخ التغيير
+  effective_from?: Date;               // تاريخ بدء التفعيل
+  effective_until?: Date;              // تاريخ نهاية التفعيل (للإيقاف المؤقت)
+  
+  // الأيام
+  days_before_change?: number;         // الأيام المتبقية قبل التغيير
+  days_after_change?: number;          // الأيام المتبقية بعد التغيير
+  pause_duration_days?: number;        // مدة التوقف (بالأيام) - للإيقاف المؤقت
+  
+  // التفاصيل المالية (عند التغيير)
+  financial_impact?: {
+    amount_paid: number;               // المبلغ المدفوع حتى الآن
+    amount_remaining: number;          // المبلغ المتبقي
+    refund_issued?: number;            // المبلغ المسترد (إن وجد)
+  };
+  
+  // من قام بالتغيير
+  changed_by: string;                  // معرف المستخدم/الأدمن
+  changed_by_type: 'admin' | 'system' | 'auto';
+  
+  // السبب والملاحظات
+  reason?: string;                     // سبب التغيير
+  notes?: string;                      // ملاحظات إضافية
+  ip_address?: string;                 // عنوان IP
+  
   created_at: Date;
 }

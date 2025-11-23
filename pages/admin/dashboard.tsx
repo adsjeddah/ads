@@ -177,14 +177,15 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
 
       const [statsRes, advertisersRes, requestsRes, remindersRes, refundsRes, auditRes] = await Promise.all([
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/statistics/dashboard`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/advertisers`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests`, { headers }),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/reminders?status=pending`, { headers }).catch(() => ({ data: { reminders: [] } })),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/refunds?status=pending`, { headers }).catch(() => ({ data: [] })),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/audit/stats`, { headers }).catch(() => ({ data: { total_audits: 0 } }))
+        axios.get(`${apiUrl}/statistics/dashboard`, { headers }),
+        axios.get(`${apiUrl}/advertisers`, { headers }),
+        axios.get(`${apiUrl}/ad-requests`, { headers }),
+        axios.get(`${apiUrl}/reminders?status=pending`, { headers }).catch(() => ({ data: { reminders: [] } })),
+        axios.get(`${apiUrl}/refunds?status=pending`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${apiUrl}/audit/stats`, { headers }).catch(() => ({ data: { total_audits: 0 } }))
       ]);
 
       // Enhance statistics with new data
@@ -218,24 +219,27 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteAdvertiser = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا المعلن؟')) return;
+    if (!confirm('هل أنت متأكد من حذف هذا المعلن؟ سيتم أرشفة البيانات المالية المرتبطة.')) return;
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/advertisers/${id}`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      await axios.delete(`${apiUrl}/advertisers/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('تم حذف المعلن بنجاح');
       fetchData();
-    } catch (error) {
-      toast.error('خطأ في حذف المعلن');
+    } catch (error: any) {
+      console.error('Error deleting advertiser:', error);
+      toast.error(error.response?.data?.error || 'خطأ في حذف المعلن');
     }
   };
 
   const handleUpdateRequestStatus = async (id: string, status: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests/${id}`,
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      await axios.put(`${apiUrl}/ad-requests/${id}`,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
