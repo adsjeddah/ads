@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FaArrowRight, FaEye, FaCheck, FaTimes, FaClock, FaBuilding, FaPhone, FaWhatsapp, FaCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { formatDate } from '@/lib/utils';
 
 interface AdRequest {
   id: number;
@@ -277,7 +278,7 @@ export default function AdRequests() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center text-sm text-gray-500">
                             <FaCalendarAlt className="ml-1" />
-                            {new Date(request.created_at).toLocaleDateString('ar-SA')}
+                            {formatDate(request.created_at)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
