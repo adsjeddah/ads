@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -70,6 +70,53 @@ export default function AdvertiserDetails() {
   const [showGracePeriodModal, setShowGracePeriodModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
   const [gracePeriodDays, setGracePeriodDays] = useState(7);
+
+  // تعريف الأيقونات المتاحة (نفس النظام من index.tsx)
+  const iconComponents: { [key: string]: any } = {
+    'truck': FaTruck,
+    'boxes': FaBoxes,
+    'home': FaHome,
+    'dolly': FaDolly,
+    'shipping-fast': FaShippingFast,
+    'warehouse': FaWarehouse,
+    'handshake': FaHandshake,
+    'tools': FaTools,
+    'people-carry': FaPeopleCarry,
+    'route': FaRoute,
+    'clock': FaClock,
+    'shield-alt': FaShieldAlt,
+    'award': FaAward,
+    'star': FaStar,
+    'map-marked-alt': FaMapMarkedAlt,
+    'headset': FaHeadset,
+    'user-tie': FaUserTie,
+    'clipboard-check': FaClipboardCheck,
+    'truck-loading': FaTruckLoading,
+    'box-open': FaBoxOpen,
+  };
+
+  const iconColors: { [key: string]: string } = {
+    'truck': 'text-blue-600',
+    'boxes': 'text-amber-600',
+    'home': 'text-green-600',
+    'dolly': 'text-purple-600',
+    'shipping-fast': 'text-red-600',
+    'warehouse': 'text-indigo-600',
+    'handshake': 'text-teal-600',
+    'tools': 'text-orange-600',
+    'people-carry': 'text-pink-600',
+    'route': 'text-cyan-600',
+    'clock': 'text-yellow-600',
+    'shield-alt': 'text-gray-600',
+    'award': 'text-yellow-500',
+    'star': 'text-yellow-400',
+    'map-marked-alt': 'text-green-500',
+    'headset': 'text-blue-500',
+    'user-tie': 'text-gray-700',
+    'clipboard-check': 'text-green-700',
+    'truck-loading': 'text-red-700',
+    'box-open': 'text-amber-700',
+  };
 
   // Helper function to safely convert Firestore Timestamp to Date
   const toDate = (timestamp: any): Date => {
@@ -304,11 +351,21 @@ export default function AdvertiserDetails() {
             {/* Left Column: Advertiser Info & Actions */}
             <div className="lg:col-span-1 space-y-8">
               <InfoCard title="معلومات الشركة" icon={FaBuilding}>
-                {advertiser.icon_url && (
-                  <div className="mb-4 text-center">
-                    <img src={advertiser.icon_url} alt={advertiser.company_name} className="w-32 h-32 object-contain rounded-full shadow-md mx-auto" />
-                  </div>
-                )}
+                {/* عرض الأيقونة */}
+                <div className="mb-6 flex justify-center">
+                  {advertiser.icon_url && iconComponents[advertiser.icon_url] ? (
+                    <div className="w-32 h-32 bg-gradient-to-br from-primary-50 to-secondary-50 rounded-full flex items-center justify-center shadow-lg border-4 border-primary-200">
+                      {React.createElement(iconComponents[advertiser.icon_url], {
+                        className: `text-6xl ${iconColors[advertiser.icon_url] || 'text-primary-600'}`
+                      })}
+                    </div>
+                  ) : (
+                    <div className="w-32 h-32 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white text-5xl font-bold shadow-lg border-4 border-primary-300">
+                      {advertiser.company_name.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                
                 <p><strong>الهاتف:</strong> <a href={`tel:${advertiser.phone}`} className="text-blue-600 hover:underline">{advertiser.phone}</a></p>
                 {advertiser.whatsapp && <p><strong>واتساب:</strong> <a href={`https://wa.me/${advertiser.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">{advertiser.whatsapp}</a></p>}
                 <p><strong>البريد الإلكتروني:</strong> <a href={`mailto:${advertiser.email}`} className="text-blue-600 hover:underline">{advertiser.email}</a></p>

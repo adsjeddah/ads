@@ -25,7 +25,7 @@ app.all('*', (req, res) => {
 exports.nextServer = https.onRequest(async (req, res) => {
   await nextjsApp.prepare();
   return app(req, res);
-});
+}); 
 
 // ====================== Cloud Functions الجديدة ======================
 
