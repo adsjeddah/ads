@@ -127,15 +127,18 @@ export default function EditAdvertiser() {
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/admin/login');
-      return;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
     }
     if (id) {
       fetchAdvertiserData();
     }
-  }, [id, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchAdvertiserData = async () => {
     setLoading(true);

@@ -94,15 +94,20 @@ export default function ConvertAdRequest() {
   ];
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/admin/login');
-    } else if (id) {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+    }
+    if (id) {
       fetchRequest();
       fetchPlans();
       fetchExistingAdvertisers();
     }
-  }, [router, id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchRequest = async () => {
     try {

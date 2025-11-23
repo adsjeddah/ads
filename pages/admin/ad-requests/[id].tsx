@@ -30,13 +30,18 @@ export default function AdRequestDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/admin/login');
-    } else if (id) {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+    }
+    if (id) {
       fetchRequest();
     }
-  }, [router, id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchRequest = async () => {
     try {

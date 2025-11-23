@@ -68,13 +68,18 @@ export default function AdvertiserInvoices() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/admin/login');
-    } else if (router.isReady && id) {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+    }
+    if (router.isReady && id) {
       fetchData();
     }
-  }, [router, router.isReady, id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, id]);
 
   const fetchData = async () => {
     // Double check id is available

@@ -176,15 +176,18 @@ export default function AdvertiserDetails() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/admin/login');
-      return;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
     }
     if (id) {
       fetchAdvertiserDetails();
     }
-  }, [id, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchAdvertiserDetails = async () => {
     setLoading(true);

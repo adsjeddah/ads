@@ -66,13 +66,18 @@ export default function InvoiceDetailPage() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/admin/login');
-    } else if (id) {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+    }
+    if (id) {
       fetchInvoiceDetails();
     }
-  }, [router, id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchInvoiceDetails = async () => {
     setLoading(true);
