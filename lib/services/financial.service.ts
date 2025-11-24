@@ -119,7 +119,7 @@ export class FinancialService {
   }
 
   /**
-   * إنشاء اشتراك مع فاتورة تلقائياً (مع دعم VAT)
+   * إنشاء اشتراك مع فاتورة تلقائياً (مع دعم VAT والتغطية الجغرافية)
    */
   static async createSubscriptionWithInvoice(data: {
     advertiser_id: string;
@@ -133,6 +133,10 @@ export class FinancialService {
     vat_percentage?: number;
     user_id?: string;
     ip_address?: string;
+    
+    // 🆕 التغطية الجغرافية
+    coverage_area?: 'kingdom' | 'city';
+    city?: string;
   }): Promise<{
     subscription_id: string;
     invoice_id: string;
@@ -210,7 +214,11 @@ export class FinancialService {
       paid_amount: paidAmount,
       remaining_amount: remainingAmount,
       status: subscriptionStatus, // 🆕 حالة ديناميكية حسب الدفع
-      payment_status: paymentStatus
+      payment_status: paymentStatus,
+      
+      // 🆕 التغطية الجغرافية للاشتراك
+      coverage_area: data.coverage_area,
+      city: data.city
     };
 
     const subscriptionId = await SubscriptionAdminService.create(subscriptionData);

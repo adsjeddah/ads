@@ -36,6 +36,20 @@ export default async function handler(
         selected_icon,
         status = 'active',
         include_vat = false,
+        
+        // 🆕 النظام الجديد: التغطية الجغرافية
+        coverage_type,
+        coverage_cities,
+        
+        // 🆕 النظام الجديد: الباقات المتعددة
+        packages = [], // array of package objects
+        
+        // 🆕 تصنيف العملاء
+        customer_type,
+        is_trusted,
+        payment_terms_days,
+        
+        // القديم (backward compatibility)
         plan_id,
         start_date,
         end_date,
@@ -59,16 +73,59 @@ export default async function handler(
         icon_url: selected_icon || undefined, // Map selected_icon to icon_url
         include_vat: include_vat, // خيار ضريبة القيمة المضافة
         vat_percentage: include_vat ? 15 : undefined, // نسبة الضريبة الافتراضية
-        status: status as 'active' | 'inactive' | 'pending'
+        status: status as 'active' | 'inactive' | 'pending',
+        
+        // 🆕 التغطية الجغرافية
+        coverage_type: coverage_type as 'kingdom' | 'city' | 'both' | undefined,
+        coverage_cities: coverage_cities || undefined,
+        
+        // 🆕 تصنيف العملاء
+        customer_type: customer_type as 'new' | 'trusted' | 'vip' | undefined,
+        is_trusted: is_trusted || undefined,
+        payment_terms_days: payment_terms_days || undefined
       };
       
       // Use Admin service to create advertiser (bypasses client permissions)
       const newAdvertiserId = await AdvertiserAdminService.create(advertiserData);
       
-      // If subscription data is provided, use FinancialService to create subscription + invoice + payment
-      if (plan_id && start_date) {
+      // 🆕 إنشاء اشتراكات متعددة من الباقات المختارة
+      const createdSubscriptions = [];
+      
+      if (packages && packages.length > 0) {
+        // النظام الجديد: باقات متعددة
+        console.log(`📦 إنشاء ${packages.length} اشتراك(ات) للمعلن ${newAdvertiserId}`);
+        
+        for (const pkg of packages) {
+          try {
+            const financialResult = await FinancialService.createSubscriptionWithInvoice({
+              advertiser_id: newAdvertiserId,
+              plan_id: pkg.plan_id,
+              start_date: new Date(pkg.start_date),
+              discount_type: pkg.discount_type || 'amount',
+              discount_amount: pkg.discount_amount || 0,
+              initial_payment: pkg.paid_amount || 0,
+              payment_method: 'cash',
+              notes: `إنشاء اشتراك ${pkg.coverage_type === 'kingdom' ? 'المملكة' : `مدينة ${pkg.city || ''}`}`,
+              // إضافة معلومات التغطية للاشتراك
+              coverage_area: pkg.coverage_type,
+              city: pkg.city || undefined
+            });
+            
+            createdSubscriptions.push({
+              coverage_type: pkg.coverage_type,
+              city: pkg.city,
+              subscription_id: financialResult.subscription_id
+            });
+            
+            console.log(`✅ اشتراك ${pkg.coverage_type} تم إنشاؤه بنجاح:`, financialResult.subscription_id);
+          } catch (subError: any) {
+            console.error(`❌ خطأ في إنشاء اشتراك ${pkg.coverage_type}:`, subError);
+            // نستمر مع الباقات الأخرى حتى لو فشل واحد
+          }
+        }
+      } else if (plan_id && start_date) {
+        // النظام القديم: backward compatibility
         try {
-          // استخدام النظام المالي المتكامل لإنشاء اشتراك + فاتورة + دفعة (إن وجدت)
           const financialResult = await FinancialService.createSubscriptionWithInvoice({
             advertiser_id: newAdvertiserId,
             plan_id,
@@ -76,22 +133,30 @@ export default async function handler(
             discount_type: discount_type || 'amount',
             discount_amount: discount_amount || 0,
             initial_payment: paid_amount || 0,
-            payment_method: 'cash', // يمكن تمريره من الفرونت إند
+            payment_method: 'cash',
             notes: 'إنشاء اشتراك مع إضافة المعلن'
-            // VAT سيتم قراءته تلقائياً من إعدادات المعلن
           });
           
-          console.log('✅ Subscription + Invoice + Payment created:', financialResult);
+          createdSubscriptions.push({
+            coverage_type: 'legacy',
+            subscription_id: financialResult.subscription_id
+          });
+          
+          console.log('✅ Subscription + Invoice + Payment created (legacy):', financialResult);
         } catch (subError: any) {
           console.error('❌ Error creating subscription with invoice:', subError);
-          // لا نفشل العملية بالكامل إذا فشل إنشاء الاشتراك
-          // لكن نسجل الخطأ
         }
       }
       
+      // استجابة محسنة تشمل معلومات الاشتراكات
+      const message = createdSubscriptions.length > 0
+        ? `تم إنشاء المعلن بنجاح مع ${createdSubscriptions.length} اشتراك(ات)`
+        : 'تم إنشاء المعلن بنجاح';
+      
       res.status(201).json({ 
         id: newAdvertiserId,
-        message: plan_id ? 'تم إنشاء المعلن والاشتراك والفاتورة بنجاح' : 'تم إنشاء المعلن بنجاح'
+        message: message,
+        subscriptions: createdSubscriptions.length > 0 ? createdSubscriptions : undefined
       });
     } catch (error: any) {
       console.error('Error creating advertiser:', error);
