@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FaArrowLeft, FaSave, FaBuilding, FaPhone, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaBox, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaClock, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import CoverageAndPackageSelector, { SelectedPackage } from '../../../components/admin/CoverageAndPackageSelector';
 
 interface ExistingAdvertiser {
   id: number;
@@ -50,6 +51,9 @@ export default function NewAdvertiser() {
   const [plans, setPlans] = useState<any[]>([]);
   const [existingAdvertisers, setExistingAdvertisers] = useState<ExistingAdvertiser[]>([]);
   const [loadingExisting, setLoadingExisting] = useState(false);
+  
+  // 🆕 النظام الجديد: الباقات المتعددة
+  const [selectedPackages, setSelectedPackages] = useState<SelectedPackage[]>([]);
 
   // أسعار ثابتة للمدد المختلفة (احتياطي في حالة عدم استخدام الخطط من قاعدة البيانات)
   const pricingPlans: { [key: string]: { name: string; price: number } } = {
@@ -154,16 +158,8 @@ export default function NewAdvertiser() {
   };
 
   const calculateTotalAmount = () => {
-    let basePrice = 0;
-    
-    if (formData.duration_type === 'preset' && formData.plan_id) {
-      const selectedPlan = plans.find(p => p.id.toString() === formData.plan_id);
-      basePrice = selectedPlan?.price || 0;
-    } else if (formData.custom_start_date && formData.custom_end_date) {
-      const days = calculateDays(formData.custom_start_date, formData.custom_end_date);
-      // حساب السعر للأيام المخصصة (26.67 ريال لليوم الواحد بناءً على سعر الشهر)
-      basePrice = Math.round((800 / 30) * days);
-    }
+    // 🆕 حساب السعر الأساسي من جميع الباقات المختارة
+    let basePrice = selectedPackages.reduce((sum, pkg) => sum + pkg.plan.price, 0);
     
     // حساب الخصم
     let discountValue = 0;
@@ -190,9 +186,10 @@ export default function NewAdvertiser() {
     }));
   };
 
+  // 🆕 حساب المبلغ الكلي عند تغيير الباقات أو الخصم أو الضريبة
   useEffect(() => {
     calculateTotalAmount();
-  }, [formData.duration_type, formData.plan_id, formData.custom_start_date, formData.custom_end_date, formData.discount_amount, formData.discount_type, formData.include_vat, plans]);
+  }, [selectedPackages, formData.discount_amount, formData.discount_type, formData.include_vat]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name } = e.target;
@@ -222,55 +219,82 @@ export default function NewAdvertiser() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    // حساب تواريخ البداية والنهاية
-    let startDate = new Date().toISOString().split('T')[0];
-    let endDate = '';
     
-    if (formData.duration_type === 'preset' && formData.plan_id) {
-      const selectedPlan = plans.find(p => p.id.toString() === formData.plan_id);
-      if (selectedPlan) {
-        endDate = calculateEndDate(startDate, selectedPlan.duration_days);
-      }
-    } else {
-      startDate = formData.custom_start_date;
-      endDate = formData.custom_end_date;
+    // التحقق من اختيار الباقات
+    if (selectedPackages.length === 0) {
+      toast.error('يرجى اختيار باقة واحدة على الأقل');
+      return;
     }
-
-    const advertiserData = {
-      company_name: formData.company_name,
-      phone: formData.phone,
-      whatsapp: formData.whatsapp || null,
-      services: formData.services || null,
-      selected_icon: formData.selected_icon || null,
-      plan_id: formData.plan_id || '1',
-      start_date: startDate,
-      end_date: endDate,
-      base_price: formData.base_price,
-      discount_type: formData.discount_type,
-      discount_amount: formData.discount_amount,
-      include_vat: formData.include_vat,
-      total_amount: formData.total_amount,
-      paid_amount: formData.paid_amount,
-      status: 'active',
-      // 🆕 تصنيف العميل
-      customer_type: formData.customer_type,
-      is_trusted: formData.customer_type === 'trusted' || formData.customer_type === 'vip',
-      payment_terms_days: formData.payment_terms_days
-    };
+    
+    setLoading(true);
 
     try {
       const token = localStorage.getItem('token');
+      const startDate = new Date().toISOString().split('T')[0];
+
+      // 🆕 تحديد coverage_type بناءً على الباقات المختارة
+      let coverageType: 'kingdom' | 'city' | 'both' = 'kingdom';
+      const hasKingdom = selectedPackages.some(pkg => pkg.coverage_type === 'kingdom');
+      const hasCity = selectedPackages.some(pkg => pkg.coverage_type === 'city');
+      
+      if (hasKingdom && hasCity) {
+        coverageType = 'both';
+      } else if (hasCity) {
+        coverageType = 'city';
+      }
+
+      // استخراج المدن المختارة
+      const selectedCities = selectedPackages
+        .filter(pkg => pkg.coverage_type === 'city' && pkg.city)
+        .map(pkg => pkg.city as string);
+
+      // بيانات المعلن الأساسية
+      const advertiserData = {
+        company_name: formData.company_name,
+        phone: formData.phone,
+        whatsapp: formData.whatsapp || null,
+        services: formData.services || null,
+        selected_icon: formData.selected_icon || null,
+        status: 'active',
+        
+        // 🆕 التغطية الجغرافية
+        coverage_type: coverageType,
+        coverage_cities: selectedCities.length > 0 ? selectedCities : null,
+        
+        // تصنيف العميل
+        customer_type: formData.customer_type,
+        is_trusted: formData.customer_type === 'trusted' || formData.customer_type === 'vip',
+        payment_terms_days: formData.payment_terms_days,
+        
+        // الضريبة
+        include_vat: formData.include_vat,
+        
+        // 🆕 الباقات المختارة (سيتم إنشاء اشتراك لكل باقة)
+        packages: selectedPackages.map(pkg => ({
+          plan_id: pkg.plan_id,
+          coverage_type: pkg.coverage_type,
+          city: pkg.city || null,
+          start_date: startDate,
+          end_date: calculateEndDate(startDate, pkg.plan.duration_days),
+          base_price: pkg.plan.price,
+          discount_type: formData.discount_type,
+          discount_amount: formData.discount_amount,
+          total_amount: formData.total_amount,
+          paid_amount: formData.paid_amount,
+        }))
+      };
+
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, advertiserData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      toast.success('تم إضافة المعلن بنجاح');
+      
+      toast.success('تم إضافة المعلن بنجاح مع جميع الباقات المختارة!');
       router.push('/admin/dashboard?tab=advertisers');
     } catch (error: any) {
+      console.error('Error creating advertiser:', error);
       toast.error(error.response?.data?.error || 'خطأ في إضافة المعلن');
     } finally {
       setLoading(false);
@@ -535,111 +559,31 @@ export default function NewAdvertiser() {
               </div>
 
 
-              {/* Package/Plan Selection */}
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  <FaBox className="inline ml-2" /> اختر الباقة
-                </label>
-                
-                {/* Duration Type Toggle */}
-                <div className="flex gap-4 mb-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="duration_type"
-                      value="preset"
-                      checked={formData.duration_type === 'preset'}
-                      onChange={handleInputChange}
-                      className="ml-2"
-                    />
-                    <span>باقة محددة مسبقاً</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="duration_type"
-                      value="custom"
-                      checked={formData.duration_type === 'custom'}
-                      onChange={handleInputChange}
-                      className="ml-2"
-                    />
-                    <span>تحديد مدة مخصصة</span>
-                  </label>
+              {/* 🆕 Package/Plan Selection - النظام الجديد الذكي */}
+              <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-gray-200">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+                    <FaBox className="text-primary-500" />
+                    اختيار التغطية الجغرافية والباقات
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    حدد نوع التغطية المطلوبة ثم اختر الباقات المناسبة
+                  </p>
                 </div>
-
-                {formData.duration_type === 'preset' ? (
-                  <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {plans.map((plan) => (
-                        <motion.div
-                          key={plan.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            setFormData({
-                              ...formData,
-                              plan_id: plan.id.toString(),
-                              base_price: plan.price
-                            });
-                          }}
-                          className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
-                            formData.plan_id === plan.id.toString()
-                              ? 'border-primary-500 bg-primary-50 shadow-lg'
-                              : 'border-gray-200 hover:border-gray-300 bg-white'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-semibold text-gray-800">{plan.name}</h4>
-                              <p className="text-sm text-gray-600 mt-1">المدة: {plan.duration_days} يوم</p>
-                              {plan.features && (
-                                <div className="mt-2 space-y-1">
-                                  {(Array.isArray(plan.features) ? plan.features : [plan.features]).slice(0, 3).map((feature: string, idx: number) => (
-                                    <p key={idx} className="text-xs text-gray-500 flex items-start gap-1">
-                                      <span className="text-green-500">•</span>
-                                      <span>{feature}</span>
-                                    </p>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-primary-600">{plan.price}</p>
-                              <p className="text-sm text-gray-600">ريال</p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
+                
+                <CoverageAndPackageSelector
+                  plans={plans}
+                  onSelectionChange={(packages) => {
+                    setSelectedPackages(packages);
                     
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-gray-600 text-sm mb-1">تاريخ البداية</label>
-                      <input
-                        type="date"
-                        name="custom_start_date"
-                        value={formData.custom_start_date}
-                        onChange={handleInputChange}
-                        required={formData.duration_type === 'custom'}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-600 text-sm mb-1">تاريخ النهاية</label>
-                      <input
-                        type="date"
-                        name="custom_end_date"
-                        value={formData.custom_end_date}
-                        onChange={handleInputChange}
-                        required={formData.duration_type === 'custom'}
-                        min={formData.custom_start_date}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                )}
+                    // حساب المبلغ الكلي من جميع الباقات
+                    const totalBasePrice = packages.reduce((sum, pkg) => sum + pkg.plan.price, 0);
+                    setFormData(prev => ({
+                      ...prev,
+                      base_price: totalBasePrice,
+                    }));
+                  }}
+                />
               </div>
 
               {/* Discount Section */}
