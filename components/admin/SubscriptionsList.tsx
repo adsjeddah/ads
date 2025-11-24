@@ -11,7 +11,8 @@ import {
   FaExclamationCircle,
   FaClock,
   FaBox,
-  FaTimes
+  FaTimes,
+  FaGift
 } from 'react-icons/fa';
 import { formatDate, formatPrice, firestoreTimestampToDate, daysBetween } from '@/lib/utils';
 
@@ -29,6 +30,11 @@ interface Subscription {
   status: 'active' | 'expired' | 'cancelled';
   payment_status: 'paid' | 'partial' | 'pending';
   created_at: any;
+  // Grace Period fields
+  is_in_grace_period?: boolean;
+  grace_period_end_date?: any;
+  grace_period_days?: number;
+  total_grace_extensions?: number;
 }
 
 interface Plan {
@@ -41,6 +47,7 @@ interface SubscriptionsListProps {
   subscriptions: Subscription[];
   plans: Plan[];
   onAddPayment?: (subscription: Subscription) => void;
+  onActivateGrace?: (subscription: Subscription) => void;
   loading?: boolean;
 }
 
@@ -48,6 +55,7 @@ export default function SubscriptionsList({
   subscriptions,
   plans,
   onAddPayment,
+  onActivateGrace,
   loading
 }: SubscriptionsListProps) {
   if (loading || !subscriptions || !plans) {
@@ -164,9 +172,16 @@ export default function SubscriptionsList({
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   {getStatusBadge(sub.status)}
                   {getPaymentStatusBadge(sub.payment_status, sub.remaining_amount > 0)}
+                  {/* Grace Period Badge */}
+                  {sub.is_in_grace_period && (
+                    <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-800 text-xs font-bold flex items-center gap-1 animate-pulse">
+                      <FaGift className="text-sm" />
+                      فترة سماح
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -203,6 +218,39 @@ export default function SubscriptionsList({
                   </div>
                 </div>
               </div>
+
+              {/* Grace Period Info */}
+              {sub.is_in_grace_period && sub.grace_period_end_date && (
+                <div className="mb-4 p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FaGift className="text-orange-600 text-2xl" />
+                      <div>
+                        <p className="font-bold text-orange-800">في فترة سماح الآن</p>
+                        <p className="text-sm text-orange-600">
+                          تنتهي في: {formatDate(firestoreTimestampToDate(sub.grace_period_end_date))}
+                        </p>
+                        {sub.total_grace_extensions !== undefined && sub.total_grace_extensions > 0 && (
+                          <p className="text-xs text-orange-500 mt-1">
+                            عدد التمديدات: <span className="font-bold">{sub.total_grace_extensions}</span> مرة
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {(() => {
+                      const gracePeriodEnd = firestoreTimestampToDate(sub.grace_period_end_date);
+                      if (!gracePeriodEnd) return null;
+                      const graceDaysRemaining = daysBetween(new Date(), gracePeriodEnd);
+                      return (
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-orange-600">{Math.max(0, graceDaysRemaining)}</p>
+                          <p className="text-xs text-orange-500">يوم متبقي</p>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
 
               {/* Financial Details */}
               <div className="bg-gray-50 rounded-lg p-4 mb-4">
@@ -278,17 +326,33 @@ export default function SubscriptionsList({
               </div>
 
               {/* Actions */}
-              {sub.remaining_amount > 0 && sub.status === 'active' && onAddPayment && (
+              {(onAddPayment || onActivateGrace) && (sub.status === 'active' || sub.status === 'expired') && (
                 <div className="pt-4 border-t">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => onAddPayment(sub)}
-                    className="w-full md:w-auto bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-6 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                  >
-                    <FaMoneyBillWave />
-                    تسجيل دفعة
-                  </motion.button>
+                  <div className="flex flex-wrap gap-3">
+                    {sub.remaining_amount > 0 && sub.status === 'active' && onAddPayment && (
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => onAddPayment(sub)}
+                        className="flex-1 md:flex-none bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-6 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                      >
+                        <FaMoneyBillWave />
+                        تسجيل دفعة
+                      </motion.button>
+                    )}
+                    
+                    {(sub.status === 'active' || sub.status === 'expired') && onActivateGrace && (
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => onActivateGrace(sub)}
+                        className="flex-1 md:flex-none bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 px-6 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                      >
+                        <FaGift />
+                        {sub.is_in_grace_period ? 'تمديد السماح' : 'تفعيل فترة سماح'}
+                      </motion.button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

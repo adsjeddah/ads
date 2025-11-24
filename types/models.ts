@@ -65,8 +65,27 @@ export interface Subscription {
   active_days?: number;                // الأيام النشطة فعلياً
   remaining_active_days?: number;      // الأيام النشطة المتبقية
   
+  // نظام فترة السماح (Grace Period System) - يدوي من الأدمن فقط
+  grace_period_days?: number;          // عدد أيام السماح (افتراضي: 3)
+  grace_period_end_date?: Date;        // تاريخ نهاية فترة السماح
+  is_in_grace_period?: boolean;        // هل في فترة سماح الآن؟
+  grace_period_started_at?: Date;      // متى بدأت فترة السماح الحالية
+  grace_period_extensions?: GracePeriodExtension[]; // سجل جميع التمديدات
+  total_grace_extensions?: number;     // عدد المحاولات الكلي للتمديد
+  
   created_at: Date;
   updated_at?: Date;
+}
+
+// سجل تمديد فترة السماح
+export interface GracePeriodExtension {
+  extended_at: Date;                   // تاريخ التمديد
+  extended_by: string;                 // من قام بالتمديد (admin uid)
+  days_added: number;                  // عدد الأيام المضافة
+  reason?: string;                     // سبب التمديد (اختياري)
+  previous_end_date: Date;             // تاريخ النهاية قبل التمديد
+  new_end_date: Date;                  // تاريخ النهاية بعد التمديد
+  notes?: string;                      // ملاحظات إضافية
 }
 
 export interface Invoice {

@@ -1,11 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { FinancialService } from '../../../lib/services/financial.service';
+import { GracePeriodService } from '../../../lib/services/grace-period.service';
 
 /**
  * API للتحقق من صلاحية الاشتراكات وتحديثها
  * POST /api/financial/check-subscriptions
  * 
  * يتحقق من جميع الاشتراكات النشطة ويحدث حالتها إلى "expired" إذا انتهى تاريخها
+ * ويتحقق أيضاً من انتهاء فترات السماح
  * 
  * يُنصح بتشغيل هذا الـ API:
  * - يومياً عبر Cron Job
@@ -24,9 +26,12 @@ export default async function handler(
     // التحقق وتحديث حالات الاشتراكات
     const result = await FinancialService.checkAndUpdateSubscriptionStatuses();
 
+    // التحقق من انتهاء فترات السماح
+    await GracePeriodService.checkExpiredGracePeriods();
+
     return res.status(200).json({
       success: true,
-      message: `Updated ${result.updated} expired subscriptions`,
+      message: `Updated ${result.updated} expired subscriptions and checked grace periods`,
       data: result
     });
   } catch (error: any) {

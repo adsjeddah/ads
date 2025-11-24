@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaGift, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -35,6 +35,11 @@ interface Subscription {
   total_amount: number;
   paid_amount: number;
   remaining_amount: number;
+  // Grace Period fields
+  is_in_grace_period?: boolean;
+  grace_period_end_date?: string;
+  grace_period_days?: number;
+  total_grace_extensions?: number;
 }
 
 interface Invoice {
@@ -69,7 +74,9 @@ export default function AdvertiserDetails() {
   const [showRenewalModal, setShowRenewalModal] = useState(false);
   const [showGracePeriodModal, setShowGracePeriodModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
-  const [gracePeriodDays, setGracePeriodDays] = useState(7);
+  const [gracePeriodDays, setGracePeriodDays] = useState(3);
+  const [gracePeriodReason, setGracePeriodReason] = useState('');
+  const [gracePeriodLoading, setGracePeriodLoading] = useState(false);
 
   // تعريف الأيقونات المتاحة (نفس النظام من index.tsx)
   const iconComponents: { [key: string]: any } = {
@@ -285,23 +292,30 @@ export default function AdvertiserDetails() {
   const handleAddGracePeriod = async () => {
     if (!selectedSubscription) return;
     
+    setGracePeriodLoading(true);
     try {
       const token = localStorage.getItem('token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      const newEndDate = new Date(selectedSubscription.end_date);
-      newEndDate.setDate(newEndDate.getDate() + gracePeriodDays);
       
-      await axios.put(
-        `${apiUrl}/subscriptions/${selectedSubscription.id}`,
-        { end_date: newEndDate.toISOString().split('T')[0] },
+      // استخدام الـ API الجديد لتفعيل فترة السماح
+      const response = await axios.post(
+        `${apiUrl}/subscriptions/${selectedSubscription.id}/activate-grace`,
+        { 
+          days: gracePeriodDays,
+          reason: gracePeriodReason || 'تمديد فترة سماح'
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      toast.success(`تم إضافة ${gracePeriodDays} يوم كفترة سماح`);
+      toast.success(response.data.message || `تم تفعيل فترة سماح لمدة ${gracePeriodDays} أيام`);
       setShowGracePeriodModal(false);
+      setGracePeriodReason('');
       fetchAdvertiserDetails();
-    } catch (error) {
-      toast.error('خطأ في إضافة فترة السماح');
+    } catch (error: any) {
+      console.error('Error adding grace period:', error);
+      toast.error(error.response?.data?.error || 'خطأ في إضافة فترة السماح');
+    } finally {
+      setGracePeriodLoading(false);
     }
   };
 
@@ -610,55 +624,121 @@ export default function AdvertiserDetails() {
         </div>
       )}
 
-      {/* Modal لإضافة فترة سماح */}
+      {/* Modal لإضافة فترة سماح - محدث */}
       {showGracePeriodModal && selectedSubscription && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl p-6 max-w-md w-full mx-4"
+            className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl"
           >
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <FaClock className="text-orange-600" />
-              إضافة فترة سماح
-            </h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold flex items-center gap-2">
+                <FaGift className="text-orange-600" />
+                تفعيل فترة سماح
+              </h3>
+              <button
+                onClick={() => {
+                  setShowGracePeriodModal(false);
+                  setGracePeriodDays(3);
+                  setGracePeriodReason('');
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <FaTimes className="text-xl text-gray-600" />
+              </button>
+            </div>
+
+            {/* معلومات الاشتراك */}
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>الباقة:</strong> {selectedSubscription.plan_name}
+              </p>
+              <p className="text-sm text-gray-700 mb-2">
+                <strong>تاريخ الانتهاء الحالي:</strong>{' '}
+                {format(new Date(selectedSubscription.end_date), 'dd/MM/yyyy', { locale: ar })}
+              </p>
+              {selectedSubscription.is_in_grace_period && (
+                <p className="text-sm text-orange-700 font-semibold">
+                  🎁 الاشتراك حالياً في فترة سماح
+                </p>
+              )}
+              {selectedSubscription.total_grace_extensions !== undefined && selectedSubscription.total_grace_extensions > 0 && (
+                <p className="text-sm text-gray-600 mt-2">
+                  <strong>عدد التمديدات السابقة:</strong>{' '}
+                  <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-bold">
+                    {selectedSubscription.total_grace_extensions} مرة
+                  </span>
+                </p>
+              )}
+            </div>
             
+            {/* عدد الأيام */}
             <div className="mb-4">
               <label className="block text-gray-700 font-semibold mb-2">
-                عدد الأيام
+                عدد الأيام <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={gracePeriodDays}
-                onChange={(e) => setGracePeriodDays(parseInt(e.target.value) || 0)}
+                onChange={(e) => setGracePeriodDays(parseInt(e.target.value) || 3)}
                 min="1"
                 max="30"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                سيتم تمديد الاشتراك حتى: {format(
-                  new Date(new Date(selectedSubscription.end_date).getTime() + gracePeriodDays * 24 * 60 * 60 * 1000),
-                  'dd/MM/yyyy',
-                  { locale: ar }
-                )}
+              <p className="text-sm text-orange-600 mt-2 font-semibold">
+                📅 التاريخ الجديد للانتهاء:{' '}
+                {(() => {
+                  const currentEnd = selectedSubscription.is_in_grace_period && selectedSubscription.grace_period_end_date
+                    ? new Date(selectedSubscription.grace_period_end_date)
+                    : new Date(selectedSubscription.end_date);
+                  const newEnd = new Date(currentEnd.getTime() + gracePeriodDays * 24 * 60 * 60 * 1000);
+                  return format(newEnd, 'dd/MM/yyyy', { locale: ar });
+                })()}
+              </p>
+            </div>
+
+            {/* سبب التمديد */}
+            <div className="mb-6">
+              <label className="block text-gray-700 font-semibold mb-2">
+                سبب التمديد (اختياري)
+              </label>
+              <textarea
+                value={gracePeriodReason}
+                onChange={(e) => setGracePeriodReason(e.target.value)}
+                placeholder="اكتب سبب إضافة فترة السماح..."
+                rows={3}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* تحذير */}
+            <div className="mb-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <p className="text-sm text-yellow-800">
+                ⚠️ <strong>ملاحظة:</strong> فترة السماح لن تؤثر على الفواتير أو الحسابات المالية. 
+                هي مجرد تمديد مجاني للوقت لإتاحة الفرصة للمعلن للتجديد.
               </p>
             </div>
             
-            <div className="flex gap-3 justify-end">
+            {/* أزرار الإجراءات */}
+            <div className="flex gap-3">
               <button
                 onClick={() => {
                   setShowGracePeriodModal(false);
-                  setGracePeriodDays(7);
+                  setGracePeriodDays(3);
+                  setGracePeriodReason('');
                 }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                disabled={gracePeriodLoading}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 إلغاء
               </button>
               <button
                 onClick={handleAddGracePeriod}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                disabled={gracePeriodLoading || gracePeriodDays < 1}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 font-semibold disabled:opacity-50 transition-all shadow-lg"
               >
-                إضافة فترة السماح
+                {gracePeriodLoading ? 'جاري التفعيل...' : '🎁 تفعيل فترة السماح'}
               </button>
             </div>
           </motion.div>

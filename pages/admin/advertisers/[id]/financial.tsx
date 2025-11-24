@@ -394,6 +394,10 @@ export default function AdvertiserFinancial() {
               subscriptions={subscriptions}
               plans={plans}
               onAddPayment={handleRecordPayment}
+              onActivateGrace={(subscription) => {
+                // Navigate to main advertiser page where grace period modal is
+                window.location.href = `/admin/advertisers/${id}#grace-period`;
+              }}
               loading={loading}
             />
           </motion.div>

@@ -10,7 +10,7 @@ import {
   FaHistory, FaUndo, FaExclamationTriangle, FaPercent,
   FaChartBar, FaCalendarAlt, FaArrowUp, FaArrowDown,
   FaPause, FaPlay, FaStop, FaBan, FaRedo, FaSearch, FaFilter,
-  FaStickyNote
+  FaStickyNote, FaGift
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -29,6 +29,7 @@ interface Statistics {
   pendingRefunds?: { count: number };
   overdueInvoices?: { count: number };
   totalAudits?: number;
+  gracePeriodSubscriptions?: { total: number; expiring_soon: number };
 }
 
 interface Advertiser {
@@ -222,13 +223,14 @@ export default function AdminDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
 
-      const [statsRes, advertisersRes, requestsRes, remindersRes, refundsRes, auditRes] = await Promise.all([
+      const [statsRes, advertisersRes, requestsRes, remindersRes, refundsRes, auditRes, gracePeriodStatsRes] = await Promise.all([
         axios.get(`${apiUrl}/statistics/dashboard`, { headers }),
         axios.get(`${apiUrl}/advertisers`, { headers }),
         axios.get(`${apiUrl}/ad-requests`, { headers }),
         axios.get(`${apiUrl}/reminders?status=pending`, { headers }).catch(() => ({ data: { reminders: [] } })),
         axios.get(`${apiUrl}/refunds?status=pending`, { headers }).catch(() => ({ data: [] })),
-        axios.get(`${apiUrl}/audit/stats`, { headers }).catch(() => ({ data: { total_audits: 0 } }))
+        axios.get(`${apiUrl}/audit/stats`, { headers }).catch(() => ({ data: { total_audits: 0 } })),
+        axios.get(`${apiUrl}/subscriptions/grace-period/stats`, { headers }).catch(() => ({ data: { total: 0, expiring_soon: 0 } }))
       ]);
 
       // Enhance statistics with new data
@@ -239,7 +241,11 @@ export default function AdminDashboard() {
         ...statsRes.data,
         pendingReminders: { count: remindersData.length || 0 },
         pendingRefunds: { count: refundsData.length || 0 },
-        totalAudits: auditRes.data.total_audits || 0
+        totalAudits: auditRes.data.total_audits || 0,
+        gracePeriodSubscriptions: {
+          total: gracePeriodStatsRes.data.total || 0,
+          expiring_soon: gracePeriodStatsRes.data.expiring_soon || 0
+        }
       };
 
       setStatistics(enhancedStats);
@@ -623,6 +629,13 @@ export default function AdminDashboard() {
                   title="استردادات معلقة"
                   value={statistics?.pendingRefunds?.count || 0}
                   color="bg-indigo-500"
+                />
+                <StatCard
+                  icon={FaGift}
+                  title="فترات سماح نشطة"
+                  value={statistics?.gracePeriodSubscriptions?.total || 0}
+                  subtitle={statistics?.gracePeriodSubscriptions?.expiring_soon ? `${statistics.gracePeriodSubscriptions.expiring_soon} تنتهي قريباً` : undefined}
+                  color="bg-orange-500"
                 />
                 <StatCard
                   icon={FaHistory}
