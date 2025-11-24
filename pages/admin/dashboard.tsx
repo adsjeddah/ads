@@ -9,7 +9,8 @@ import {
   FaCheckCircle, FaClock, FaTimesCircle, FaMoneyBillWave,
   FaHistory, FaUndo, FaExclamationTriangle, FaPercent,
   FaChartBar, FaCalendarAlt, FaArrowUp, FaArrowDown,
-  FaPause, FaPlay, FaStop, FaBan, FaRedo
+  FaPause, FaPlay, FaStop, FaBan, FaRedo, FaSearch, FaFilter,
+  FaStickyNote
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -71,9 +72,22 @@ interface Reminder {
 interface Refund {
   id: string;
   subscription_id: string;
+  invoice_id?: string;
+  payment_id?: string;
+  original_amount: number;
   refund_amount: number;
-  status: string;
-  created_at: string;
+  refund_reason: string;
+  refund_method: 'cash' | 'bank_transfer' | 'card' | 'online';
+  refund_date: Date;
+  processed_by: string;
+  status: 'pending' | 'approved' | 'completed' | 'rejected';
+  bank_details?: string;
+  notes?: string;
+  created_at: Date | string;
+  completed_at?: Date;
+  // بيانات إضافية (من الاشتراك)
+  company_name?: string;
+  advertiser_id?: string;
 }
 
 interface AuditLog {
@@ -94,6 +108,11 @@ export default function AdminDashboard() {
   const [refunds, setRefunds] = useState<Refund[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  // States for refunds tab
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateRefundModal, setShowCreateRefundModal] = useState(false);
 
   // Initialize active tab from URL query parameter
   useEffect(() => {
@@ -107,6 +126,13 @@ export default function AdminDashboard() {
     checkAuth();
     fetchData();
   }, []);
+
+  // Fetch refunds when switching to refunds tab
+  useEffect(() => {
+    if (activeTab === 'refunds') {
+      fetchAllRefunds();
+    }
+  }, [activeTab]);
 
   const checkAuth = () => {
     const token = localStorage.getItem('token');
@@ -221,6 +247,112 @@ export default function AdminDashboard() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     router.push('/admin/login');
+  };
+
+  // Fetch all refunds with details for refunds tab
+  const fetchAllRefunds = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const response = await axios.get(`${apiUrl}/refunds`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // إثراء البيانات بمعلومات الاشتراك
+      const enrichedRefunds = await Promise.all(
+        response.data.map(async (refund: Refund) => {
+          try {
+            const subRes = await axios.get(`${apiUrl}/subscriptions/${refund.subscription_id}`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            const subscription = subRes.data;
+            
+            // جلب معلومات المعلن
+            if (subscription.advertiser_id) {
+              const advRes = await axios.get(`${apiUrl}/advertisers/${subscription.advertiser_id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              return {
+                ...refund,
+                company_name: advRes.data.company_name,
+                advertiser_id: subscription.advertiser_id
+              };
+            }
+            return refund;
+          } catch (error) {
+            return refund;
+          }
+        })
+      );
+      
+      setRefunds(enrichedRefunds);
+    } catch (error: any) {
+      console.error('Error fetching refunds:', error);
+      toast.error('خطأ في جلب الاستردادات');
+    }
+  };
+
+  // تحديث حالة الاسترداد
+  const handleUpdateRefundStatus = async (refundId: string, newStatus: string) => {
+    const confirmMessages = {
+      approved: 'هل تريد الموافقة على هذا الاسترداد؟',
+      completed: 'هل تم تنفيذ الاسترداد فعلياً؟ سيتم تحديث الاشتراك.',
+      rejected: 'هل تريد رفض هذا الاسترداد؟'
+    };
+
+    if (!confirm(confirmMessages[newStatus as keyof typeof confirmMessages])) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      
+      await axios.patch(
+        `${apiUrl}/refunds/${refundId}`,
+        { 
+          status: newStatus,
+          notes: `تم ${newStatus === 'completed' ? 'إتمام' : newStatus === 'approved' ? 'الموافقة على' : 'رفض'} الاسترداد بواسطة الإدارة`
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success(`تم ${newStatus === 'completed' ? 'إتمام' : newStatus === 'approved' ? 'الموافقة على' : 'رفض'} الاسترداد`);
+      fetchAllRefunds();
+    } catch (error: any) {
+      console.error('Error updating refund:', error);
+      toast.error('خطأ في تحديث الاسترداد');
+    }
+  };
+
+  // Helper functions for refunds tab
+  const getStatusBadge = (status: string) => {
+    const badges = {
+      pending: { color: 'bg-yellow-100 text-yellow-800', icon: FaClock, label: 'معلق' },
+      approved: { color: 'bg-blue-100 text-blue-800', icon: FaCheckCircle, label: 'موافق عليه' },
+      completed: { color: 'bg-green-100 text-green-800', icon: FaCheckCircle, label: 'مكتمل' },
+      rejected: { color: 'bg-red-100 text-red-800', icon: FaTimesCircle, label: 'مرفوض' }
+    };
+
+    const badge = badges[status as keyof typeof badges] || badges.pending;
+    const Icon = badge.icon;
+
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${badge.color} flex items-center gap-1 w-fit`}>
+        <Icon className="text-xs" />
+        {badge.label}
+      </span>
+    );
+  };
+
+  const getRefundMethodLabel = (method: string) => {
+    const methods = {
+      cash: 'نقداً',
+      bank_transfer: 'تحويل بنكي',
+      card: 'بطاقة',
+      online: 'أونلاين'
+    };
+    return methods[method as keyof typeof methods] || method;
   };
 
   const handleDeleteAdvertiser = async (id: string) => {
@@ -382,9 +514,9 @@ export default function AdminDashboard() {
                 }`}
               >
                 الاستردادات
-                {refunds.length > 0 && (
-                  <span className="absolute -top-1 -left-2 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {refunds.length}
+                {statistics?.pendingRefunds && statistics.pendingRefunds.count > 0 && (
+                  <span className="absolute -top-1 -left-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {statistics.pendingRefunds.count}
                   </span>
                 )}
               </button>
@@ -503,7 +635,7 @@ export default function AdminDashboard() {
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
-                  onClick={() => router.push('/admin/refunds')}
+                  onClick={() => changeTab('refunds')}
                 >
                   <FaUndo className="text-3xl mb-2" />
                   <h3 className="text-lg font-bold mb-1">إدارة الاستردادات</h3>
@@ -997,69 +1129,231 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold">طلبات الاسترداد</h2>
-                </div>
+              {/* الإحصائيات */}
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-xl shadow-md p-4 text-center"
+                >
+                  <FaUndo className="text-3xl text-gray-600 mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-gray-800">{refunds.length}</p>
+                  <p className="text-sm text-gray-600">الإجمالي</p>
+                </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-yellow-50 rounded-lg p-4">
-                    <p className="text-sm text-yellow-600 mb-1">معلق</p>
-                    <p className="text-2xl font-bold text-yellow-800">{refunds.length}</p>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-yellow-50 rounded-xl shadow-md p-4 text-center border border-yellow-200"
+                >
+                  <FaClock className="text-3xl text-yellow-600 mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-yellow-800">{refunds.filter(r => r.status === 'pending').length}</p>
+                  <p className="text-sm text-yellow-700">معلق</p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-blue-50 rounded-xl shadow-md p-4 text-center border border-blue-200"
+                >
+                  <FaCheckCircle className="text-3xl text-blue-600 mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-blue-800">{refunds.filter(r => r.status === 'approved').length}</p>
+                  <p className="text-sm text-blue-700">موافق</p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-green-50 rounded-xl shadow-md p-4 text-center border border-green-200"
+                >
+                  <FaCheckCircle className="text-3xl text-green-600 mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-green-800">{refunds.filter(r => r.status === 'completed').length}</p>
+                  <p className="text-sm text-green-700">مكتمل</p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="bg-red-50 rounded-xl shadow-md p-4 text-center border border-red-200"
+                >
+                  <FaTimesCircle className="text-3xl text-red-600 mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-red-800">{refunds.filter(r => r.status === 'rejected').length}</p>
+                  <p className="text-sm text-red-700">مرفوض</p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-xl shadow-md p-4 text-center border border-primary-200"
+                >
+                  <FaMoneyBillWave className="text-3xl text-primary-600 mx-auto mb-2" />
+                  <p className="text-xl font-bold text-primary-800">
+                    {formatPrice(refunds.filter(r => r.status === 'completed').reduce((sum, r) => sum + r.refund_amount, 0))}
+                  </p>
+                  <p className="text-xs text-primary-700">مجموع المسترد</p>
+                </motion.div>
+              </div>
+
+              {/* الفلاتر والبحث */}
+              <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* البحث */}
+                  <div className="relative">
+                    <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="بحث بالشركة، السبب، أو الرقم..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
                   </div>
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <p className="text-sm text-blue-600 mb-1">تمت الموافقة</p>
-                    <p className="text-2xl font-bold text-blue-800">0</p>
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <p className="text-sm text-green-600 mb-1">مكتمل</p>
-                    <p className="text-2xl font-bold text-green-800">0</p>
-                  </div>
-                  <div className="bg-red-50 rounded-lg p-4">
-                    <p className="text-sm text-red-600 mb-1">مرفوض</p>
-                    <p className="text-2xl font-bold text-red-800">0</p>
+
+                  {/* فلتر الحالة */}
+                  <div className="relative">
+                    <FaFilter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent appearance-none"
+                    >
+                      <option value="all">جميع الحالات</option>
+                      <option value="pending">معلق</option>
+                      <option value="approved">موافق عليه</option>
+                      <option value="completed">مكتمل</option>
+                      <option value="rejected">مرفوض</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
-                {refunds.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FaUndo className="text-6xl text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">لا توجد طلبات استرداد</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-right py-3 px-4">رقم الطلب</th>
-                          <th className="text-right py-3 px-4">المبلغ</th>
-                          <th className="text-right py-3 px-4">الحالة</th>
-                          <th className="text-right py-3 px-4">التاريخ</th>
-                          <th className="text-right py-3 px-4">الإجراءات</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {refunds.map((refund) => (
-                          <tr key={refund.id} className="border-b hover:bg-gray-50">
-                            <td className="py-3 px-4">#{refund.id.slice(0, 8)}</td>
-                            <td className="py-3 px-4 font-bold">{refund.refund_amount} ريال</td>
-                            <td className="py-3 px-4">
-                              <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
-                                {refund.status === 'pending' && 'معلق'}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">{formatDate(refund.created_at, 'dd/MM/yyyy')}</td>
-                            <td className="py-3 px-4">
-                              <button className="text-primary-600 hover:text-primary-700">
-                                <FaEye />
-                              </button>
-                            </td>
+              {/* جدول الاستردادات */}
+              <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                {(() => {
+                  const filteredRefunds = refunds.filter(refund => {
+                    const matchesStatus = filterStatus === 'all' || refund.status === filterStatus;
+                    const matchesSearch = !searchTerm || 
+                      refund.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      refund.refund_reason?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      refund.id.toLowerCase().includes(searchTerm.toLowerCase());
+                    
+                    return matchesStatus && matchesSearch;
+                  });
+
+                  return filteredRefunds.length === 0 ? (
+                    <div className="text-center py-16">
+                      <FaExclamationTriangle className="text-6xl text-gray-300 mx-auto mb-4" />
+                      <p className="text-xl text-gray-500">لا توجد استردادات</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="text-right py-4 px-4 font-semibold text-gray-700">الرقم</th>
+                            <th className="text-right py-4 px-4 font-semibold text-gray-700">الشركة</th>
+                            <th className="text-right py-4 px-4 font-semibold text-gray-700">المبلغ</th>
+                            <th className="text-right py-4 px-4 font-semibold text-gray-700">الطريقة</th>
+                            <th className="text-right py-4 px-4 font-semibold text-gray-700">الحالة</th>
+                            <th className="text-right py-4 px-4 font-semibold text-gray-700">التاريخ</th>
+                            <th className="text-center py-4 px-4 font-semibold text-gray-700">الإجراءات</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                        </thead>
+                        <tbody>
+                          {filteredRefunds.map((refund, index) => (
+                            <motion.tr
+                              key={refund.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="border-b hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="py-4 px-4">
+                                <span className="text-sm font-mono text-gray-600">
+                                  #{refund.id.slice(0, 8)}
+                                </span>
+                              </td>
+                              <td className="py-4 px-4">
+                                <div>
+                                  <p className="font-semibold text-gray-800">
+                                    {refund.company_name || 'غير معروف'}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {refund.refund_reason?.slice(0, 40)}
+                                    {refund.refund_reason && refund.refund_reason.length > 40 && '...'}
+                                  </p>
+                                </div>
+                              </td>
+                              <td className="py-4 px-4">
+                                <p className="font-bold text-lg text-primary-600">
+                                  {formatPrice(refund.refund_amount)}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  من {formatPrice(refund.original_amount)}
+                                </p>
+                              </td>
+                              <td className="py-4 px-4">
+                                <span className="text-sm text-gray-700">
+                                  {getRefundMethodLabel(refund.refund_method)}
+                                </span>
+                              </td>
+                              <td className="py-4 px-4">
+                                {getStatusBadge(refund.status)}
+                              </td>
+                              <td className="py-4 px-4 text-sm text-gray-600">
+                                {formatDate(refund.created_at, 'dd/MM/yyyy')}
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className="flex items-center justify-center gap-2">
+                                  {/* زر عرض التفاصيل */}
+                                  <Link href={`/admin/refunds/${refund.id}`}>
+                                    <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                      <FaEye />
+                                    </button>
+                                  </Link>
+
+                                  {/* أزرار تحديث الحالة */}
+                                  {refund.status === 'pending' && (
+                                    <>
+                                      <button
+                                        onClick={() => handleUpdateRefundStatus(refund.id, 'approved')}
+                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                        title="موافقة"
+                                      >
+                                        <FaCheckCircle />
+                                      </button>
+                                      <button
+                                        onClick={() => handleUpdateRefundStatus(refund.id, 'rejected')}
+                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="رفض"
+                                      >
+                                        <FaTimesCircle />
+                                      </button>
+                                    </>
+                                  )}
+
+                                  {refund.status === 'approved' && (
+                                    <button
+                                      onClick={() => handleUpdateRefundStatus(refund.id, 'completed')}
+                                      className="px-3 py-1 bg-green-500 text-white text-xs rounded-lg hover:bg-green-600 transition-colors"
+                                    >
+                                      إتمام
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </motion.tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
               </div>
             </motion.div>
           )}
