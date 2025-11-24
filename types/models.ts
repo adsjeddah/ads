@@ -12,6 +12,14 @@ export interface Advertiser {
   status: 'active' | 'inactive' | 'pending';
   include_vat?: boolean; // خيار إضافة ضريبة القيمة المضافة (15%)
   vat_percentage?: number; // نسبة الضريبة (افتراضياً 15%)
+  
+  // 🆕 نظام تصنيف العملاء (Customer Classification)
+  customer_type?: 'new' | 'trusted' | 'vip'; // نوع العميل
+  is_trusted?: boolean;                       // عميل موثوق؟
+  credit_limit?: number;                      // حد الائتمان (للموثوقين فقط)
+  trust_level?: number;                       // مستوى الثقة (1-5)
+  payment_terms_days?: number;                // مهلة الدفع بالأيام
+  
   created_at: Date;
   updated_at: Date;
 }
@@ -41,7 +49,7 @@ export interface Subscription {
   remaining_amount: number;
   
   // الحالات الموسعة
-  status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled';
+  status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled' | 'pending_payment';
   payment_status: 'paid' | 'partial' | 'pending';
   
   // نظام الإيقاف المؤقت (Pause System)

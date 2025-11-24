@@ -26,6 +26,11 @@ export class AdvertiserAdminService {
     if (data.include_vat !== undefined) advertiserData.include_vat = data.include_vat;
     if (data.vat_percentage !== undefined) advertiserData.vat_percentage = data.vat_percentage;
     
+    // 🆕 حقول تصنيف العملاء
+    if ((data as any).customer_type) advertiserData.customer_type = (data as any).customer_type;
+    if ((data as any).is_trusted !== undefined) advertiserData.is_trusted = (data as any).is_trusted;
+    if ((data as any).payment_terms_days !== undefined) advertiserData.payment_terms_days = (data as any).payment_terms_days;
+    
     // تشفير كلمة المرور إذا كانت موجودة
     if (data.password) {
       advertiserData.password = await bcrypt.hash(data.password, 10);

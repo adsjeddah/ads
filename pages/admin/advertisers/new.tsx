@@ -42,6 +42,9 @@ export default function NewAdvertiser() {
     include_vat: false, // إضافة ضريبة القيمة المضافة (15%)
     total_amount: 0,
     paid_amount: 0,
+    // 🆕 تصنيف العملاء
+    customer_type: 'new' as 'new' | 'trusted' | 'vip',
+    payment_terms_days: 0, // مهلة الدفع بالأيام (للعملاء الموثوقين)
   });
   const [loading, setLoading] = useState(false);
   const [plans, setPlans] = useState<any[]>([]);
@@ -250,7 +253,11 @@ export default function NewAdvertiser() {
       include_vat: formData.include_vat,
       total_amount: formData.total_amount,
       paid_amount: formData.paid_amount,
-      status: 'active'
+      status: 'active',
+      // 🆕 تصنيف العميل
+      customer_type: formData.customer_type,
+      is_trusted: formData.customer_type === 'trusted' || formData.customer_type === 'vip',
+      payment_terms_days: formData.payment_terms_days
     };
 
     try {
@@ -351,6 +358,100 @@ export default function NewAdvertiser() {
                     dir="ltr"
                   />
                 </div>
+              </div>
+
+              {/* 🆕 Customer Type - تصنيف العميل */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  <FaUserTie className="inline ml-2" /> تصنيف العميل
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div 
+                    onClick={() => setFormData({ ...formData, customer_type: 'new', payment_terms_days: 0 })}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      formData.customer_type === 'new' 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-300 hover:border-blue-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        formData.customer_type === 'new' 
+                          ? 'border-blue-500 bg-blue-500' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.customer_type === 'new' && (
+                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                        )}
+                      </div>
+                      <span className="font-semibold text-blue-700">عميل جديد</span>
+                    </div>
+                    <p className="text-xs text-gray-600">يجب الدفع لتفعيل الاشتراك</p>
+                  </div>
+
+                  <div 
+                    onClick={() => setFormData({ ...formData, customer_type: 'trusted', payment_terms_days: 7 })}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      formData.customer_type === 'trusted' 
+                        ? 'border-green-500 bg-green-50' 
+                        : 'border-gray-300 hover:border-green-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        formData.customer_type === 'trusted' 
+                          ? 'border-green-500 bg-green-500' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.customer_type === 'trusted' && (
+                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                        )}
+                      </div>
+                      <span className="font-semibold text-green-700">عميل موثوق</span>
+                    </div>
+                    <p className="text-xs text-gray-600">مهلة دفع 7 أيام - تفعيل فوري</p>
+                  </div>
+
+                  <div 
+                    onClick={() => setFormData({ ...formData, customer_type: 'vip', payment_terms_days: 14 })}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      formData.customer_type === 'vip' 
+                        ? 'border-amber-500 bg-amber-50' 
+                        : 'border-gray-300 hover:border-amber-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        formData.customer_type === 'vip' 
+                          ? 'border-amber-500 bg-amber-500' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.customer_type === 'vip' && (
+                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                        )}
+                      </div>
+                      <span className="font-semibold text-amber-700">⭐ عميل VIP</span>
+                    </div>
+                    <p className="text-xs text-gray-600">مهلة دفع 14 يوم - تفعيل فوري</p>
+                  </div>
+                </div>
+                
+                {/* معلومات إضافية حسب نوع العميل */}
+                {formData.customer_type === 'new' && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                    ℹ️ العميل الجديد: يتطلب دفع ريال واحد على الأقل لتفعيل الاشتراك فوراً
+                  </div>
+                )}
+                {formData.customer_type === 'trusted' && (
+                  <div className="mt-3 p-3 bg-green-50 rounded-lg text-sm text-green-800">
+                    ✅ العميل الموثوق: يتم تفعيل الاشتراك فوراً مع مهلة دفع 7 أيام
+                  </div>
+                )}
+                {formData.customer_type === 'vip' && (
+                  <div className="mt-3 p-3 bg-amber-50 rounded-lg text-sm text-amber-800">
+                    ⭐ العميل VIP: يتم تفعيل الاشتراك فوراً مع مهلة دفع 14 يوم وامتيازات خاصة
+                  </div>
+                )}
               </div>
 
               {/* Services */}

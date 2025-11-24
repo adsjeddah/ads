@@ -189,6 +189,14 @@ export class FinancialService {
       paymentStatus = 'partial';
     }
 
+    // 🆕 تحديد حالة الاشتراك حسب نظام "الدفع عند التوصيل"
+    // ✅ إذا دفع ريال واحد على الأقل → يبدأ الاشتراك فوراً (active)
+    // ⏳ إذا لم يدفع شيئاً → ينتظر أول دفعة (pending_payment)
+    let subscriptionStatus: 'active' | 'pending_payment' = 'pending_payment';
+    if (paidAmount >= 1) {
+      subscriptionStatus = 'active';
+    }
+
     // 7. إنشاء الاشتراك
     const subscriptionData: Omit<Subscription, 'id' | 'created_at'> = {
       advertiser_id: data.advertiser_id,
@@ -201,7 +209,7 @@ export class FinancialService {
       total_amount: totalFinal, // المبلغ النهائي (مع أو بدون ضريبة)
       paid_amount: paidAmount,
       remaining_amount: remainingAmount,
-      status: 'active',
+      status: subscriptionStatus, // 🆕 حالة ديناميكية حسب الدفع
       payment_status: paymentStatus
     };
 
