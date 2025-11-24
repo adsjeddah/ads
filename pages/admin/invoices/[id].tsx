@@ -128,7 +128,7 @@ export default function InvoiceDetailPage() {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
         <p className="text-xl text-gray-700 mb-4">لم يتم العثور على الفاتورة.</p>
-        <Link href="/admin/invoices">
+        <Link href="/admin/dashboard?tab=invoices">
           <motion.button
             whileHover={{ scale: 1.05 }}
             className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center"

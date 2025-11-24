@@ -220,7 +220,7 @@ export default function AdvertiserInvoices() {
                 <h1 className="text-2xl font-bold text-gradient">فواتير {advertiser?.company_name}</h1>
                 <p className="text-gray-600 mt-1">{advertiser?.phone} • {advertiser?.email}</p>
               </div>
-              <Link href="/admin/invoices">
+              <Link href="/admin/dashboard?tab=invoices">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors"

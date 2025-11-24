@@ -111,6 +111,21 @@ interface Subscription {
   status: string;
 }
 
+interface Invoice {
+  id: number;
+  invoice_number: string;
+  company_name: string; // Advertiser's company name
+  phone: string; // Advertiser's phone
+  plan_name: string;
+  amount: number; // Invoice amount (same as subscription_total for the main invoice)
+  status: string; // 'paid', 'unpaid', 'partial', 'overdue'
+  issued_date: string;
+  due_date: string;
+  subscription_total: number;
+  subscription_paid: number;
+  subscription_remaining: number;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -126,6 +141,12 @@ export default function AdminDashboard() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateRefundModal, setShowCreateRefundModal] = useState(false);
+
+  // States for invoices tab
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
+  const [invoicesSearchTerm, setInvoicesSearchTerm] = useState('');
+  const [invoicesFilterStatus, setInvoicesFilterStatus] = useState('all');
 
   // Initialize active tab from URL query parameter
   useEffect(() => {
@@ -144,6 +165,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeTab === 'refunds') {
       fetchAllRefunds();
+    }
+  }, [activeTab]);
+
+  // Fetch invoices when switching to invoices tab
+  useEffect(() => {
+    if (activeTab === 'invoices') {
+      fetchAllInvoices();
     }
   }, [activeTab]);
 
@@ -309,6 +337,64 @@ export default function AdminDashboard() {
       toast.error('خطأ في جلب الاستردادات');
     }
   };
+
+  // Fetch all invoices for invoices tab
+  const fetchAllInvoices = async () => {
+    setInvoicesLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const response = await axios.get(`${apiUrl}/invoices`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setInvoices(response.data);
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      toast.error('خطأ في جلب الفواتير');
+    } finally {
+      setInvoicesLoading(false);
+    }
+  };
+
+  // Get invoice status badge
+  const getInvoiceStatusBadge = (invoice: Invoice) => {
+    if (invoice.status === 'paid') {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <FaCheckCircle className="mr-1" /> مدفوعة
+        </span>
+      );
+    } else if (invoice.subscription_paid > 0 && invoice.subscription_remaining > 0) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+          <FaClock className="mr-1" /> مدفوعة جزئياً
+        </span>
+      );
+    } else if (invoice.status === 'unpaid') {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+          <FaExclamationTriangle className="mr-1" /> غير مدفوعة
+        </span>
+      );
+    }
+    return null;
+  };
+
+  // Filter invoices based on search and status
+  const filteredInvoices = invoices.filter(invoice => {
+    const searchTermLower = invoicesSearchTerm.toLowerCase();
+    const matchesSearch = invoice.company_name.toLowerCase().includes(searchTermLower) ||
+                         invoice.phone.includes(invoicesSearchTerm) ||
+                         invoice.invoice_number.toLowerCase().includes(searchTermLower) ||
+                         invoice.plan_name.toLowerCase().includes(searchTermLower);
+    
+    if (invoicesFilterStatus === 'all') return matchesSearch;
+    if (invoicesFilterStatus === 'paid') return matchesSearch && invoice.status === 'paid';
+    if (invoicesFilterStatus === 'unpaid') return matchesSearch && invoice.status === 'unpaid' && invoice.subscription_paid === 0;
+    if (invoicesFilterStatus === 'partial') return matchesSearch && invoice.status === 'unpaid' && invoice.subscription_paid > 0 && invoice.subscription_remaining > 0;
+    
+    return matchesSearch;
+  });
 
   // تحديث حالة الاسترداد
   const handleUpdateRefundStatus = async (refundId: string, newStatus: string) => {
@@ -650,7 +736,7 @@ export default function AdminDashboard() {
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
-                  onClick={() => router.push('/admin/invoices')}
+                  onClick={() => changeTab('invoices')}
                 >
                   <FaFileInvoice className="text-3xl mb-2" />
                   <h3 className="text-lg font-bold mb-1">إدارة الفواتير</h3>
@@ -883,91 +969,172 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold">إدارة الفواتير</h2>
-                  <Link href="/admin/invoices">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      className="btn-primary flex items-center gap-2"
-                    >
-                      <FaFileInvoice />
-                      <span>عرض جميع الفواتير</span>
-                    </motion.button>
-                  </Link>
-                </div>
+              {/* Statistics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                {/* عدد الفواتير */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-blue-50 rounded-xl shadow-lg p-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-blue-600 text-sm font-medium mb-1">عدد الفواتير</p>
+                      <p className="text-3xl font-bold text-blue-900">{invoices.length}</p>
+                    </div>
+                    <div className="bg-blue-100 p-4 rounded-lg">
+                      <FaFileInvoice className="text-blue-600 text-2xl" />
+                    </div>
+                  </div>
+                </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <p className="text-sm text-green-600 mb-1">إجمالي المدفوعات</p>
-                    <p className="text-2xl font-bold text-green-800">
-                      {statistics?.totalRevenue.total || 0} ريال
-                    </p>
+                {/* المبالغ المعلقة */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-yellow-50 rounded-xl shadow-lg p-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-yellow-600 text-sm font-medium mb-1">المبالغ المعلقة</p>
+                      <p className="text-3xl font-bold text-yellow-900">
+                        {formatPrice(invoices.reduce((sum, inv) => sum + (inv.subscription_remaining || 0), 0))}
+                      </p>
+                    </div>
+                    <div className="bg-yellow-100 p-4 rounded-lg">
+                      <FaClock className="text-yellow-600 text-2xl" />
+                    </div>
                   </div>
-                  <div className="bg-yellow-50 rounded-lg p-4">
-                    <p className="text-sm text-yellow-600 mb-1">المبالغ المعلقة</p>
-                    <p className="text-2xl font-bold text-yellow-800">
-                      {advertisers.reduce((sum, adv) => sum + (adv.remaining_amount || 0), 0)} ريال
-                    </p>
-                  </div>
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <p className="text-sm text-blue-600 mb-1">عدد الفواتير</p>
-                    <p className="text-2xl font-bold text-blue-800">
-                      {advertisers.reduce((sum, adv) => sum + (adv.total_subscriptions || 0), 0)}
-                    </p>
-                  </div>
-                </div>
+                </motion.div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-right py-3 px-4">المعلن</th>
-                        <th className="text-right py-3 px-4">إجمالي المبلغ</th>
-                        <th className="text-right py-3 px-4">المدفوع</th>
-                        <th className="text-right py-3 px-4">المتبقي</th>
-                        <th className="text-right py-3 px-4">الحالة</th>
-                        <th className="text-right py-3 px-4">الإجراءات</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {advertisers.filter(adv => (adv.total_amount || 0) > 0).slice(0, 10).map((advertiser) => (
-                        <tr key={advertiser.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4">{advertiser.company_name}</td>
-                          <td className="py-3 px-4">{advertiser.total_amount || 0} ريال</td>
-                          <td className="py-3 px-4 text-green-600">{advertiser.paid_amount || 0} ريال</td>
-                          <td className="py-3 px-4 text-red-600">{advertiser.remaining_amount || 0} ريال</td>
-                          <td className="py-3 px-4">
-                            {advertiser.remaining_amount === 0 && (advertiser.total_amount || 0) > 0 ? (
-                              <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                                مدفوع بالكامل
-                              </span>
-                            ) : (advertiser.paid_amount || 0) > 0 ? (
-                              <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
-                                دفع جزئي
-                              </span>
-                            ) : (advertiser.total_amount || 0) > 0 ? (
-                              <span className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">
-                                غير مدفوع
-                              </span>
-                            ) : null}
-                          </td>
-                          <td className="py-3 px-4">
-                            <Link href={`/admin/advertisers/${advertiser.id}/invoices`}>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                className="text-primary-600 hover:text-primary-700"
-                              >
-                                <FaEye />
-                              </motion.button>
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                {/* إجمالي المدفوعات */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-green-50 rounded-xl shadow-lg p-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-green-600 text-sm font-medium mb-1">إجمالي المدفوعات</p>
+                      <p className="text-3xl font-bold text-green-900">
+                        {formatPrice(invoices.reduce((sum, inv) => sum + (inv.subscription_paid || 0), 0))}
+                      </p>
+                    </div>
+                    <div className="bg-green-100 p-4 rounded-lg">
+                      <FaMoneyBillWave className="text-green-600 text-2xl" />
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Button to refresh invoices */}
+              <div className="text-center mb-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={fetchAllInvoices}
+                  className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 mx-auto"
+                >
+                  <FaFileInvoice />
+                  تحديث الفواتير
+                </motion.button>
+              </div>
+
+              {/* Filters and Search */}
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Search */}
+                  <div className="relative">
+                    <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="البحث بالاسم أو الهاتف أو رقم الفاتورة..."
+                      value={invoicesSearchTerm}
+                      onChange={(e) => setInvoicesSearchTerm(e.target.value)}
+                      className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Filter Status */}
+                  <select
+                    value={invoicesFilterStatus}
+                    onChange={(e) => setInvoicesFilterStatus(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="all">جميع الحالات</option>
+                    <option value="paid">مدفوعة</option>
+                    <option value="partial">مدفوعة جزئياً</option>
+                    <option value="unpaid">غير مدفوعة</option>
+                  </select>
                 </div>
               </div>
+
+              {/* Invoices List */}
+              {invoicesLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                </div>
+              ) : filteredInvoices.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+                  <p className="text-gray-500">لا توجد فواتير تطابق البحث أو الفلتر.</p>
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الفاتورة</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العميل</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخطة</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ الإصدار</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المبلغ الإجمالي</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المدفوع</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المتبقي</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {filteredInvoices.map((invoice) => (
+                          <motion.tr
+                            key={invoice.id}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="hover:bg-gray-50"
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{invoice.invoice_number}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                              <div>{invoice.company_name}</div>
+                              <div className="text-xs text-gray-500">{invoice.phone}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.plan_name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDateUtil(invoice.issued_date)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{formatPrice(invoice.amount)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">{formatPrice(invoice.subscription_paid)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">{formatPrice(invoice.subscription_remaining)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{getInvoiceStatusBadge(invoice)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              <Link href={`/admin/invoices/${invoice.id}`}>
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                                >
+                                  <FaEye />
+                                  <span>عرض</span>
+                                </motion.button>
+                              </Link>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
