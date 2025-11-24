@@ -20,6 +20,11 @@ export interface Advertiser {
   trust_level?: number;                       // مستوى الثقة (1-5)
   payment_terms_days?: number;                // مهلة الدفع بالأيام
   
+  // 🆕 نظام التغطية الجغرافية (Geographic Coverage System)
+  coverage_type?: 'kingdom' | 'city' | 'both';  // نوع التغطية
+  coverage_cities?: string[];                     // المدن المغطاة (إذا كان city أو both)
+  // أمثلة: ['jeddah'], ['riyadh', 'jeddah'], etc.
+  
   created_at: Date;
   updated_at: Date;
 }
@@ -32,6 +37,12 @@ export interface Plan {
   price: number;
   features?: string | string[];
   is_active?: boolean;
+  
+  // 🆕 نظام التغطية الجغرافية للباقات (Plan Coverage System)
+  plan_type?: 'kingdom' | 'city';  // نوع الباقة: مملكة أو مدينة
+  city?: string;                    // المدينة (إذا كانت باقة مدينة)
+  // أمثلة: 'jeddah', 'riyadh', null (للباقات المملكة)
+  
   created_at: Date;
 }
 
@@ -51,6 +62,11 @@ export interface Subscription {
   // الحالات الموسعة
   status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled' | 'pending_payment';
   payment_status: 'paid' | 'partial' | 'pending';
+  
+  // 🆕 التغطية الجغرافية للاشتراك (Subscription Coverage)
+  coverage_area?: 'kingdom' | 'city';  // منطقة التغطية لهذا الاشتراك
+  city?: string;                        // المدينة (إذا كانت تغطية مدينة)
+  // يمكن للمعلن الواحد أن يكون له عدة اشتراكات بتغطيات مختلفة
   
   // نظام الإيقاف المؤقت (Pause System)
   paused_at?: Date;                    // تاريخ الإيقاف المؤقت
