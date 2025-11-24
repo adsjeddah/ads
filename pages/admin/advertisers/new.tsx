@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -54,6 +54,18 @@ export default function NewAdvertiser() {
   
   // 🆕 النظام الجديد: الباقات المتعددة
   const [selectedPackages, setSelectedPackages] = useState<SelectedPackage[]>([]);
+
+  // 🆕 Handler للباقات - مثبت بـ useCallback لتجنب infinite loop
+  const handlePackagesChange = useCallback((packages: SelectedPackage[]) => {
+    setSelectedPackages(packages);
+    
+    // حساب المبلغ الكلي من جميع الباقات
+    const totalBasePrice = packages.reduce((sum, pkg) => sum + pkg.plan.price, 0);
+    setFormData(prev => ({
+      ...prev,
+      base_price: totalBasePrice,
+    }));
+  }, []);
 
   // أسعار ثابتة للمدد المختلفة (احتياطي في حالة عدم استخدام الخطط من قاعدة البيانات)
   const pricingPlans: { [key: string]: { name: string; price: number } } = {
@@ -573,16 +585,7 @@ export default function NewAdvertiser() {
                 
                 <CoverageAndPackageSelector
                   plans={plans}
-                  onSelectionChange={(packages) => {
-                    setSelectedPackages(packages);
-                    
-                    // حساب المبلغ الكلي من جميع الباقات
-                    const totalBasePrice = packages.reduce((sum, pkg) => sum + pkg.plan.price, 0);
-                    setFormData(prev => ({
-                      ...prev,
-                      base_price: totalBasePrice,
-                    }));
-                  }}
+                  onSelectionChange={handlePackagesChange}
                 />
               </div>
 
