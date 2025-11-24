@@ -243,8 +243,8 @@ export interface SubscriptionStatusHistory {
   advertiser_id: string;
   
   // تفاصيل التغيير
-  from_status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled';
-  to_status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled';
+  from_status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled' | 'pending_payment';
+  to_status: 'active' | 'paused' | 'stopped' | 'expired' | 'cancelled' | 'pending_payment';
   action_type: 'pause' | 'resume' | 'stop' | 'reactivate' | 'expire' | 'cancel';
   
   // تفاصيل التوقيت

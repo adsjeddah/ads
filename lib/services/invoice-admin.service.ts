@@ -179,6 +179,7 @@ export class InvoiceAdminService {
       
       const invoiceData = invoiceDoc.data();
       const subscriptionId = invoiceData?.subscription_id;
+      let advertiserId: string | undefined;
       
       // 2️⃣ إيقاف الاشتراك المرتبط (إذا وُجد)
       if (subscriptionId) {
@@ -186,6 +187,9 @@ export class InvoiceAdminService {
         const subscriptionDoc = await subscriptionRef.get();
         
         if (subscriptionDoc.exists) {
+          const subscriptionData = subscriptionDoc.data();
+          advertiserId = subscriptionData?.advertiser_id;
+          
           // تحديث حالة الاشتراك إلى cancelled
           await subscriptionRef.update({
             status: 'cancelled',
@@ -198,12 +202,27 @@ export class InvoiceAdminService {
         }
       }
       
-      // 3️⃣ حذف الفاتورة
+      // 3️⃣ إيقاف المعلن (تحديث حالته إلى inactive) - هذا هو المفتاح! 🔑
+      if (advertiserId) {
+        const advertiserRef = adminDb.collection('advertisers').doc(advertiserId);
+        const advertiserDoc = await advertiserRef.get();
+        
+        if (advertiserDoc.exists) {
+          await advertiserRef.update({
+            status: 'inactive',
+            updated_at: FieldValue.serverTimestamp()
+          });
+          
+          console.log(`✅ Advertiser ${advertiserId} set to inactive due to invoice deletion`);
+        }
+      }
+      
+      // 4️⃣ حذف الفاتورة
       await adminDb.collection('invoices').doc(id).delete();
       
       console.log(`✅ Invoice ${id} deleted successfully`);
       
-      // 4️⃣ تسجيل العملية في Audit Log
+      // 5️⃣ تسجيل العملية في Audit Log
       try {
         await adminDb.collection('audit_logs').add({
           entity_type: 'invoice',
@@ -212,9 +231,10 @@ export class InvoiceAdminService {
           details: {
             invoice_id: id,
             subscription_id: subscriptionId,
+            advertiser_id: advertiserId,
             invoice_number: invoiceData?.invoice_number,
             amount: invoiceData?.amount,
-            reason: 'حذف الفاتورة وإيقاف الاشتراك المرتبط'
+            reason: 'حذف الفاتورة وإيقاف الاشتراك والمعلن'
           },
           performed_at: FieldValue.serverTimestamp(),
           ip_address: 'admin'
