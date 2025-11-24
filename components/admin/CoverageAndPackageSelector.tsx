@@ -1,11 +1,25 @@
 /**
- * مكون اختيار التغطية الجغرافية والباقات
- * يدعم:
- * - تغطية المملكة
- * - تغطية مدينة محددة
- * - تغطية المملكة + مدينة
- * - اختيار باقات متعددة
- * - حساب المجموع الكلي
+ * 🎯 مكون اختيار التغطية الجغرافية والباقات - النظام الذكي المتدرج
+ * 
+ * النظام الجديد:
+ * ============
+ * Step 1: اختيار نوع التغطية (مملكة / مدينة / كلاهما)
+ * Step 2: عرض الباقات المناسبة فقط بشكل ديناميكي
+ * Step 3: ملخص تلقائي ومباشر
+ * 
+ * المزايا:
+ * ========
+ * ✅ Progressive Disclosure - كشف تدريجي
+ * ✅ واجهة نظيفة غير مزدحمة
+ * ✅ خطوات واضحة ومنطقية
+ * ✅ قابلية توسع عالية (مدن + قطاعات)
+ * ✅ تجربة مستخدم احترافية
+ * 
+ * البنية القابلة للتوسع:
+ * ===================
+ * - إضافة مدن جديدة بسهولة
+ * - إضافة قطاعات جديدة (سباكة، نظافة، إلخ)
+ * - دعم باقات ديناميكية
  */
 
 import React, { useState, useEffect } from 'react';
@@ -16,7 +30,9 @@ import {
   FaCheckCircle, 
   FaInfoCircle,
   FaBox,
-  FaPlus
+  FaStar,
+  FaArrowDown,
+  FaCheck
 } from 'react-icons/fa';
 
 export type CoverageType = 'kingdom' | 'city' | 'both' | null;
@@ -46,373 +62,611 @@ interface Props {
   initialCoverageType?: CoverageType;
 }
 
+// قائمة المدن المتاحة (قابلة للتوسع)
+const AVAILABLE_CITIES = [
+  { id: 'jeddah', name: 'جدة', emoji: '🏙️' },
+  // يمكن إضافة المزيد لاحقاً:
+  // { id: 'riyadh', name: 'الرياض', emoji: '🌆' },
+  // { id: 'makkah', name: 'مكة المكرمة', emoji: '🕋' },
+  // { id: 'dammam', name: 'الدمام', emoji: '🏖️' },
+];
+
 export default function CoverageAndPackageSelector({ 
   plans, 
   onSelectionChange,
   initialCoverageType = null 
 }: Props) {
+  // ============ State Management ============
   const [coverageType, setCoverageType] = useState<CoverageType>(initialCoverageType);
-  const [selectedPackages, setSelectedPackages] = useState<SelectedPackage[]>([]);
-  const [availableCities] = useState(['jeddah']); // يمكن توسيعها لاحقاً
+  const [selectedKingdomPlan, setSelectedKingdomPlan] = useState<Plan | null>(null);
+  const [selectedCityPlan, setSelectedCityPlan] = useState<Plan | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string>('jeddah');
 
-  // فلترة الباقات حسب النوع
-  const kingdomPlans = plans.filter(p => p.plan_type === 'kingdom');
-  const cityPlans = plans.filter(p => p.plan_type === 'city' || !p.plan_type);
+  // ============ Plans Filtering ============
+  const kingdomPlans = plans.filter(p => p.plan_type === 'kingdom' && p.is_active !== false);
+  const cityPlans = plans.filter(p => (p.plan_type === 'city' || !p.plan_type) && p.is_active !== false);
 
-  // حساب المجموع الكلي
-  const totalAmount = selectedPackages.reduce((sum, pkg) => sum + pkg.plan.price, 0);
+  // ============ Calculations ============
+  const totalAmount = (selectedKingdomPlan?.price || 0) + (selectedCityPlan?.price || 0);
+  
+  // التحقق من اكتمال الاختيارات
+  const isKingdomStepComplete = coverageType !== 'kingdom' && coverageType !== 'both' || selectedKingdomPlan !== null;
+  const isCityStepComplete = coverageType !== 'city' && coverageType !== 'both' || (selectedCityPlan !== null && selectedCity !== null);
+  const isAllComplete = isKingdomStepComplete && isCityStepComplete && coverageType !== null;
 
+  // ============ Effects ============
   useEffect(() => {
-    onSelectionChange(selectedPackages);
-  }, [selectedPackages, onSelectionChange]);
+    // بناء مصفوفة الباقات المختارة
+    const packages: SelectedPackage[] = [];
+    
+    if (selectedKingdomPlan) {
+      packages.push({
+        plan_id: selectedKingdomPlan.id,
+        plan: selectedKingdomPlan,
+        coverage_type: 'kingdom'
+      });
+    }
+    
+    if (selectedCityPlan && selectedCity) {
+      packages.push({
+        plan_id: selectedCityPlan.id,
+        plan: selectedCityPlan,
+        coverage_type: 'city',
+        city: selectedCity
+      });
+    }
+    
+    onSelectionChange(packages);
+  }, [selectedKingdomPlan, selectedCityPlan, selectedCity, onSelectionChange]);
 
-  // إعادة تعيين الباقات المختارة عند تغيير نوع التغطية
+  // إعادة تعيين الباقات عند تغيير نوع التغطية
   useEffect(() => {
-    setSelectedPackages([]);
+    setSelectedKingdomPlan(null);
+    setSelectedCityPlan(null);
   }, [coverageType]);
 
-  const handlePackageSelect = (plan: Plan, coverage: 'kingdom' | 'city', city?: string) => {
-    // التحقق من عدم التكرار
-    const exists = selectedPackages.find(
-      pkg => pkg.plan_id === plan.id && pkg.coverage_type === coverage && pkg.city === city
-    );
-
-    if (exists) {
-      // إزالة الباقة
-      setSelectedPackages(prev => 
-        prev.filter(pkg => !(pkg.plan_id === plan.id && pkg.coverage_type === coverage && pkg.city === city))
-      );
-    } else {
-      // إضافة الباقة
-      const newPackage: SelectedPackage = {
-        plan_id: plan.id,
-        plan: plan,
-        coverage_type: coverage,
-        city: city
-      };
-      setSelectedPackages(prev => [...prev, newPackage]);
-    }
+  // ============ Handlers ============
+  const handleCoverageTypeChange = (type: CoverageType) => {
+    setCoverageType(type);
   };
 
-  const isPackageSelected = (planId: string, coverage: 'kingdom' | 'city', city?: string) => {
-    return selectedPackages.some(
-      pkg => pkg.plan_id === planId && pkg.coverage_type === coverage && pkg.city === city
-    );
+  const handleKingdomPlanSelect = (plan: Plan) => {
+    setSelectedKingdomPlan(plan);
   };
 
+  const handleCityPlanSelect = (plan: Plan) => {
+    setSelectedCityPlan(plan);
+  };
+
+  // ============ Render ============
   return (
-    <div className="space-y-6">
-      {/* اختيار نوع التغطية */}
+    <div className="space-y-8">
+      {/* ==================== STEP 1: اختيار نوع التغطية ==================== */}
       <div>
-        <label className="block text-gray-700 font-bold text-lg mb-4">
-          <FaGlobe className="inline ml-2" /> اختر نوع التغطية الجغرافية
-        </label>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-500 text-white font-bold text-lg">
+            1
+          </div>
+          <h2 className="text-xl font-bold text-gray-800">
+            اختر نوع التغطية الجغرافية
+          </h2>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* تغطية المملكة */}
+          {/* المملكة فقط */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setCoverageType('kingdom')}
+            onClick={() => handleCoverageTypeChange('kingdom')}
             className={`cursor-pointer p-6 rounded-xl border-2 transition-all ${
               coverageType === 'kingdom'
-                ? 'border-primary-500 bg-primary-50 shadow-lg'
-                : 'border-gray-200 hover:border-gray-300 bg-white'
+                ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-primary-100 shadow-xl ring-2 ring-primary-200'
+                : 'border-gray-200 hover:border-primary-300 bg-white hover:shadow-md'
             }`}
           >
-            <div className="flex items-start gap-3">
-              <FaGlobe className={`text-3xl mt-1 ${
-                coverageType === 'kingdom' ? 'text-primary-600' : 'text-gray-400'
-              }`} />
-              <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1">المملكة بالكامل</h3>
-                <p className="text-sm text-gray-600">
-                  ظهور الإعلان في الصفحة الرئيسية لجميع زوار المملكة
-                </p>
-                {coverageType === 'kingdom' && (
-                  <div className="mt-2 flex items-center gap-1 text-green-600 text-sm font-semibold">
-                    <FaCheckCircle />
-                    <span>محدد</span>
-                  </div>
-                )}
+            <div className="text-center">
+              <div className="mb-3 flex justify-center">
+                <FaGlobe className={`text-5xl ${
+                  coverageType === 'kingdom' ? 'text-primary-600' : 'text-gray-400'
+                }`} />
               </div>
+              <h3 className="font-bold text-xl mb-2">المملكة بالكامل</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                ظهور الإعلان في الصفحة الرئيسية<br/>لجميع زوار المملكة
+              </p>
+              {coverageType === 'kingdom' && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold text-sm"
+                >
+                  <FaCheck />
+                  <span>محدد</span>
+                </motion.div>
+              )}
             </div>
           </motion.div>
 
-          {/* تغطية مدينة محددة */}
+          {/* مدينة محددة */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setCoverageType('city')}
+            onClick={() => handleCoverageTypeChange('city')}
             className={`cursor-pointer p-6 rounded-xl border-2 transition-all ${
               coverageType === 'city'
-                ? 'border-secondary-500 bg-secondary-50 shadow-lg'
-                : 'border-gray-200 hover:border-gray-300 bg-white'
+                ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-xl ring-2 ring-blue-200'
+                : 'border-gray-200 hover:border-blue-300 bg-white hover:shadow-md'
             }`}
           >
-            <div className="flex items-start gap-3">
-              <FaMapMarkerAlt className={`text-3xl mt-1 ${
-                coverageType === 'city' ? 'text-secondary-600' : 'text-gray-400'
-              }`} />
-              <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1">مدينة محددة</h3>
-                <p className="text-sm text-gray-600">
-                  ظهور الإعلان في صفحة مدينة واحدة (مثل جدة)
-                </p>
-                {coverageType === 'city' && (
-                  <div className="mt-2 flex items-center gap-1 text-green-600 text-sm font-semibold">
-                    <FaCheckCircle />
-                    <span>محدد</span>
-                  </div>
-                )}
+            <div className="text-center">
+              <div className="mb-3 flex justify-center">
+                <FaMapMarkerAlt className={`text-5xl ${
+                  coverageType === 'city' ? 'text-blue-600' : 'text-gray-400'
+                }`} />
               </div>
+              <h3 className="font-bold text-xl mb-2">مدينة محددة</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                ظهور الإعلان في صفحة مدينة<br/>واحدة محددة (مثل جدة)
+              </p>
+              {coverageType === 'city' && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold text-sm"
+                >
+                  <FaCheck />
+                  <span>محدد</span>
+                </motion.div>
+              )}
             </div>
           </motion.div>
 
-          {/* تغطية المملكة + مدينة */}
+          {/* المملكة + مدينة */}
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setCoverageType('both')}
-            className={`cursor-pointer p-6 rounded-xl border-2 transition-all ${
+            onClick={() => handleCoverageTypeChange('both')}
+            className={`cursor-pointer p-6 rounded-xl border-2 transition-all relative ${
               coverageType === 'both'
-                ? 'border-accent-500 bg-accent-50 shadow-lg'
-                : 'border-gray-200 hover:border-gray-300 bg-white'
+                ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-amber-100 shadow-xl ring-2 ring-orange-200'
+                : 'border-gray-200 hover:border-orange-300 bg-white hover:shadow-md'
             }`}
           >
-            <div className="flex items-start gap-3">
-              <div className="flex flex-col gap-1">
-                <FaGlobe className={`text-2xl ${
-                  coverageType === 'both' ? 'text-accent-600' : 'text-gray-400'
+            {/* شارة الأكثر شعبية */}
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full shadow-lg">
+                <FaStar className="text-yellow-300" />
+                الأكثر شعبية
+              </span>
+            </div>
+            
+            <div className="text-center">
+              <div className="mb-3 flex justify-center items-center gap-2">
+                <FaGlobe className={`text-4xl ${
+                  coverageType === 'both' ? 'text-orange-600' : 'text-gray-400'
                 }`} />
-                <FaMapMarkerAlt className={`text-xl ${
-                  coverageType === 'both' ? 'text-accent-600' : 'text-gray-400'
+                <span className="text-2xl font-bold text-gray-400">+</span>
+                <FaMapMarkerAlt className={`text-4xl ${
+                  coverageType === 'both' ? 'text-orange-600' : 'text-gray-400'
                 }`} />
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1">المملكة + مدينة</h3>
-                <p className="text-sm text-gray-600">
-                  ظهور الإعلان في الصفحة الرئيسية ومدينة محددة
-                </p>
-                <div className="mt-1 text-xs text-orange-600 font-semibold">
-                  ⭐ الأكثر شعبية
-                </div>
-                {coverageType === 'both' && (
-                  <div className="mt-2 flex items-center gap-1 text-green-600 text-sm font-semibold">
-                    <FaCheckCircle />
-                    <span>محدد</span>
-                  </div>
-                )}
-              </div>
+              <h3 className="font-bold text-xl mb-2">المملكة + مدينة</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                ظهور الإعلان في الصفحة الرئيسية<br/>ومدينة محددة للتغطية الشاملة
+              </p>
+              {coverageType === 'both' && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold text-sm"
+                >
+                  <FaCheck />
+                  <span>محدد</span>
+                </motion.div>
+              )}
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* عرض الباقات المتاحة */}
+      {/* ==================== STEP 2: الباقات (ديناميكية حسب الاختيار) ==================== */}
       <AnimatePresence mode="wait">
         {coverageType && (
           <motion.div
             key={coverageType}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
           >
-            {/* باقات المملكة */}
+            {/* ========== باقات المملكة (إذا اختار kingdom أو both) ========== */}
             {(coverageType === 'kingdom' || coverageType === 'both') && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <FaGlobe className="text-primary-500" />
-                  باقات المملكة
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {kingdomPlans.map((plan) => (
-                    <motion.div
-                      key={`kingdom-${plan.id}`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handlePackageSelect(plan, 'kingdom')}
-                      className={`cursor-pointer p-5 rounded-xl border-2 transition-all ${
-                        isPackageSelected(plan.id, 'kingdom')
-                          ? 'border-primary-500 bg-primary-50 shadow-lg'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <h4 className="font-bold text-gray-800">{plan.name}</h4>
-                        {isPackageSelected(plan.id, 'kingdom') && (
-                          <FaCheckCircle className="text-green-500 text-xl flex-shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{plan.description}</p>
-                      <div className="flex items-baseline gap-2 mb-3">
-                        <span className="text-3xl font-bold text-primary-600">
-                          {plan.price.toLocaleString('ar-SA')}
-                        </span>
-                        <span className="text-gray-600">ريال</span>
-                      </div>
-                      <div className="text-sm text-gray-600 mb-3">
-                        المدة: <span className="font-semibold">{plan.duration_days} يوم</span>
-                      </div>
-                      {plan.features && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <div className="space-y-1">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg ${
+                    selectedKingdomPlan 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-primary-500 text-white'
+                  }`}>
+                    {selectedKingdomPlan ? <FaCheck /> : '2'}
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <FaGlobe className="text-primary-500" />
+                      اختر باقة المملكة
+                      {coverageType === 'both' && <span className="text-sm text-red-600">(مطلوبة)</span>}
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      ظهور الإعلان في prokr.net لجميع زوار المملكة
+                    </p>
+                  </div>
+                </div>
+
+                {/* Kingdom Plans Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {kingdomPlans.length > 0 ? (
+                    kingdomPlans.map((plan) => (
+                      <motion.div
+                        key={`kingdom-${plan.id}`}
+                        whileHover={{ scale: 1.03, y: -5 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleKingdomPlanSelect(plan)}
+                        className={`cursor-pointer p-5 rounded-xl border-2 transition-all ${
+                          selectedKingdomPlan?.id === plan.id
+                            ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-blue-50 shadow-xl ring-2 ring-primary-200'
+                            : 'border-gray-200 hover:border-primary-300 bg-white hover:shadow-lg'
+                        }`}
+                      >
+                        {/* Header */}
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="font-bold text-lg text-gray-800">{plan.name}</h4>
+                          {selectedKingdomPlan?.id === plan.id && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                            >
+                              <FaCheckCircle className="text-green-500 text-2xl flex-shrink-0" />
+                            </motion.div>
+                          )}
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-sm text-gray-600 mb-4 min-h-[40px]">{plan.description}</p>
+
+                        {/* Price */}
+                        <div className="bg-primary-50 rounded-lg p-3 mb-3">
+                          <div className="flex items-baseline justify-center gap-2">
+                            <span className="text-4xl font-bold text-primary-600">
+                              {plan.price.toLocaleString('ar-SA')}
+                            </span>
+                            <span className="text-gray-700 font-semibold">ريال</span>
+                          </div>
+                          <div className="text-center text-sm text-gray-600 mt-1">
+                            <FaBox className="inline ml-1" />
+                            المدة: <span className="font-semibold">{plan.duration_days} يوم</span>
+                          </div>
+                        </div>
+
+                        {/* Features */}
+                        {plan.features && (
+                          <div className="space-y-2">
                             {(Array.isArray(plan.features) ? plan.features : plan.features.split('\n'))
                               .slice(0, 3)
                               .map((feature, idx) => (
-                                <div key={idx} className="flex items-start gap-2 text-xs text-gray-600">
+                                <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
                                   <FaCheckCircle className="text-green-500 mt-0.5 flex-shrink-0" />
                                   <span>{feature}</span>
                                 </div>
                               ))}
                           </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
+                        )}
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-3 text-center py-8 text-gray-500">
+                      <FaInfoCircle className="inline text-3xl mb-2" />
+                      <p>لا توجد باقات متاحة حالياً</p>
+                    </div>
+                  )}
                 </div>
-              </div>
+
+                {/* Arrow Indicator for 'both' option */}
+                {coverageType === 'both' && selectedKingdomPlan && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-center mb-6"
+                  >
+                    <FaArrowDown className="text-4xl text-primary-500 animate-bounce" />
+                  </motion.div>
+                )}
+              </motion.div>
             )}
 
-            {/* باقات المدن */}
+            {/* ========== باقات المدن (إذا اختار city أو both) ========== */}
             {(coverageType === 'city' || coverageType === 'both') && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <FaMapMarkerAlt className="text-secondary-500" />
-                  باقات المدن
-                </h3>
-                
-                {/* اختيار المدينة */}
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    اختر المدينة
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: coverageType === 'both' ? 0.2 : 0.1 }}
+              >
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg ${
+                    selectedCityPlan 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-blue-500 text-white'
+                  }`}>
+                    {selectedCityPlan ? <FaCheck /> : (coverageType === 'both' ? '3' : '2')}
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <FaMapMarkerAlt className="text-blue-500" />
+                      اختر باقة المدينة
+                      {coverageType === 'both' && <span className="text-sm text-red-600">(مطلوبة)</span>}
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      ظهور الإعلان في صفحة مدينة محددة (مثل prokr.net/jeddah/movers)
+                    </p>
+                  </div>
+                </div>
+
+                {/* City Selector */}
+                <div className="mb-5 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <label className="block text-sm font-bold text-gray-700 mb-3">
+                    🏙️ اختر المدينة:
                   </label>
-                  <div className="flex gap-3">
-                    {availableCities.map((city) => (
-                      <div
-                        key={city}
-                        className="px-4 py-2 bg-secondary-100 text-secondary-800 rounded-lg font-semibold"
+                  <div className="flex flex-wrap gap-3">
+                    {AVAILABLE_CITIES.map((city) => (
+                      <motion.button
+                        key={city.id}
+                        type="button"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedCity(city.id)}
+                        className={`px-5 py-3 rounded-lg font-bold text-lg transition-all ${
+                          selectedCity === city.id
+                            ? 'bg-blue-600 text-white shadow-lg ring-2 ring-blue-300'
+                            : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-blue-400'
+                        }`}
                       >
-                        {city === 'jeddah' ? 'جدة' : city}
-                      </div>
+                        <span className="ml-2">{city.emoji}</span>
+                        {city.name}
+                        {selectedCity === city.id && (
+                          <FaCheckCircle className="inline mr-2 text-green-300" />
+                        )}
+                      </motion.button>
                     ))}
                   </div>
                 </div>
 
+                {/* City Plans Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {cityPlans.map((plan) => (
-                    <motion.div
-                      key={`city-${plan.id}`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handlePackageSelect(plan, 'city', 'jeddah')}
-                      className={`cursor-pointer p-5 rounded-xl border-2 transition-all ${
-                        isPackageSelected(plan.id, 'city', 'jeddah')
-                          ? 'border-secondary-500 bg-secondary-50 shadow-lg'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <h4 className="font-bold text-gray-800">{plan.name}</h4>
-                        {isPackageSelected(plan.id, 'city', 'jeddah') && (
-                          <FaCheckCircle className="text-green-500 text-xl flex-shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{plan.description}</p>
-                      <div className="flex items-baseline gap-2 mb-3">
-                        <span className="text-3xl font-bold text-secondary-600">
-                          {plan.price.toLocaleString('ar-SA')}
-                        </span>
-                        <span className="text-gray-600">ريال</span>
-                      </div>
-                      <div className="text-sm text-gray-600 mb-3">
-                        المدة: <span className="font-semibold">{plan.duration_days} يوم</span>
-                      </div>
-                      {plan.features && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <div className="space-y-1">
+                  {cityPlans.length > 0 ? (
+                    cityPlans.map((plan) => (
+                      <motion.div
+                        key={`city-${plan.id}`}
+                        whileHover={{ scale: 1.03, y: -5 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleCityPlanSelect(plan)}
+                        className={`cursor-pointer p-5 rounded-xl border-2 transition-all ${
+                          selectedCityPlan?.id === plan.id
+                            ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-xl ring-2 ring-blue-200'
+                            : 'border-gray-200 hover:border-blue-300 bg-white hover:shadow-lg'
+                        }`}
+                      >
+                        {/* Header */}
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="font-bold text-lg text-gray-800">{plan.name}</h4>
+                          {selectedCityPlan?.id === plan.id && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                            >
+                              <FaCheckCircle className="text-green-500 text-2xl flex-shrink-0" />
+                            </motion.div>
+                          )}
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-sm text-gray-600 mb-4 min-h-[40px]">{plan.description}</p>
+
+                        {/* Price */}
+                        <div className="bg-blue-50 rounded-lg p-3 mb-3">
+                          <div className="flex items-baseline justify-center gap-2">
+                            <span className="text-4xl font-bold text-blue-600">
+                              {plan.price.toLocaleString('ar-SA')}
+                            </span>
+                            <span className="text-gray-700 font-semibold">ريال</span>
+                          </div>
+                          <div className="text-center text-sm text-gray-600 mt-1">
+                            <FaBox className="inline ml-1" />
+                            المدة: <span className="font-semibold">{plan.duration_days} يوم</span>
+                          </div>
+                        </div>
+
+                        {/* Features */}
+                        {plan.features && (
+                          <div className="space-y-2">
                             {(Array.isArray(plan.features) ? plan.features : plan.features.split('\n'))
                               .slice(0, 3)
                               .map((feature, idx) => (
-                                <div key={idx} className="flex items-start gap-2 text-xs text-gray-600">
+                                <div key={idx} className="flex items-start gap-2 text-xs text-gray-700">
                                   <FaCheckCircle className="text-green-500 mt-0.5 flex-shrink-0" />
                                   <span>{feature}</span>
                                 </div>
                               ))}
                           </div>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ملخص الباقات المختارة */}
-            {selectedPackages.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-br from-green-50 to-blue-50 p-6 rounded-xl border-2 border-green-200"
-              >
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <FaBox className="text-green-600" />
-                  الباقات المختارة ({selectedPackages.length})
-                </h3>
-                <div className="space-y-3 mb-4">
-                  {selectedPackages.map((pkg, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between bg-white p-3 rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        {pkg.coverage_type === 'kingdom' ? (
-                          <FaGlobe className="text-primary-500 text-xl" />
-                        ) : (
-                          <FaMapMarkerAlt className="text-secondary-500 text-xl" />
                         )}
-                        <div>
-                          <div className="font-semibold text-gray-800">{pkg.plan.name}</div>
-                          <div className="text-xs text-gray-600">
-                            {pkg.coverage_type === 'kingdom' ? 'المملكة' : `${pkg.city === 'jeddah' ? 'جدة' : pkg.city}`}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-left">
-                        <div className="font-bold text-lg text-gray-800">
-                          {pkg.plan.price.toLocaleString('ar-SA')} ر.س
-                        </div>
-                        <div className="text-xs text-gray-600">{pkg.plan.duration_days} يوم</div>
-                      </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-3 text-center py-8 text-gray-500">
+                      <FaInfoCircle className="inline text-3xl mb-2" />
+                      <p>لا توجد باقات متاحة حالياً</p>
                     </div>
-                  ))}
-                </div>
-                
-                {/* المجموع الكلي */}
-                <div className="border-t-2 border-green-300 pt-4 flex items-center justify-between">
-                  <div>
-                    <div className="text-sm text-gray-600">المجموع الكلي</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      قبل الخصومات والضريبة
-                    </div>
-                  </div>
-                  <div className="text-3xl font-bold text-green-600">
-                    {totalAmount.toLocaleString('ar-SA')} ر.س
-                  </div>
+                  )}
                 </div>
               </motion.div>
             )}
 
-            {/* رسالة تنبيهية */}
-            {selectedPackages.length === 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-                <FaInfoCircle className="text-blue-500 text-xl mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-800">
-                  <strong>ملاحظة:</strong> يرجى اختيار باقة واحدة على الأقل للمتابعة. 
-                  يمكنك اختيار عدة باقات في نفس الوقت للحصول على تغطية أوسع.
+            {/* ========== ملخص الباقات المختارة ========== */}
+            {(selectedKingdomPlan || selectedCityPlan) && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 border-2 border-green-300 rounded-2xl p-6 shadow-xl"
+              >
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white">
+                    <FaCheckCircle className="text-2xl" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                      📦 ملخص الباقات المختارة
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      مراجعة الباقات قبل الانتقال للخطوات التالية
+                    </p>
+                  </div>
                 </div>
-              </div>
+
+                {/* Selected Packages */}
+                <div className="space-y-3 mb-5">
+                  {/* Kingdom Package */}
+                  {selectedKingdomPlan && (
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      className="bg-white rounded-xl p-4 shadow-md border-l-4 border-primary-500"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary-100">
+                            <FaGlobe className="text-primary-600 text-2xl" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg text-gray-800">
+                              {selectedKingdomPlan.name}
+                            </div>
+                            <div className="text-sm text-gray-600 flex items-center gap-2">
+                              <FaGlobe className="text-primary-500" />
+                              <span>تغطية المملكة</span>
+                              <span className="text-gray-400">•</span>
+                              <span>{selectedKingdomPlan.duration_days} يوم</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-left">
+                          <div className="text-2xl font-bold text-primary-600">
+                            {selectedKingdomPlan.price.toLocaleString('ar-SA')}
+                          </div>
+                          <div className="text-sm text-gray-600">ريال</div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* City Package */}
+                  {selectedCityPlan && (
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                      className="bg-white rounded-xl p-4 shadow-md border-l-4 border-blue-500"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
+                            <FaMapMarkerAlt className="text-blue-600 text-2xl" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg text-gray-800">
+                              {selectedCityPlan.name}
+                            </div>
+                            <div className="text-sm text-gray-600 flex items-center gap-2">
+                              <FaMapMarkerAlt className="text-blue-500" />
+                              <span>
+                                {AVAILABLE_CITIES.find(c => c.id === selectedCity)?.name || selectedCity}
+                              </span>
+                              <span className="text-gray-400">•</span>
+                              <span>{selectedCityPlan.duration_days} يوم</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-left">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {selectedCityPlan.price.toLocaleString('ar-SA')}
+                          </div>
+                          <div className="text-sm text-gray-600">ريال</div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Total Amount */}
+                <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-5 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-lg font-semibold opacity-90">المجموع الكلي</div>
+                      <div className="text-sm opacity-75 mt-1">
+                        قبل الخصومات والضريبة
+                      </div>
+                    </div>
+                    <div className="text-left">
+                      <div className="text-4xl font-bold">
+                        {totalAmount.toLocaleString('ar-SA')}
+                      </div>
+                      <div className="text-lg font-semibold">ريال سعودي</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Success Badge */}
+                {isAllComplete && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", delay: 0.4 }}
+                    className="mt-4 text-center"
+                  >
+                    <span className="inline-flex items-center gap-2 px-5 py-2 bg-green-100 text-green-800 rounded-full font-bold">
+                      <FaCheckCircle className="text-xl" />
+                      تم اختيار جميع الباقات المطلوبة بنجاح!
+                    </span>
+                  </motion.div>
+                )}
+              </motion.div>
+            )}
+
+            {/* ========== رسائل تنبيهية وإرشادية ========== */}
+            {!selectedKingdomPlan && !selectedCityPlan && coverageType && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-5 flex items-start gap-4"
+              >
+                <FaInfoCircle className="text-blue-500 text-3xl mt-1 flex-shrink-0" />
+                <div className="flex-1">
+                  <h4 className="font-bold text-lg text-gray-800 mb-2">
+                    👆 يرجى اختيار الباقات المطلوبة
+                  </h4>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {coverageType === 'kingdom' && 'اختر باقة واحدة من باقات المملكة للمتابعة.'}
+                    {coverageType === 'city' && 'اختر المدينة ثم اختر باقة واحدة من باقات المدن للمتابعة.'}
+                    {coverageType === 'both' && 'يجب اختيار باقة واحدة من المملكة وباقة واحدة من المدن للحصول على التغطية الشاملة.'}
+                  </p>
+                </div>
+              </motion.div>
             )}
           </motion.div>
         )}
