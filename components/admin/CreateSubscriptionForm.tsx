@@ -8,7 +8,7 @@ import { FaPlus, FaPercent, FaMoneyBillWave, FaCalendarAlt, FaTimes } from 'reac
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/router';
-import { getValidToken, getAuthHeaders, handleAuthError } from '../lib/utils/auth';
+import { getValidToken, getAuthHeaders, handleAuthError } from '../../lib/utils/auth';
 
 interface Plan {
   id: string;
