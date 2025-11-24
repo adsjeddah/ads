@@ -11,9 +11,29 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      const { status } = req.query;
+      const { status, sector, city } = req.query;
+      
       // Use Admin service for GET to avoid permissions issues
-      const advertisers = await AdvertiserAdminService.getAll(status as string | undefined);
+      let advertisers = await AdvertiserAdminService.getAll(status as string | undefined);
+      
+      // 🆕 فلترة حسب القطاع
+      if (sector) {
+        advertisers = advertisers.filter(adv => adv.sector === sector);
+      }
+      
+      // 🆕 فلترة حسب المدينة
+      if (city) {
+        advertisers = advertisers.filter(adv => {
+          // المعلنون الذين يغطون المملكة بالكامل
+          if (adv.coverage_type === 'kingdom') return true;
+          // المعلنون الذين يغطون المملكة والمدينة
+          if (adv.coverage_type === 'both') return true;
+          // المعلنون الذين يغطون هذه المدينة فقط
+          if (adv.coverage_type === 'city' && adv.coverage_cities?.includes(city as string)) return true;
+          return false;
+        });
+      }
+      
       res.status(200).json(advertisers);
     } catch (error: any) {
       console.error('Error fetching advertisers:', error);

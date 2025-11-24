@@ -609,10 +609,22 @@ export default function Home() {
 
   const fetchAdvertisers = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers?status=active`);
-      setAdvertisers(response.data);
+      // 🆕 الصفحة الرئيسية: نقل العفش في المملكة فقط
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, {
+        params: {
+          status: 'active',
+          sector: 'movers' // فقط نقل العفش
+        }
+      });
+      
+      // فلترة إضافية: فقط معلني المملكة أو كلاهما
+      const kingdomAdvertisers = response.data.filter((adv: any) => 
+        adv.coverage_type === 'kingdom' || adv.coverage_type === 'both'
+      );
+      
+      setAdvertisers(kingdomAdvertisers);
       // خلط الإعلانات مرة واحدة عند تحميل البيانات
-      const shuffled = shuffleAdvertisers(response.data);
+      const shuffled = shuffleAdvertisers(kingdomAdvertisers);
       setShuffledAdvertisers(shuffled);
       setLoading(false);
     } catch (error) {
