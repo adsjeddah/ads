@@ -147,6 +147,16 @@ export default function AdminDashboard() {
   const [invoicesLoading, setInvoicesLoading] = useState(false);
   const [invoicesSearchTerm, setInvoicesSearchTerm] = useState('');
   const [invoicesFilterStatus, setInvoicesFilterStatus] = useState('all');
+  
+  // 🆕 Advanced Filters for Invoices
+  const [invoicesDateRange, setInvoicesDateRange] = useState('all'); // 'all', 'today', 'last7days', 'thisMonth', 'lastMonth', 'custom'
+  const [invoicesStartDate, setInvoicesStartDate] = useState('');
+  const [invoicesEndDate, setInvoicesEndDate] = useState('');
+  const [invoicesMinAmount, setInvoicesMinAmount] = useState('');
+  const [invoicesMaxAmount, setInvoicesMaxAmount] = useState('');
+  const [invoicesMinPaid, setInvoicesMinPaid] = useState('');
+  const [invoicesMaxPaid, setInvoicesMaxPaid] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Initialize active tab from URL query parameter
   useEffect(() => {
@@ -356,6 +366,52 @@ export default function AdminDashboard() {
     }
   };
 
+  // 🆕 Delete Invoice - حذف الفاتورة بشكل كامل
+  const handleDeleteInvoice = async (invoiceId: number) => {
+    if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف هذه الفاتورة؟\n\nسيتم حذف الفاتورة بشكل نهائي من النظام وقاعدة البيانات.\n\n⚠️ هذا الإجراء لا يمكن التراجع عنه!')) {
+      return;
+    }
+
+    // تأكيد إضافي
+    if (!confirm('تأكيد نهائي: اضغط موافق لحذف الفاتورة نهائياً')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      
+      await axios.delete(`${apiUrl}/invoices/${invoiceId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success('✅ تم حذف الفاتورة بنجاح');
+      
+      // تحديث القائمة
+      setInvoices(invoices.filter(inv => inv.id !== invoiceId));
+      
+      // إعادة جلب البيانات لتحديث الإحصائيات
+      fetchAllInvoices();
+      
+    } catch (error: any) {
+      console.error('Error deleting invoice:', error);
+      toast.error(error.response?.data?.error || 'خطأ في حذف الفاتورة');
+    }
+  };
+
+  // Reset all advanced filters
+  const resetAdvancedFilters = () => {
+    setInvoicesDateRange('all');
+    setInvoicesStartDate('');
+    setInvoicesEndDate('');
+    setInvoicesMinAmount('');
+    setInvoicesMaxAmount('');
+    setInvoicesMinPaid('');
+    setInvoicesMaxPaid('');
+    setInvoicesFilterStatus('all');
+    setInvoicesSearchTerm('');
+  };
+
   // Get invoice status badge
   const getInvoiceStatusBadge = (invoice: Invoice) => {
     if (invoice.status === 'paid') {
@@ -380,20 +436,77 @@ export default function AdminDashboard() {
     return null;
   };
 
-  // Filter invoices based on search and status
+  // 🆕 Advanced Filter for Invoices - شامل ومفصل
   const filteredInvoices = invoices.filter(invoice => {
+    // 1️⃣ البحث النصي (Search)
     const searchTermLower = invoicesSearchTerm.toLowerCase();
     const matchesSearch = invoice.company_name.toLowerCase().includes(searchTermLower) ||
                          invoice.phone.includes(invoicesSearchTerm) ||
                          invoice.invoice_number.toLowerCase().includes(searchTermLower) ||
                          invoice.plan_name.toLowerCase().includes(searchTermLower);
     
-    if (invoicesFilterStatus === 'all') return matchesSearch;
-    if (invoicesFilterStatus === 'paid') return matchesSearch && invoice.status === 'paid';
-    if (invoicesFilterStatus === 'unpaid') return matchesSearch && invoice.status === 'unpaid' && invoice.subscription_paid === 0;
-    if (invoicesFilterStatus === 'partial') return matchesSearch && invoice.status === 'unpaid' && invoice.subscription_paid > 0 && invoice.subscription_remaining > 0;
+    if (!matchesSearch) return false;
     
-    return matchesSearch;
+    // 2️⃣ فلتر الحالة (Status Filter)
+    if (invoicesFilterStatus !== 'all') {
+      if (invoicesFilterStatus === 'paid' && invoice.status !== 'paid') return false;
+      if (invoicesFilterStatus === 'unpaid' && (invoice.status !== 'unpaid' || invoice.subscription_paid > 0)) return false;
+      if (invoicesFilterStatus === 'partial' && !(invoice.status === 'unpaid' && invoice.subscription_paid > 0 && invoice.subscription_remaining > 0)) return false;
+    }
+    
+    // 3️⃣ فلتر التواريخ (Date Range Filter)
+    if (invoicesDateRange !== 'all') {
+      const invoiceDate = new Date(invoice.issued_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (invoicesDateRange === 'today') {
+        const todayEnd = new Date(today);
+        todayEnd.setHours(23, 59, 59, 999);
+        if (invoiceDate < today || invoiceDate > todayEnd) return false;
+      }
+      
+      if (invoicesDateRange === 'last7days') {
+        const last7Days = new Date(today);
+        last7Days.setDate(last7Days.getDate() - 7);
+        if (invoiceDate < last7Days) return false;
+      }
+      
+      if (invoicesDateRange === 'thisMonth') {
+        const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        const thisMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+        if (invoiceDate < thisMonthStart || invoiceDate > thisMonthEnd) return false;
+      }
+      
+      if (invoicesDateRange === 'lastMonth') {
+        const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59);
+        if (invoiceDate < lastMonthStart || invoiceDate > lastMonthEnd) return false;
+      }
+      
+      if (invoicesDateRange === 'custom') {
+        if (invoicesStartDate) {
+          const startDate = new Date(invoicesStartDate);
+          startDate.setHours(0, 0, 0, 0);
+          if (invoiceDate < startDate) return false;
+        }
+        if (invoicesEndDate) {
+          const endDate = new Date(invoicesEndDate);
+          endDate.setHours(23, 59, 59, 999);
+          if (invoiceDate > endDate) return false;
+        }
+      }
+    }
+    
+    // 4️⃣ فلتر المبلغ الإجمالي (Total Amount Filter)
+    if (invoicesMinAmount && invoice.amount < parseFloat(invoicesMinAmount)) return false;
+    if (invoicesMaxAmount && invoice.amount > parseFloat(invoicesMaxAmount)) return false;
+    
+    // 5️⃣ فلتر المبلغ المدفوع (Paid Amount Filter)
+    if (invoicesMinPaid && invoice.subscription_paid < parseFloat(invoicesMinPaid)) return false;
+    if (invoicesMaxPaid && invoice.subscription_paid > parseFloat(invoicesMaxPaid)) return false;
+    
+    return true;
   });
 
   // تحديث حالة الاسترداد
@@ -1042,9 +1155,33 @@ export default function AdminDashboard() {
                 </motion.button>
               </div>
 
-              {/* Filters and Search */}
+              {/* 🆕 Advanced Filters - فلاتر متقدمة شاملة */}
               <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-gray-800">الفلاتر والبحث</h3>
+                  <div className="flex gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                    >
+                      <FaFilter />
+                      <span>{showAdvancedFilters ? 'إخفاء الفلاتر المتقدمة' : 'إظهار الفلاتر المتقدمة'}</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={resetAdvancedFilters}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                      إعادة تعيين
+                    </motion.button>
+                  </div>
+                </div>
+
+                {/* Basic Filters */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   {/* Search */}
                   <div className="relative">
                     <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -1068,7 +1205,122 @@ export default function AdminDashboard() {
                     <option value="partial">مدفوعة جزئياً</option>
                     <option value="unpaid">غير مدفوعة</option>
                   </select>
+
+                  {/* Date Range Quick Filter */}
+                  <select
+                    value={invoicesDateRange}
+                    onChange={(e) => setInvoicesDateRange(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="all">كل الفترات</option>
+                    <option value="today">اليوم</option>
+                    <option value="last7days">آخر 7 أيام</option>
+                    <option value="thisMonth">الشهر الحالي</option>
+                    <option value="lastMonth">الشهر السابق</option>
+                    <option value="custom">مدة مخصصة</option>
+                  </select>
                 </div>
+
+                {/* Advanced Filters - يظهر عند الطلب */}
+                {showAdvancedFilters && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="border-t pt-4 mt-4"
+                  >
+                    <h4 className="text-md font-semibold text-gray-700 mb-3">الفلاتر المتقدمة</h4>
+                    
+                    {/* Custom Date Range */}
+                    {invoicesDateRange === 'custom' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <FaCalendarAlt className="inline ml-1" /> من تاريخ
+                          </label>
+                          <input
+                            type="date"
+                            value={invoicesStartDate}
+                            onChange={(e) => setInvoicesStartDate(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <FaCalendarAlt className="inline ml-1" /> إلى تاريخ
+                          </label>
+                          <input
+                            type="date"
+                            value={invoicesEndDate}
+                            onChange={(e) => setInvoicesEndDate(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Amount Filters */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <FaMoneyBillWave className="inline ml-1" /> المبلغ الإجمالي (من)
+                        </label>
+                        <input
+                          type="number"
+                          value={invoicesMinAmount}
+                          onChange={(e) => setInvoicesMinAmount(e.target.value)}
+                          placeholder="0"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <FaMoneyBillWave className="inline ml-1" /> المبلغ الإجمالي (إلى)
+                        </label>
+                        <input
+                          type="number"
+                          value={invoicesMaxAmount}
+                          onChange={(e) => setInvoicesMaxAmount(e.target.value)}
+                          placeholder="∞"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Paid Amount Filters */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <FaCheckCircle className="inline ml-1" /> المبلغ المدفوع (من)
+                        </label>
+                        <input
+                          type="number"
+                          value={invoicesMinPaid}
+                          onChange={(e) => setInvoicesMinPaid(e.target.value)}
+                          placeholder="0"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <FaCheckCircle className="inline ml-1" /> المبلغ المدفوع (إلى)
+                        </label>
+                        <input
+                          type="number"
+                          value={invoicesMaxPaid}
+                          onChange={(e) => setInvoicesMaxPaid(e.target.value)}
+                          placeholder="∞"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Filter Summary */}
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                      ℹ️ عدد الفواتير المطابقة: <strong>{filteredInvoices.length}</strong> من أصل <strong>{invoices.length}</strong>
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
               {/* Invoices List */}
@@ -1117,16 +1369,31 @@ export default function AdminDashboard() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">{formatPrice(invoice.subscription_remaining)}</td>
                             <td className="px-6 py-4 whitespace-nowrap">{getInvoiceStatusBadge(invoice)}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <Link href={`/admin/invoices/${invoice.id}`}>
+                              <div className="flex items-center gap-2">
+                                <Link href={`/admin/invoices/${invoice.id}`}>
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 px-3 py-1 rounded"
+                                    title="عرض الفاتورة"
+                                  >
+                                    <FaEye />
+                                    <span>عرض</span>
+                                  </motion.button>
+                                </Link>
+                                
+                                {/* 🆕 Delete Button */}
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
-                                  className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                                  onClick={() => handleDeleteInvoice(invoice.id)}
+                                  className="text-red-600 hover:text-red-700 font-medium flex items-center gap-1 px-3 py-1 rounded hover:bg-red-50"
+                                  title="حذف الفاتورة نهائياً"
                                 >
-                                  <FaEye />
-                                  <span>عرض</span>
+                                  <FaTrash />
+                                  <span>حذف</span>
                                 </motion.button>
-                              </Link>
+                              </div>
                             </td>
                           </motion.tr>
                         ))}
