@@ -60,21 +60,21 @@ interface Props {
   plans: Plan[];
   onSelectionChange: (packages: SelectedPackage[]) => void;
   initialCoverageType?: CoverageType;
+  sector?: string; // 🆕 القطاع المحدد لفلترة الباقات
 }
 
-// قائمة المدن المتاحة (قابلة للتوسع)
+// قائمة المدن المتاحة
 const AVAILABLE_CITIES = [
   { id: 'jeddah', name: 'جدة', emoji: '🏙️' },
-  // يمكن إضافة المزيد لاحقاً:
-  // { id: 'riyadh', name: 'الرياض', emoji: '🌆' },
-  // { id: 'makkah', name: 'مكة المكرمة', emoji: '🕋' },
-  // { id: 'dammam', name: 'الدمام', emoji: '🏖️' },
+  { id: 'riyadh', name: 'الرياض', emoji: '🌆' },
+  { id: 'dammam', name: 'الدمام', emoji: '🏖️' },
 ];
 
 export default function CoverageAndPackageSelector({ 
   plans, 
   onSelectionChange,
-  initialCoverageType = null 
+  initialCoverageType = null,
+  sector 
 }: Props) {
   // ============ State Management ============
   const [coverageType, setCoverageType] = useState<CoverageType>(initialCoverageType);
@@ -83,8 +83,18 @@ export default function CoverageAndPackageSelector({
   const [selectedCity, setSelectedCity] = useState<string>('jeddah');
 
   // ============ Plans Filtering ============
-  const kingdomPlans = plans.filter(p => p.plan_type === 'kingdom' && p.is_active !== false);
-  const cityPlans = plans.filter(p => (p.plan_type === 'city' || !p.plan_type) && p.is_active !== false);
+  // فلترة الباقات حسب القطاع المحدد
+  const kingdomPlans = plans.filter(p => 
+    p.plan_type === 'kingdom' && 
+    p.is_active !== false &&
+    (!sector || p.sector === sector) // فلترة حسب القطاع إذا كان محدداً
+  );
+  
+  const cityPlans = plans.filter(p => 
+    (p.plan_type === 'city' || !p.plan_type) && 
+    p.is_active !== false &&
+    (!sector || p.sector === sector) // فلترة حسب القطاع إذا كان محدداً
+  );
 
   // ============ Calculations ============
   const totalAmount = (selectedKingdomPlan?.price || 0) + (selectedCityPlan?.price || 0);

@@ -20,11 +20,41 @@ export interface Advertiser {
   trust_level?: number;                       // مستوى الثقة (1-5)
   payment_terms_days?: number;                // مهلة الدفع بالأيام
   
+  // 🆕 نظام القطاعات (Sector System)
+  sector?: 'movers' | 'cleaning' | 'water-leaks' | 'pest-control'; // القطاع
+  
   // 🆕 نظام التغطية الجغرافية (Geographic Coverage System)
   coverage_type?: 'kingdom' | 'city' | 'both';  // نوع التغطية
   coverage_cities?: string[];                     // المدن المغطاة (إذا كان city أو both)
-  // أمثلة: ['jeddah'], ['riyadh', 'jeddah'], etc.
+  // أمثلة: ['jeddah'], ['riyadh', 'dammam'], etc.
   
+  created_at: Date;
+  updated_at: Date;
+}
+
+// 🆕 Sector Interface (القطاعات)
+export interface Sector {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  description_ar: string;
+  description_en: string;
+  icon: string;
+  slug: string;
+  is_active: boolean;
+  order: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// 🆕 City Interface (المدن)
+export interface City {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  slug: string;
+  emoji: string;
+  order: number;
   created_at: Date;
   updated_at: Date;
 }
@@ -38,10 +68,13 @@ export interface Plan {
   features?: string | string[];
   is_active?: boolean;
   
+  // 🆕 نظام القطاعات (Sector System)
+  sector?: 'movers' | 'cleaning' | 'water-leaks' | 'pest-control'; // القطاع
+  
   // 🆕 نظام التغطية الجغرافية للباقات (Plan Coverage System)
   plan_type?: 'kingdom' | 'city';  // نوع الباقة: مملكة أو مدينة
   city?: string;                    // المدينة (إذا كانت باقة مدينة)
-  // أمثلة: 'jeddah', 'riyadh', null (للباقات المملكة)
+  // أمثلة: 'jeddah', 'riyadh', 'dammam', null (للباقات المملكة)
   
   created_at: Date;
 }
