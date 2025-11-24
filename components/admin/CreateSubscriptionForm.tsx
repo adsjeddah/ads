@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import { FaPlus, FaPercent, FaMoneyBillWave, FaCalendarAlt, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/router';
+import { getValidToken, getAuthHeaders, handleAuthError } from '../lib/utils/auth';
 
 interface Plan {
   id: string;
@@ -27,6 +29,7 @@ export default function CreateSubscriptionForm({
   onSuccess,
   onCancel
 }: CreateSubscriptionFormProps) {
+  const router = useRouter();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingPlans, setLoadingPlans] = useState(true);
@@ -107,17 +110,33 @@ export default function CreateSubscriptionForm({
     setLoading(true);
     
     try {
+      // 🔑 الحصول على التوكن الصحيح
+      const token = await getValidToken();
+      if (!token) {
+        toast.error('انتهت جلستك، الرجاء تسجيل الدخول مرة أخرى');
+        router.push('/admin/login');
+        return;
+      }
+      
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      const response = await axios.post(`${apiUrl}/financial/create-subscription`, {
-        advertiser_id: advertiserId,
-        plan_id: selectedPlanId,
-        start_date: startDate,
-        discount_type: discountType,
-        discount_amount: discountAmount,
-        initial_payment: initialPayment,
-        payment_method: paymentMethod,
-        notes: notes
-      });
+      const response = await axios.post(
+        `${apiUrl}/financial/create-subscription`, 
+        {
+          advertiser_id: advertiserId,
+          plan_id: selectedPlanId,
+          start_date: startDate,
+          discount_type: discountType,
+          discount_amount: discountAmount,
+          initial_payment: initialPayment,
+          payment_method: paymentMethod,
+          notes: notes
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
 
       if (response.data.success) {
         toast.success('تم إنشاء الاشتراك بنجاح!');
@@ -125,6 +144,13 @@ export default function CreateSubscriptionForm({
       }
     } catch (error: any) {
       console.error('Error creating subscription:', error);
+      
+      // معالجة أخطاء المصادقة
+      if (handleAuthError(error, router)) {
+        toast.error('انتهت جلستك، الرجاء تسجيل الدخول مرة أخرى');
+        return;
+      }
+      
       toast.error(error.response?.data?.details || 'فشل إنشاء الاشتراك');
     } finally {
       setLoading(false);
