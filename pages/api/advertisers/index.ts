@@ -182,8 +182,8 @@ export default async function handler(
       res.status(201).json({ 
         id: newAdvertiserId,
         message: message,
-        subscriptions: createdSubscriptions.length > 0 ? createdSubscriptions : undefined
-      });
+        subscriptionsCount: createdSubscriptions.length
+      } as any);
     } catch (error: any) {
       console.error('Error creating advertiser:', error);
       if (error.message.includes('Unauthorized') || error.message.includes('admin')) {

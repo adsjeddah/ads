@@ -46,6 +46,7 @@ export interface Plan {
   features?: string | string[];
   plan_type?: 'kingdom' | 'city';
   city?: string;
+  sector?: 'movers' | 'cleaning' | 'water-leaks' | 'pest-control'; // 🆕 القطاع
   is_active?: boolean;
 }
 

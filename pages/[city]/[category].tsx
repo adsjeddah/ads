@@ -19,14 +19,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import CounterSection from '../../components/CounterSection';
-import AdvertiserCard from '../../components/AdvertiserCard';
-import UserGuideSection from '../../components/UserGuideSection';
-import GuaranteesSection from '../../components/GuaranteesSection';
+import axios from 'axios';
+import { FaPhone, FaWhatsapp, FaCheckCircle, FaStar } from 'react-icons/fa';
 
 // تعريف البيانات الأساسية
 const CITIES = {
@@ -73,6 +71,7 @@ interface Advertiser {
   sector?: string;
   coverage_type?: string;
   coverage_cities?: string[];
+  is_trusted?: boolean;
 }
 
 interface PageProps {
@@ -200,8 +199,57 @@ export default function CityCategory({ city, category, cityData, categoryData }:
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
+                        className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-100 hover:border-primary-300"
                       >
-                        <AdvertiserCard advertiser={advertiser} />
+                        {/* Advertiser Card */}
+                        <div className="p-6">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center text-white text-2xl">
+                              {advertiser.icon_url || '🚛'}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-gray-800 mb-1">
+                                {advertiser.company_name}
+                              </h3>
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <FaStar key={i} className="text-yellow-400 text-sm" />
+                                ))}
+                                <span className="text-xs text-gray-600 mr-1">(5.0)</span>
+                              </div>
+                            </div>
+                            {advertiser.is_trusted && (
+                              <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                                <FaCheckCircle /> موثوق
+                              </div>
+                            )}
+                          </div>
+                          
+                          {advertiser.services && (
+                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                              {advertiser.services}
+                            </p>
+                          )}
+                          
+                          <div className="flex gap-2">
+                            <a
+                              href={`tel:${advertiser.phone}`}
+                              className="flex-1 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-all flex items-center justify-center gap-2 font-semibold"
+                            >
+                              <FaPhone /> اتصال
+                            </a>
+                            {advertiser.whatsapp && (
+                              <a
+                                href={`https://wa.me/${advertiser.whatsapp.replace(/\D/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2 font-semibold"
+                              >
+                                <FaWhatsapp /> واتساب
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       </motion.div>
                     ))}
                   </motion.div>
@@ -220,12 +268,12 @@ export default function CityCategory({ city, category, cityData, categoryData }:
                       <br />
                       يرجى المحاولة لاحقاً أو تصفح مدن أخرى.
                     </p>
-                    <button
-                      onClick={() => router.push('/')}
-                      className="px-8 py-3 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl"
+                    <Link
+                      href="/"
+                      className="inline-block px-8 py-3 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl"
                     >
                       العودة للصفحة الرئيسية
-                    </button>
+                    </Link>
                   </motion.div>
                 )}
               </div>
@@ -233,14 +281,23 @@ export default function CityCategory({ city, category, cityData, categoryData }:
           </div>
         </section>
 
-        {/* Counter Section */}
-        <CounterSection />
-
-        {/* Guarantees Section */}
-        <GuaranteesSection />
-
-        {/* User Guide Section */}
-        <UserGuideSection />
+        {/* Call to Action */}
+        <section className="py-12 bg-gradient-to-br from-primary-600 to-primary-800 text-white">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold mb-4">
+              هل تريد الإعلان عن خدماتك؟
+            </h2>
+            <p className="text-lg mb-6 opacity-90">
+              انضم إلى منصتنا واحصل على عملاء جدد
+            </p>
+            <a
+              href="/"
+              className="inline-block bg-white text-primary-600 px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl"
+            >
+              ابدأ الآن
+            </a>
+          </div>
+        </section>
       </div>
     </>
   );
