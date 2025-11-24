@@ -83,17 +83,21 @@ export default function CoverageAndPackageSelector({
   const [selectedCity, setSelectedCity] = useState<string>('jeddah');
 
   // ============ Plans Filtering ============
-  // فلترة الباقات حسب القطاع المحدد
+  // 🎯 فلترة دقيقة للباقات حسب القطاع والمدينة
+  
+  // باقات المملكة: فقط للقطاع المحدد
   const kingdomPlans = plans.filter(p => 
     p.plan_type === 'kingdom' && 
     p.is_active !== false &&
-    (!sector || p.sector === sector) // فلترة حسب القطاع إذا كان محدداً
+    (!sector || p.sector === sector) // فلترة حسب القطاع
   );
   
+  // باقات المدن: فلترة حسب القطاع AND المدينة المحددة
   const cityPlans = plans.filter(p => 
     (p.plan_type === 'city' || !p.plan_type) && 
     p.is_active !== false &&
-    (!sector || p.sector === sector) // فلترة حسب القطاع إذا كان محدداً
+    (!sector || p.sector === sector) && // فلترة حسب القطاع
+    (!selectedCity || p.city === selectedCity) // 🆕 فلترة حسب المدينة المحددة فقط
   );
 
   // ============ Calculations ============
@@ -134,6 +138,14 @@ export default function CoverageAndPackageSelector({
     setSelectedKingdomPlan(null);
     setSelectedCityPlan(null);
   }, [coverageType]);
+
+  // 🆕 إعادة تعيين باقة المدينة عند تغيير المدينة المحددة
+  useEffect(() => {
+    // إذا كانت الباقة المختارة لا تنتمي للمدينة الجديدة، امسحها
+    if (selectedCityPlan && selectedCityPlan.city !== selectedCity) {
+      setSelectedCityPlan(null);
+    }
+  }, [selectedCity]);
 
   // ============ Handlers ============
   const handleCoverageTypeChange = (type: CoverageType) => {
@@ -318,6 +330,26 @@ export default function CoverageAndPackageSelector({
                   </div>
                 </div>
 
+                {/* 🆕 رسالة توضيحية */}
+                {sector && (
+                  <div className="mb-4 p-3 bg-primary-50 rounded-lg border border-primary-200">
+                    <div className="flex items-start gap-2 text-sm text-gray-700">
+                      <FaInfoCircle className="text-primary-500 mt-0.5 flex-shrink-0" />
+                      <p>
+                        <strong>ملاحظة:</strong> الباقات المعروضة أدناه خاصة بـ
+                        <strong className="text-primary-600"> تغطية المملكة</strong>{' '}
+                        في قطاع{' '}
+                        <strong className="text-primary-600">
+                          {sector === 'movers' ? 'نقل العفش' :
+                           sector === 'cleaning' ? 'النظافة' :
+                           sector === 'water-leaks' ? 'كشف تسربات المياه' :
+                           'مكافحة الحشرات'}
+                        </strong>.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Kingdom Plans Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   {kingdomPlans.length > 0 ? (
@@ -454,6 +486,25 @@ export default function CoverageAndPackageSelector({
                       </motion.button>
                     ))}
                   </div>
+                  
+                  {/* 🆕 رسالة توضيحية */}
+                  <div className="mt-3 p-3 bg-white rounded-lg border border-blue-200">
+                    <div className="flex items-start gap-2 text-sm text-gray-700">
+                      <FaInfoCircle className="text-blue-500 mt-0.5 flex-shrink-0" />
+                      <p>
+                        <strong>ملاحظة:</strong> الباقات المعروضة أدناه خاصة بمدينة{' '}
+                        <strong className="text-blue-600">
+                          {AVAILABLE_CITIES.find(c => c.id === selectedCity)?.name}
+                        </strong>{' '}
+                        فقط{sector ? ` في قطاع ${
+                          sector === 'movers' ? 'نقل العفش' :
+                          sector === 'cleaning' ? 'النظافة' :
+                          sector === 'water-leaks' ? 'كشف تسربات المياه' :
+                          'مكافحة الحشرات'
+                        }` : ''}.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* City Plans Grid */}
@@ -567,11 +618,22 @@ export default function CoverageAndPackageSelector({
                             <div className="font-bold text-lg text-gray-800">
                               {selectedKingdomPlan.name}
                             </div>
-                            <div className="text-sm text-gray-600 flex items-center gap-2">
+                            <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap">
                               <FaGlobe className="text-primary-500" />
                               <span>تغطية المملكة</span>
                               <span className="text-gray-400">•</span>
                               <span>{selectedKingdomPlan.duration_days} يوم</span>
+                              {selectedKingdomPlan.sector && (
+                                <>
+                                  <span className="text-gray-400">•</span>
+                                  <span className="text-primary-600 font-semibold">
+                                    {selectedKingdomPlan.sector === 'movers' ? '🚛 نقل العفش' :
+                                     selectedKingdomPlan.sector === 'cleaning' ? '🧹 النظافة' :
+                                     selectedKingdomPlan.sector === 'water-leaks' ? '💧 كشف تسربات' :
+                                     '🪲 مكافحة حشرات'}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -602,13 +664,24 @@ export default function CoverageAndPackageSelector({
                             <div className="font-bold text-lg text-gray-800">
                               {selectedCityPlan.name}
                             </div>
-                            <div className="text-sm text-gray-600 flex items-center gap-2">
+                            <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap">
                               <FaMapMarkerAlt className="text-blue-500" />
                               <span>
                                 {AVAILABLE_CITIES.find(c => c.id === selectedCity)?.name || selectedCity}
                               </span>
                               <span className="text-gray-400">•</span>
                               <span>{selectedCityPlan.duration_days} يوم</span>
+                              {selectedCityPlan.sector && (
+                                <>
+                                  <span className="text-gray-400">•</span>
+                                  <span className="text-blue-600 font-semibold">
+                                    {selectedCityPlan.sector === 'movers' ? '🚛 نقل العفش' :
+                                     selectedCityPlan.sector === 'cleaning' ? '🧹 النظافة' :
+                                     selectedCityPlan.sector === 'water-leaks' ? '💧 كشف تسربات' :
+                                     '🪲 مكافحة حشرات'}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
