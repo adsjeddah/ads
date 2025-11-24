@@ -167,9 +167,67 @@ export class InvoiceAdminService {
     }
   }
 
-  // حذف فاتورة
+  // 🆕 حذف فاتورة + إيقاف الاشتراك والإعلان
   static async delete(id: string): Promise<void> {
-    await adminDb.collection('invoices').doc(id).delete();
+    try {
+      // 1️⃣ جلب معلومات الفاتورة قبل الحذف
+      const invoiceDoc = await adminDb.collection('invoices').doc(id).get();
+      
+      if (!invoiceDoc.exists) {
+        throw new Error('Invoice not found');
+      }
+      
+      const invoiceData = invoiceDoc.data();
+      const subscriptionId = invoiceData?.subscription_id;
+      
+      // 2️⃣ إيقاف الاشتراك المرتبط (إذا وُجد)
+      if (subscriptionId) {
+        const subscriptionRef = adminDb.collection('subscriptions').doc(subscriptionId);
+        const subscriptionDoc = await subscriptionRef.get();
+        
+        if (subscriptionDoc.exists) {
+          // تحديث حالة الاشتراك إلى cancelled
+          await subscriptionRef.update({
+            status: 'cancelled',
+            cancelled_at: FieldValue.serverTimestamp(),
+            cancellation_reason: 'تم حذف الفاتورة من قبل الإدارة',
+            updated_at: FieldValue.serverTimestamp()
+          });
+          
+          console.log(`✅ Subscription ${subscriptionId} cancelled due to invoice deletion`);
+        }
+      }
+      
+      // 3️⃣ حذف الفاتورة
+      await adminDb.collection('invoices').doc(id).delete();
+      
+      console.log(`✅ Invoice ${id} deleted successfully`);
+      
+      // 4️⃣ تسجيل العملية في Audit Log
+      try {
+        await adminDb.collection('audit_logs').add({
+          entity_type: 'invoice',
+          entity_id: id,
+          action: 'delete_with_cancellation',
+          details: {
+            invoice_id: id,
+            subscription_id: subscriptionId,
+            invoice_number: invoiceData?.invoice_number,
+            amount: invoiceData?.amount,
+            reason: 'حذف الفاتورة وإيقاف الاشتراك المرتبط'
+          },
+          performed_at: FieldValue.serverTimestamp(),
+          ip_address: 'admin'
+        });
+      } catch (auditError) {
+        console.error('Failed to log audit for invoice deletion:', auditError);
+        // لا نوقف العملية إذا فشل التسجيل
+      }
+      
+    } catch (error) {
+      console.error('Error in invoice delete with subscription cancellation:', error);
+      throw error;
+    }
   }
 
   // تحديث حالة الدفع

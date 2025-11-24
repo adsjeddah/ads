@@ -62,6 +62,10 @@ export interface Subscription {
   stopped_at?: Date;                   // تاريخ الإيقاف الكامل
   stop_reason?: string;                // سبب الإيقاف
   
+  // نظام الإلغاء (Cancellation System)
+  cancelled_at?: Date;                 // تاريخ الإلغاء
+  cancellation_reason?: string;        // سبب الإلغاء
+  
   // التواريخ الأصلية والمعدلة
   original_start_date?: Date;          // تاريخ البداية الأصلي
   original_end_date?: Date;            // تاريخ النهاية الأصلي
