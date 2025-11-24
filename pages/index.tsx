@@ -800,9 +800,6 @@ export default function Home() {
                 <br />
                 <span className="text-gray-800">في مدينة جدة</span>
               </h1>
-              {/* عداد الإنجازات */}
-              <CounterSection />
-
 
               {/* Advertisers Section - MOVED HERE */}
               <div className="mt-4 md:mt-12"> {/* Reduced margin on mobile for above the fold */}
@@ -895,6 +892,13 @@ export default function Home() {
               </div>
               {/* End of Moved Advertisers Section */}
             </motion.div>
+          </div>
+        </section>
+
+        {/* عداد الإنجازات - Counter Section */}
+        <section className="py-8 md:py-12">
+          <div className="container mx-auto px-4">
+            <CounterSection />
           </div>
         </section>
 
