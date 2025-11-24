@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaSave, FaBuilding, FaPhone, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaBox, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaClock, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaBuilding, FaPhone, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaBox, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaClock, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaBroom, FaSprayCan, FaBrush, FaWater, FaTint, FaWrench, FaBug, FaLeaf, FaShower, FaToilet, FaSoap, FaTrash, FaRecycle, FaHammer, FaFaucet } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import CoverageAndPackageSelector, { SelectedPackage } from '../../../components/admin/CoverageAndPackageSelector';
@@ -79,29 +79,96 @@ export default function NewAdvertiser() {
     '90': { name: '3 أشهر', price: 1800 }
   };
 
-  // أيقونات مناسبة لشركات نقل العفش
-  const availableIcons = [
-    { icon: FaTruck, name: 'truck', color: 'text-blue-600' },
-    { icon: FaBoxes, name: 'boxes', color: 'text-amber-600' },
-    { icon: FaHome, name: 'home', color: 'text-green-600' },
-    { icon: FaDolly, name: 'dolly', color: 'text-purple-600' },
-    { icon: FaShippingFast, name: 'shipping-fast', color: 'text-red-600' },
-    { icon: FaWarehouse, name: 'warehouse', color: 'text-indigo-600' },
-    { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
-    { icon: FaTools, name: 'tools', color: 'text-orange-600' },
-    { icon: FaPeopleCarry, name: 'people-carry', color: 'text-pink-600' },
-    { icon: FaRoute, name: 'route', color: 'text-cyan-600' },
-    { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
-    { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
-    { icon: FaAward, name: 'award', color: 'text-yellow-500' },
-    { icon: FaStar, name: 'star', color: 'text-yellow-400' },
-    { icon: FaMapMarkedAlt, name: 'map-marked-alt', color: 'text-green-500' },
-    { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
-    { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
-    { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
-    { icon: FaTruckLoading, name: 'truck-loading', color: 'text-red-700' },
-    { icon: FaBoxOpen, name: 'box-open', color: 'text-amber-700' },
-  ];
+  // 🆕 دالة للحصول على الأيقونات المناسبة حسب القطاع
+  const getIconsBySector = (sector: SectorType) => {
+    const iconSets = {
+      movers: [
+        { icon: FaTruck, name: 'truck', color: 'text-blue-600' },
+        { icon: FaBoxes, name: 'boxes', color: 'text-amber-600' },
+        { icon: FaHome, name: 'home', color: 'text-green-600' },
+        { icon: FaDolly, name: 'dolly', color: 'text-purple-600' },
+        { icon: FaShippingFast, name: 'shipping-fast', color: 'text-red-600' },
+        { icon: FaWarehouse, name: 'warehouse', color: 'text-indigo-600' },
+        { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+        { icon: FaPeopleCarry, name: 'people-carry', color: 'text-pink-600' },
+        { icon: FaRoute, name: 'route', color: 'text-cyan-600' },
+        { icon: FaBoxOpen, name: 'box-open', color: 'text-amber-700' },
+        { icon: FaTruckLoading, name: 'truck-loading', color: 'text-red-700' },
+        { icon: FaMapMarkedAlt, name: 'map-marked-alt', color: 'text-green-500' },
+        { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+        { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
+        { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+        { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+        { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+        { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+        { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+        { icon: FaTools, name: 'tools', color: 'text-orange-600' },
+      ],
+      cleaning: [
+        { icon: FaBroom, name: 'broom', color: 'text-green-600' },
+        { icon: FaSprayCan, name: 'spray-can', color: 'text-blue-600' },
+        { icon: FaBrush, name: 'brush', color: 'text-purple-600' },
+        { icon: FaSoap, name: 'soap', color: 'text-pink-600' },
+        { icon: FaShower, name: 'shower', color: 'text-cyan-600' },
+        { icon: FaToilet, name: 'toilet', color: 'text-indigo-600' },
+        { icon: FaTrash, name: 'trash', color: 'text-gray-600' },
+        { icon: FaRecycle, name: 'recycle', color: 'text-green-500' },
+        { icon: FaHome, name: 'home', color: 'text-teal-600' },
+        { icon: FaBuilding, name: 'building', color: 'text-blue-700' },
+        { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
+        { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+        { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+        { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+        { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+        { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+        { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+        { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+      ],
+      'water-leaks': [
+        { icon: FaTint, name: 'tint', color: 'text-blue-600' },
+        { icon: FaWater, name: 'water', color: 'text-cyan-600' },
+        { icon: FaFaucet, name: 'faucet', color: 'text-blue-500' },
+        { icon: FaWrench, name: 'wrench', color: 'text-orange-600' },
+        { icon: FaTools, name: 'tools', color: 'text-amber-600' },
+        { icon: FaHammer, name: 'hammer', color: 'text-red-600' },
+        { icon: FaShower, name: 'shower', color: 'text-cyan-500' },
+        { icon: FaToilet, name: 'toilet', color: 'text-indigo-600' },
+        { icon: FaHome, name: 'home', color: 'text-green-600' },
+        { icon: FaBuilding, name: 'building', color: 'text-blue-700' },
+        { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
+        { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+        { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+        { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+        { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+        { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+        { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+        { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+      ],
+      'pest-control': [
+        { icon: FaBug, name: 'bug', color: 'text-red-600' },
+        { icon: FaSprayCan, name: 'spray-can', color: 'text-green-600' },
+        { icon: FaLeaf, name: 'leaf', color: 'text-green-500' },
+        { icon: FaShieldAlt, name: 'shield-alt', color: 'text-blue-600' },
+        { icon: FaTools, name: 'tools', color: 'text-orange-600' },
+        { icon: FaHome, name: 'home', color: 'text-teal-600' },
+        { icon: FaBuilding, name: 'building', color: 'text-blue-700' },
+        { icon: FaWarehouse, name: 'warehouse', color: 'text-indigo-600' },
+        { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+        { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+        { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+        { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+        { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+        { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+        { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+        { icon: FaMapMarkedAlt, name: 'map-marked-alt', color: 'text-green-500' },
+      ],
+    };
+
+    return sector ? iconSets[sector] || [] : [];
+  };
+
+  // الأيقونات المتاحة حسب القطاع المختار
+  const availableIcons = getIconsBySector(selectedSector);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -555,35 +622,6 @@ export default function NewAdvertiser() {
                 )}
               </div>
 
-              {/* Icon Selection */}
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  اختر أيقونة الشركة
-                </label>
-                <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
-                  {availableIcons.map((iconItem) => {
-                    const IconComponent = iconItem.icon;
-                    return (
-                      <motion.button
-                        key={iconItem.name}
-                        type="button"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setFormData({ ...formData, selected_icon: iconItem.name })}
-                        className={`p-3 rounded-lg border-2 transition-all ${
-                          formData.selected_icon === iconItem.name
-                            ? 'border-primary-500 bg-primary-50 shadow-lg'
-                            : 'border-gray-200 hover:border-gray-300 bg-white'
-                        }`}
-                      >
-                        <IconComponent className={`text-2xl ${iconItem.color}`} />
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </div>
-
-
               {/* 🆕 Sector Selection - STEP 1 */}
               <div className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg">
                 <SectorSelector
@@ -592,14 +630,90 @@ export default function NewAdvertiser() {
                 />
               </div>
 
-              {/* 🆕 Package/Plan Selection - STEP 2 & 3 - يظهر فقط بعد اختيار القطاع */}
+              {/* 🆕 Icon Selection - STEP 2 - يظهر فقط بعد اختيار القطاع */}
               {selectedSector && (
-                <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-gray-200">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-xl p-6 border-2 border-gray-200 shadow-md"
+                >
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white font-bold text-lg shadow-lg">
+                      2
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-800">
+                        اختر أيقونة مناسبة للشركة
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        اختر أيقونة تُمثل الشركة بشكل مناسب
+                      </p>
+                    </div>
+                  </div>
+
+                  {availableIcons.length > 0 ? (
+                    <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
+                      {availableIcons.map((iconItem) => {
+                        const IconComponent = iconItem.icon;
+                        return (
+                          <motion.button
+                            key={iconItem.name}
+                            type="button"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setFormData({ ...formData, selected_icon: iconItem.name })}
+                            className={`p-4 rounded-xl border-2 transition-all ${
+                              formData.selected_icon === iconItem.name
+                                ? 'border-primary-500 bg-primary-50 shadow-lg ring-2 ring-primary-200'
+                                : 'border-gray-200 hover:border-primary-300 bg-white hover:shadow-md'
+                            }`}
+                          >
+                            <IconComponent className={`text-2xl ${iconItem.color}`} />
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>لا توجد أيقونات متاحة لهذا القطاع</p>
+                    </div>
+                  )}
+
+                  {formData.selected_icon && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-4 text-center"
+                    >
+                      <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold text-sm">
+                        ✅ تم اختيار الأيقونة
+                      </span>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* 🆕 Package/Plan Selection - STEP 3 & 4 - يظهر فقط بعد اختيار القطاع */}
+              {selectedSector && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-gray-200"
+                >
                   <div className="mb-6">
-                    <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
-                      <FaBox className="text-primary-500" />
-                      اختيار التغطية الجغرافية والباقات
-                    </h3>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold text-lg shadow-lg">
+                        3
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                          <FaBox className="text-primary-500" />
+                          اختيار التغطية الجغرافية والباقات
+                        </h3>
+                      </div>
+                    </div>
                     <p className="text-sm text-gray-600">
                       حدد نوع التغطية المطلوبة ثم اختر الباقات المناسبة لقطاع <strong>{selectedSector === 'movers' ? 'نقل العفش' : selectedSector === 'cleaning' ? 'النظافة' : selectedSector === 'water-leaks' ? 'كشف تسربات المياه' : 'مكافحة الحشرات'}</strong>
                     </p>
@@ -610,7 +724,7 @@ export default function NewAdvertiser() {
                     onSelectionChange={handlePackagesChange}
                     sector={selectedSector}
                   />
-                </div>
+                </motion.div>
               )}
 
               {/* Discount Section */}
