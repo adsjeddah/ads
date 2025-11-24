@@ -7,6 +7,7 @@ import { FaArrowLeft, FaSave, FaBuilding, FaPhone, FaListAlt, FaWhatsapp, FaCale
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import CoverageAndPackageSelector, { SelectedPackage } from '../../../components/admin/CoverageAndPackageSelector';
+import SectorSelector, { SectorType } from '../../../components/admin/SectorSelector';
 
 interface ExistingAdvertiser {
   id: number;
@@ -51,6 +52,9 @@ export default function NewAdvertiser() {
   const [plans, setPlans] = useState<any[]>([]);
   const [existingAdvertisers, setExistingAdvertisers] = useState<ExistingAdvertiser[]>([]);
   const [loadingExisting, setLoadingExisting] = useState(false);
+  
+  // 🆕 نظام القطاعات
+  const [selectedSector, setSelectedSector] = useState<SectorType>(null);
   
   // 🆕 النظام الجديد: الباقات المتعددة
   const [selectedPackages, setSelectedPackages] = useState<SelectedPackage[]>([]);
@@ -232,6 +236,12 @@ export default function NewAdvertiser() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // التحقق من اختيار القطاع
+    if (!selectedSector) {
+      toast.error('يرجى اختيار القطاع');
+      return;
+    }
+    
     // التحقق من اختيار الباقات
     if (selectedPackages.length === 0) {
       toast.error('يرجى اختيار باقة واحدة على الأقل');
@@ -268,6 +278,9 @@ export default function NewAdvertiser() {
         services: formData.services || null,
         selected_icon: formData.selected_icon || null,
         status: 'active',
+        
+        // 🆕 القطاع
+        sector: selectedSector,
         
         // 🆕 التغطية الجغرافية
         coverage_type: coverageType,
@@ -571,23 +584,34 @@ export default function NewAdvertiser() {
               </div>
 
 
-              {/* 🆕 Package/Plan Selection - النظام الجديد الذكي */}
-              <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-gray-200">
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
-                    <FaBox className="text-primary-500" />
-                    اختيار التغطية الجغرافية والباقات
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    حدد نوع التغطية المطلوبة ثم اختر الباقات المناسبة
-                  </p>
-                </div>
-                
-                <CoverageAndPackageSelector
-                  plans={plans}
-                  onSelectionChange={handlePackagesChange}
+              {/* 🆕 Sector Selection - STEP 1 */}
+              <div className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg">
+                <SectorSelector
+                  selectedSector={selectedSector}
+                  onSectorChange={setSelectedSector}
                 />
               </div>
+
+              {/* 🆕 Package/Plan Selection - STEP 2 & 3 - يظهر فقط بعد اختيار القطاع */}
+              {selectedSector && (
+                <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-gray-200">
+                  <div className="mb-6">
+                    <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
+                      <FaBox className="text-primary-500" />
+                      اختيار التغطية الجغرافية والباقات
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      حدد نوع التغطية المطلوبة ثم اختر الباقات المناسبة لقطاع <strong>{selectedSector === 'movers' ? 'نقل العفش' : selectedSector === 'cleaning' ? 'النظافة' : selectedSector === 'water-leaks' ? 'كشف تسربات المياه' : 'مكافحة الحشرات'}</strong>
+                    </p>
+                  </div>
+                  
+                  <CoverageAndPackageSelector
+                    plans={plans}
+                    onSelectionChange={handlePackagesChange}
+                    sector={selectedSector}
+                  />
+                </div>
+              )}
 
               {/* Discount Section */}
               <div className="bg-yellow-50 rounded-lg p-6 space-y-4">

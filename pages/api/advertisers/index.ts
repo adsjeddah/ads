@@ -37,6 +37,9 @@ export default async function handler(
         status = 'active',
         include_vat = false,
         
+        // 🆕 القطاع
+        sector,
+        
         // 🆕 النظام الجديد: التغطية الجغرافية
         coverage_type,
         coverage_cities,
@@ -74,6 +77,9 @@ export default async function handler(
         include_vat: include_vat, // خيار ضريبة القيمة المضافة
         vat_percentage: include_vat ? 15 : undefined, // نسبة الضريبة الافتراضية
         status: status as 'active' | 'inactive' | 'pending',
+        
+        // 🆕 القطاع
+        sector: sector as 'movers' | 'cleaning' | 'water-leaks' | 'pest-control' | undefined,
         
         // 🆕 التغطية الجغرافية
         coverage_type: coverage_type as 'kingdom' | 'city' | 'both' | undefined,
