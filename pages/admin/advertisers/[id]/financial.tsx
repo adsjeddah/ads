@@ -132,6 +132,8 @@ export default function AdvertiserFinancial() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/admin/login');
@@ -141,7 +143,7 @@ export default function AdvertiserFinancial() {
     if (router.isReady && id && id !== 'undefined') {
       fetchData();
     }
-  }, [id, router, router.isReady, refreshKey]);
+  }, [id, router.isReady, refreshKey]);
 
   const fetchData = async () => {
     // Double check id is available and valid
