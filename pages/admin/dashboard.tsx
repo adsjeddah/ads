@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaUsers, FaFileInvoice, FaChartLine, FaBell, 
   FaSignOutAlt, FaPlus, FaEye, FaEdit, FaTrash,
@@ -96,6 +96,18 @@ interface AuditLog {
   action: string;
   performed_by: string;
   performed_at: string;
+}
+
+interface Subscription {
+  id: string;
+  advertiser_id: string;
+  plan_id: string;
+  start_date: Date;
+  end_date: Date;
+  total_amount: number;
+  paid_amount: number;
+  remaining_amount: number;
+  status: string;
 }
 
 export default function AdminDashboard() {
@@ -1129,6 +1141,23 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
+              {/* Header with Create Button */}
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gradient flex items-center gap-2">
+                  <FaUndo />
+                  إدارة الاستردادات
+                </h2>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowCreateRefundModal(true)}
+                  className="btn-primary flex items-center gap-2"
+                >
+                  <FaPlus />
+                  <span>إنشاء استرداد جديد</span>
+                </motion.button>
+              </div>
+
               {/* الإحصائيات */}
               <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
                 <motion.div
@@ -1397,7 +1426,266 @@ export default function AdminDashboard() {
             </motion.div>
           )}
         </div>
+
+        {/* Modal إنشاء استرداد */}
+        <AnimatePresence>
+          {showCreateRefundModal && (
+            <CreateRefundModal
+              onClose={() => setShowCreateRefundModal(false)}
+              onSuccess={() => {
+                setShowCreateRefundModal(false);
+                fetchAllRefunds();
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </>
+  );
+}
+
+// مكون Modal لإنشاء استرداد جديد
+function CreateRefundModal({
+  onClose,
+  onSuccess
+}: {
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    subscription_id: '',
+    refund_amount: 0,
+    refund_reason: '',
+    refund_method: 'bank_transfer' as const,
+    bank_details: '',
+    notes: ''
+  });
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
+
+  const fetchSubscriptions = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const response = await axios.get(`${apiUrl}/subscriptions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSubscriptions(response.data);
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+      toast.error('خطأ في جلب الاشتراكات');
+    }
+  };
+
+  const handleSubscriptionChange = async (subscriptionId: string) => {
+    const subscription = subscriptions.find(s => s.id === subscriptionId);
+    setSelectedSubscription(subscription);
+    setFormData(prev => ({
+      ...prev,
+      subscription_id: subscriptionId,
+      refund_amount: subscription?.remaining_amount || 0
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.subscription_id || !formData.refund_amount || !formData.refund_reason) {
+      toast.error('الرجاء ملء جميع الحقول المطلوبة');
+      return;
+    }
+
+    if (selectedSubscription && formData.refund_amount > selectedSubscription.paid_amount) {
+      toast.error('مبلغ الاسترداد أكبر من المبلغ المدفوع');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      
+      await axios.post(
+        `${apiUrl}/refunds`,
+        {
+          ...formData,
+          original_amount: selectedSubscription?.paid_amount || 0,
+          refund_date: new Date(),
+          processed_by: 'admin',
+          status: 'pending'
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success('تم إنشاء طلب الاسترداد بنجاح');
+      onSuccess();
+    } catch (error: any) {
+      console.error('Error creating refund:', error);
+      toast.error('خطأ في إنشاء الاسترداد');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6 border-b sticky top-0 bg-white z-10">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gradient flex items-center gap-2">
+              <FaPlus />
+              إنشاء استرداد جديد
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <FaTimesCircle className="text-2xl text-gray-600" />
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* اختيار الاشتراك */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              الاشتراك <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.subscription_id}
+              onChange={(e) => handleSubscriptionChange(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              required
+            >
+              <option value="">اختر الاشتراك</option>
+              {subscriptions.map((sub) => (
+                <option key={sub.id} value={sub.id}>
+                  {sub.id.slice(0, 8)} - مدفوع: {sub.paid_amount?.toLocaleString('en-US')} ريال
+                </option>
+              ))}
+            </select>
+            
+            {selectedSubscription && (
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm">
+                <p><strong>المدفوع:</strong> {selectedSubscription.paid_amount?.toLocaleString('en-US')} ريال</p>
+                <p><strong>المتبقي:</strong> {selectedSubscription.remaining_amount?.toLocaleString('en-US')} ريال</p>
+                <p><strong>الحالة:</strong> {selectedSubscription.status}</p>
+              </div>
+            )}
+          </div>
+
+          {/* مبلغ الاسترداد */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              مبلغ الاسترداد (ريال) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              value={formData.refund_amount}
+              onChange={(e) => setFormData(prev => ({ ...prev, refund_amount: parseFloat(e.target.value) || 0 }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              min="0"
+              step="0.01"
+              required
+            />
+          </div>
+
+          {/* السبب */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              سبب الاسترداد <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={formData.refund_reason}
+              onChange={(e) => setFormData(prev => ({ ...prev, refund_reason: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              rows={3}
+              required
+            />
+          </div>
+
+          {/* الطريقة */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              طريقة الاسترداد <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.refund_method}
+              onChange={(e) => setFormData(prev => ({ ...prev, refund_method: e.target.value as any }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="cash">نقداً</option>
+              <option value="bank_transfer">تحويل بنكي</option>
+              <option value="card">بطاقة</option>
+              <option value="online">أونلاين</option>
+            </select>
+          </div>
+
+          {/* التفاصيل البنكية */}
+          {formData.refund_method === 'bank_transfer' && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                التفاصيل البنكية
+              </label>
+              <input
+                type="text"
+                value={formData.bank_details}
+                onChange={(e) => setFormData(prev => ({ ...prev, bank_details: e.target.value }))}
+                placeholder="IBAN أو رقم الحساب"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+          )}
+
+          {/* ملاحظات */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              ملاحظات إضافية
+            </label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              rows={2}
+            />
+          </div>
+
+          {/* أزرار الإجراءات */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 btn-primary disabled:opacity-50"
+            >
+              {loading ? 'جاري الإنشاء...' : 'إنشاء الاسترداد'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              إلغاء
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
   );
 }
