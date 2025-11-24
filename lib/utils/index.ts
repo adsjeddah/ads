@@ -6,4 +6,5 @@ export * from './validation';
 export * from './formatting';
 export * from './date';
 export * from './numbers';
+export * from './auth';
 

@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { 
   FaPlay, 
@@ -20,6 +21,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Subscription } from '@/types/models';
 import { formatDate, formatDateTime } from '@/lib/utils/date';
+import { getValidToken, handleAuthError } from '@/lib/utils/auth';
 
 interface SubscriptionStatusManagerProps {
   subscription: Subscription;
@@ -30,7 +32,7 @@ export default function SubscriptionStatusManager({
   subscription, 
   onStatusChanged 
 }: SubscriptionStatusManagerProps) {
-  
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showReasonModal, setShowReasonModal] = useState(false);
   const [actionType, setActionType] = useState<'pause' | 'stop' | null>(null);
@@ -99,7 +101,15 @@ export default function SubscriptionStatusManager({
     
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      // الحصول على token محدّث
+      const token = await getValidToken();
+      
+      if (!token) {
+        toast.error('انتهت جلستك، الرجاء تسجيل الدخول مرة أخرى');
+        router.push('/admin/login');
+        return;
+      }
+      
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       
       const response = await axios.post(
@@ -119,6 +129,13 @@ export default function SubscriptionStatusManager({
       }
     } catch (error: any) {
       console.error('Error resuming subscription:', error);
+      
+      // معالجة أخطاء Authentication
+      if (handleAuthError(error, router)) {
+        toast.error('انتهت جلستك، الرجاء تسجيل الدخول مرة أخرى');
+        return;
+      }
+      
       toast.error(error.response?.data?.error || 'خطأ في إعادة التشغيل');
     } finally {
       setLoading(false);
@@ -131,9 +148,17 @@ export default function SubscriptionStatusManager({
       return;
     }
     
-    setLoading(false);
+    setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      // الحصول على token محدّث
+      const token = await getValidToken();
+      
+      if (!token) {
+        toast.error('انتهت جلستك، الرجاء تسجيل الدخول مرة أخرى');
+        router.push('/admin/login');
+        return;
+      }
+      
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       
       const response = await axios.post(
@@ -153,6 +178,13 @@ export default function SubscriptionStatusManager({
       }
     } catch (error: any) {
       console.error('Error reactivating subscription:', error);
+      
+      // معالجة أخطاء Authentication
+      if (handleAuthError(error, router)) {
+        toast.error('انتهت جلستك، الرجاء تسجيل الدخول مرة أخرى');
+        return;
+      }
+      
       toast.error(error.response?.data?.error || 'خطأ في إعادة التنشيط');
     } finally {
       setLoading(false);
@@ -170,7 +202,15 @@ export default function SubscriptionStatusManager({
     
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      // الحصول على token محدّث
+      const token = await getValidToken();
+      
+      if (!token) {
+        toast.error('انتهت جلستك، الرجاء تسجيل الدخول مرة أخرى');
+        router.push('/admin/login');
+        return;
+      }
+      
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       
       const response = await axios.post(
@@ -188,6 +228,13 @@ export default function SubscriptionStatusManager({
       }
     } catch (error: any) {
       console.error(`Error ${actionType}ing subscription:`, error);
+      
+      // معالجة أخطاء Authentication
+      if (handleAuthError(error, router)) {
+        toast.error('انتهت جلستك، الرجاء تسجيل الدخول مرة أخرى');
+        return;
+      }
+      
       toast.error(error.response?.data?.error || `خطأ في ${actionType === 'pause' ? 'الإيقاف المؤقت' : 'الإيقاف'}`);
     } finally {
       setLoading(false);
