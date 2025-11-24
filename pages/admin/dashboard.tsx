@@ -489,7 +489,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
@@ -498,6 +498,18 @@ export default function AdminDashboard() {
                   <FaFileInvoice className="text-3xl mb-2" />
                   <h3 className="text-lg font-bold mb-1">إدارة الفواتير</h3>
                   <p className="text-sm opacity-90">عرض وإدارة جميع الفواتير مع VAT</p>
+                </motion.div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
+                  onClick={() => router.push('/admin/refunds')}
+                >
+                  <FaUndo className="text-3xl mb-2" />
+                  <h3 className="text-lg font-bold mb-1">إدارة الاستردادات</h3>
+                  <p className="text-sm opacity-90">
+                    {statistics?.pendingRefunds ? `${statistics.pendingRefunds.count} معلق` : 'عرض وإدارة الاستردادات'}
+                  </p>
                 </motion.div>
                 
                 <motion.div

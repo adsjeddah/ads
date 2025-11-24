@@ -37,11 +37,19 @@ export class StatisticsAdminService {
         .get();
       const pendingRequests = pendingRequestsSnapshot.size;
 
+      // Get pending refunds
+      const pendingRefundsSnapshot = await adminDb
+        .collection('refunds')
+        .where('status', '==', 'pending')
+        .get();
+      const pendingRefunds = pendingRefundsSnapshot.size;
+
       return {
         totalAdvertisers: { count: totalAdvertisers },
         activeSubscriptions: { count: activeSubscriptions },
         totalRevenue: { total: totalRevenue },
-        pendingRequests: { count: pendingRequests }
+        pendingRequests: { count: pendingRequests },
+        pendingRefunds: { count: pendingRefunds }
       };
     } catch (error) {
       console.error('Error fetching dashboard statistics:', error);

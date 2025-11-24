@@ -16,6 +16,8 @@ import {
   FaBuilding,
   FaPhone,
   FaEnvelope,
+  FaUndo,
+  FaClock,
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -94,6 +96,24 @@ interface Plan {
   price: number;
 }
 
+interface Refund {
+  id: string;
+  subscription_id: string;
+  invoice_id?: string;
+  payment_id?: string;
+  original_amount: number;
+  refund_amount: number;
+  refund_reason: string;
+  refund_method: string;
+  refund_date: any;
+  processed_by: string;
+  status: 'pending' | 'approved' | 'completed' | 'rejected';
+  bank_details?: string;
+  notes?: string;
+  created_at: any;
+  completed_at?: any;
+}
+
 export default function AdvertiserFinancial() {
   const router = useRouter();
   const { id } = router.query;
@@ -102,6 +122,7 @@ export default function AdvertiserFinancial() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [refunds, setRefunds] = useState<Refund[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateSubscription, setShowCreateSubscription] = useState(false);
@@ -156,6 +177,20 @@ export default function AdvertiserFinancial() {
       setInvoices(invoicesRes.data || []);
       setPayments(paymentsRes.data || []);
       setPlans(plansRes.data || []);
+
+      // Fetch refunds - جلب جميع الاستردادات وفلترتها للمعلن الحالي
+      try {
+        const refundsRes = await axios.get(`${apiUrl}/refunds`, { headers });
+        // فلترة الاستردادات للاشتراكات الخاصة بالمعلن
+        const subscriptionIds = (subscriptionsRes.data || []).map((sub: Subscription) => sub.id);
+        const advertiserRefunds = (refundsRes.data || []).filter((refund: Refund) =>
+          subscriptionIds.includes(refund.subscription_id)
+        );
+        setRefunds(advertiserRefunds);
+      } catch (error) {
+        console.error('Error fetching refunds:', error);
+        setRefunds([]);
+      }
 
       // Fetch financial summary
       try {
@@ -381,12 +416,137 @@ export default function AdvertiserFinancial() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            className="mb-8"
           >
             <PaymentHistoryTable
               payments={payments}
               loading={loading}
             />
           </motion.div>
+
+          {/* Refunds Section */}
+          {refunds.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white rounded-xl shadow-lg overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <FaUndo />
+                  الاستردادات ({refunds.length})
+                </h2>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-700">الرقم</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-700">المبلغ</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-700">الطريقة</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-700">السبب</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-700">الحالة</th>
+                      <th className="text-right py-3 px-4 font-semibold text-gray-700">التاريخ</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700">الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {refunds.map((refund) => (
+                      <tr key={refund.id} className="border-b hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-4">
+                          <span className="text-sm font-mono text-gray-600">
+                            #{refund.id.slice(0, 8)}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <p className="font-bold text-lg text-red-600">
+                            {refund.refund_amount.toLocaleString('en-US')} ريال
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            من {refund.original_amount.toLocaleString('en-US')}
+                          </p>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">
+                          {refund.refund_method === 'cash' && 'نقداً'}
+                          {refund.refund_method === 'bank_transfer' && 'تحويل بنكي'}
+                          {refund.refund_method === 'card' && 'بطاقة'}
+                          {refund.refund_method === 'online' && 'أونلاين'}
+                        </td>
+                        <td className="py-3 px-4 max-w-xs">
+                          <p className="text-sm text-gray-700 truncate" title={refund.refund_reason}>
+                            {refund.refund_reason}
+                          </p>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit ${
+                              refund.status === 'completed'
+                                ? 'bg-green-100 text-green-800'
+                                : refund.status === 'approved'
+                                ? 'bg-blue-100 text-blue-800'
+                                : refund.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {refund.status === 'pending' && <FaClock className="text-xs" />}
+                            {refund.status === 'completed' && <FaCheckCircle className="text-xs" />}
+                            {refund.status === 'rejected' && <FaTimesCircle className="text-xs" />}
+                            {refund.status === 'pending' && 'معلق'}
+                            {refund.status === 'approved' && 'موافق'}
+                            {refund.status === 'completed' && 'مكتمل'}
+                            {refund.status === 'rejected' && 'مرفوض'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-600">
+                          {refund.created_at?.toDate
+                            ? format(refund.created_at.toDate(), 'dd/MM/yyyy', { locale: ar })
+                            : 'N/A'}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <Link href={`/admin/refunds/${refund.id}`}>
+                            <button className="text-blue-600 hover:text-blue-800 transition-colors">
+                              التفاصيل
+                            </button>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* إحصائيات الاستردادات */}
+              <div className="bg-gray-50 px-6 py-4 border-t">
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <span className="text-gray-600">إجمالي المسترد: </span>
+                    <span className="font-bold text-red-600">
+                      {refunds
+                        .filter((r) => r.status === 'completed')
+                        .reduce((sum, r) => sum + r.refund_amount, 0)
+                        .toLocaleString('en-US')}{' '}
+                      ريال
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">معلق: </span>
+                    <span className="font-bold text-yellow-600">
+                      {refunds.filter((r) => r.status === 'pending').length}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">مكتمل: </span>
+                    <span className="font-bold text-green-600">
+                      {refunds.filter((r) => r.status === 'completed').length}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 

@@ -33,12 +33,18 @@ export class RefundService {
   
   /**
    * تحديث حالة الاسترداد
+   * عند الإتمام، يتم تحديث الاشتراك تلقائياً
    */
   static async updateStatus(
     id: string,
     status: Refund['status'],
     notes?: string
   ): Promise<void> {
+    const refund = await this.getById(id);
+    if (!refund) {
+      throw new Error('Refund not found');
+    }
+
     const updateData: any = {
       status,
       notes: notes || null
@@ -46,6 +52,33 @@ export class RefundService {
     
     if (status === 'completed') {
       updateData.completed_at = FieldValue.serverTimestamp();
+      
+      // 🔄 تحديث الاشتراك تلقائياً
+      try {
+        const subscriptionRef = adminDb.collection('subscriptions').doc(refund.subscription_id);
+        const subscriptionDoc = await subscriptionRef.get();
+        
+        if (subscriptionDoc.exists) {
+          const subscriptionData = subscriptionDoc.data();
+          
+          // تحديث المبالغ في الاشتراك
+          const newPaidAmount = (subscriptionData?.paid_amount || 0) - refund.refund_amount;
+          const newRemainingAmount = (subscriptionData?.remaining_amount || 0) + refund.refund_amount;
+          
+          await subscriptionRef.update({
+            paid_amount: Math.max(0, newPaidAmount),
+            remaining_amount: newRemainingAmount,
+            updated_at: FieldValue.serverTimestamp()
+          });
+          
+          // إضافة ملاحظة للتوضيح
+          updateData.notes = (notes || '') + ` | تم تحديث الاشتراك تلقائياً: خصم ${refund.refund_amount} من المدفوع`;
+        }
+      } catch (error) {
+        console.error('Error updating subscription after refund:', error);
+        // لا نوقف العملية، فقط نسجل الخطأ
+        updateData.notes = (notes || '') + ` | تحذير: فشل تحديث الاشتراك تلقائياً`;
+      }
     }
     
     await adminDb.collection('refunds').doc(id).update(updateData);
