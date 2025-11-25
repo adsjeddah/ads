@@ -1,14 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  FaArrowLeft, FaSave, FaBuilding, FaPhone, FaEnvelope, FaLock, FaImage, FaListAlt, FaWhatsapp, FaToggleOn, FaToggleOff, FaBox, FaMoneyBillWave,
-  FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaClock, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen
-} from 'react-icons/fa'; // Added more icons for preset selection
+import { FaArrowLeft, FaSave, FaBuilding, FaPhone, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaBox, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaClock, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaBroom, FaSprayCan, FaBrush, FaWater, FaTint, FaWrench, FaBug, FaLeaf, FaShower, FaToilet, FaSoap, FaTrash, FaRecycle, FaHammer, FaFaucet } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import CoverageAndPackageSelector, { SelectedPackage } from '../../../../components/admin/CoverageAndPackageSelector';
+import SectorSelector, { SectorType } from '../../../../components/admin/SectorSelector';
+
+interface ExistingAdvertiser {
+  id: number;
+  company_name: string;
+  phone: string;
+  services: string;
+  icon_url: string;
+}
 
 // Utility function to convert Arabic numerals to English numerals
 const arabicToEnglishNumerals = (str: string): string => {
@@ -18,205 +25,303 @@ const arabicToEnglishNumerals = (str: string): string => {
   return str.replace(/[٠١٢٣٤٥٦٧٨٩]/g, (d) => (d.charCodeAt(0) - 1632).toString());
 };
 
-interface IconDefinition {
-  icon: React.ElementType;
-  name: string;
-  color: string;
-}
-
-// Available Icons (copied from new.tsx)
-const availableIcons: IconDefinition[] = [
-  { icon: FaTruck, name: 'truck', color: 'text-blue-600' },
-  { icon: FaBoxes, name: 'boxes', color: 'text-amber-600' },
-  { icon: FaHome, name: 'home', color: 'text-green-600' },
-  { icon: FaDolly, name: 'dolly', color: 'text-purple-600' },
-  { icon: FaShippingFast, name: 'shipping-fast', color: 'text-red-600' },
-  { icon: FaWarehouse, name: 'warehouse', color: 'text-indigo-600' },
-  { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
-  { icon: FaTools, name: 'tools', color: 'text-orange-600' },
-  { icon: FaPeopleCarry, name: 'people-carry', color: 'text-pink-600' },
-  { icon: FaRoute, name: 'route', color: 'text-cyan-600' },
-  { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
-  { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
-  { icon: FaAward, name: 'award', color: 'text-yellow-500' },
-  { icon: FaStar, name: 'star', color: 'text-yellow-400' },
-  { icon: FaMapMarkedAlt, name: 'map-marked-alt', color: 'text-green-500' },
-  { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
-  { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
-  { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
-  { icon: FaTruckLoading, name: 'truck-loading', color: 'text-red-700' },
-  { icon: FaBoxOpen, name: 'box-open', color: 'text-amber-700' },
-];
-
-interface AdvertiserFormData {
-  company_name: string;
-  phone: string;
-  whatsapp: string;
-  // email: string; // Removed
-  services: string;
-  status: 'active' | 'inactive' | 'admin' | 'deleted';
-  // icon?: File | null; // Removed - only preset icons
-  selected_icon_name?: string; // For preset icon name
-  // password?: string; // Removed
-  include_vat?: boolean; // خيار إضافة ضريبة القيمة المضافة (15%)
-  // Subscription fields
-  plan_id: string;
-  duration_type: 'preset' | 'custom';
-  preset_duration: string; // Corresponds to plan_id if duration_type is 'preset'
-  custom_start_date: string;
-  custom_end_date: string;
-  base_price: number;
-  discount_amount: number;
-  discount_type: 'amount' | 'percentage';
-  total_amount: number;
-  paid_amount: number;
-}
-
-interface Plan {
-  id: number;
-  name: string;
-  duration_days: number;
-  price: number;
-  features?: string;
-}
-
-interface Subscription {
-  id: number;
-  plan_id: number;
-  start_date: string;
-  end_date: string;
-  base_price: number;
-  discount_type: 'amount' | 'percentage';
-  discount_amount: number;
-  total_amount: number;
-  paid_amount: number;
-  status: string;
-  payment_status: string;
-}
-
 export default function EditAdvertiser() {
   const router = useRouter();
-  const { id } = router.query;
-  const [formData, setFormData] = useState<Partial<AdvertiserFormData>>({ // Made partial for initial load
+  const { id } = router.query; // 🆕 الحصول على ID من الرابط
+  
+  const [formData, setFormData] = useState({
     company_name: '',
     phone: '',
     whatsapp: '',
-    // email: '', // Removed
     services: '',
-    status: 'active',
-    // icon: null, // Removed
-    selected_icon_name: '', // Initialize
-    // password: '', // Removed
-    include_vat: false,
+    selected_icon: '',
     plan_id: '',
-    duration_type: 'preset',
-    preset_duration: '',
+    duration_type: 'preset', // 'preset' or 'custom'
+    preset_duration: '30', // 15, 30, 90
     custom_start_date: '',
     custom_end_date: '',
     base_price: 0,
     discount_amount: 0,
-    discount_type: 'amount',
+    discount_type: 'amount', // 'amount' or 'percentage'
+    include_vat: false, // إضافة ضريبة القيمة المضافة (15%)
     total_amount: 0,
     paid_amount: 0,
+    // 🆕 تصنيف العملاء
+    customer_type: 'new' as 'new' | 'trusted' | 'vip',
+    payment_terms_days: 0, // مهلة الدفع بالأيام (للعملاء الموثوقين)
   });
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  // const [previewIcon, setPreviewIcon] = useState<string | null>(null); // Removed
-  const [currentIconUrl, setCurrentIconUrl] = useState<string | null>(null); // Still useful to know original icon
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
+  const [loading, setLoading] = useState(true); // 🆕 true لأننا نحتاج لتحميل البيانات
+  const [plans, setPlans] = useState<any[]>([]);
+  
+  // 🆕 نظام القطاعات
+  const [selectedSector, setSelectedSector] = useState<SectorType>(null);
+  
+  // 🆕 النظام الجديد: الباقات المتعددة
+  const [selectedPackages, setSelectedPackages] = useState<SelectedPackage[]>([]);
+
+  // 🆕 Handler للباقات - مثبت بـ useCallback لتجنب infinite loop
+  const handlePackagesChange = useCallback((packages: SelectedPackage[]) => {
+    setSelectedPackages(packages);
+    
+    // حساب المبلغ الكلي من جميع الباقات
+    const totalBasePrice = packages.reduce((sum, pkg) => sum + pkg.plan.price, 0);
+    setFormData(prev => ({
+      ...prev,
+      base_price: totalBasePrice,
+    }));
+  }, []);
+
+  // أسعار ثابتة للمدد المختلفة (احتياطي في حالة عدم استخدام الخطط من قاعدة البيانات)
+  const pricingPlans: { [key: string]: { name: string; price: number } } = {
+    '14': { name: 'أسبوعين', price: 500 },
+    '30': { name: 'شهر', price: 800 },
+    '60': { name: 'شهرين', price: 1400 },
+    '90': { name: '3 أشهر', price: 1800 }
+  };
+
+  // 🆕 دالة للحصول على الأيقونات المناسبة حسب القطاع
+  const getIconsBySector = (sector: SectorType) => {
+    const iconSets: Record<string, any[]> = {
+      movers: [
+    { icon: FaTruck, name: 'truck', color: 'text-blue-600' },
+    { icon: FaBoxes, name: 'boxes', color: 'text-amber-600' },
+    { icon: FaHome, name: 'home', color: 'text-green-600' },
+    { icon: FaDolly, name: 'dolly', color: 'text-purple-600' },
+    { icon: FaShippingFast, name: 'shipping-fast', color: 'text-red-600' },
+    { icon: FaWarehouse, name: 'warehouse', color: 'text-indigo-600' },
+    { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+    { icon: FaPeopleCarry, name: 'people-carry', color: 'text-pink-600' },
+    { icon: FaRoute, name: 'route', color: 'text-cyan-600' },
+        { icon: FaBoxOpen, name: 'box-open', color: 'text-amber-700' },
+        { icon: FaTruckLoading, name: 'truck-loading', color: 'text-red-700' },
+        { icon: FaMapMarkedAlt, name: 'map-marked-alt', color: 'text-green-500' },
+    { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+    { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
+    { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+    { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+    { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+    { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+    { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+        { icon: FaTools, name: 'tools', color: 'text-orange-600' },
+      ],
+      cleaning: [
+        { icon: FaBroom, name: 'broom', color: 'text-green-600' },
+        { icon: FaSprayCan, name: 'spray-can', color: 'text-blue-600' },
+        { icon: FaBrush, name: 'brush', color: 'text-purple-600' },
+        { icon: FaSoap, name: 'soap', color: 'text-pink-600' },
+        { icon: FaShower, name: 'shower', color: 'text-cyan-600' },
+        { icon: FaToilet, name: 'toilet', color: 'text-indigo-600' },
+        { icon: FaTrash, name: 'trash', color: 'text-gray-600' },
+        { icon: FaRecycle, name: 'recycle', color: 'text-green-500' },
+        { icon: FaHome, name: 'home', color: 'text-teal-600' },
+        { icon: FaBuilding, name: 'building', color: 'text-blue-700' },
+        { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
+        { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+        { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+        { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+        { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+        { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+        { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+        { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+      ],
+      'water-leaks': [
+        { icon: FaTint, name: 'tint', color: 'text-blue-600' },
+        { icon: FaWater, name: 'water', color: 'text-cyan-600' },
+        { icon: FaFaucet, name: 'faucet', color: 'text-blue-500' },
+        { icon: FaWrench, name: 'wrench', color: 'text-orange-600' },
+        { icon: FaTools, name: 'tools', color: 'text-amber-600' },
+        { icon: FaHammer, name: 'hammer', color: 'text-red-600' },
+        { icon: FaShower, name: 'shower', color: 'text-cyan-500' },
+        { icon: FaToilet, name: 'toilet', color: 'text-indigo-600' },
+        { icon: FaHome, name: 'home', color: 'text-green-600' },
+        { icon: FaBuilding, name: 'building', color: 'text-blue-700' },
+        { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
+        { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+        { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+        { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+        { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+        { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+        { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+        { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+      ],
+      'pest-control': [
+        { icon: FaBug, name: 'bug', color: 'text-red-600' },
+        { icon: FaSprayCan, name: 'spray-can', color: 'text-green-600' },
+        { icon: FaLeaf, name: 'leaf', color: 'text-green-500' },
+        { icon: FaShieldAlt, name: 'shield-alt', color: 'text-blue-600' },
+        { icon: FaTools, name: 'tools', color: 'text-orange-600' },
+        { icon: FaHome, name: 'home', color: 'text-teal-600' },
+        { icon: FaBuilding, name: 'building', color: 'text-blue-700' },
+        { icon: FaWarehouse, name: 'warehouse', color: 'text-indigo-600' },
+        { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+        { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+        { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+        { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+        { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+        { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+        { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+        { icon: FaMapMarkedAlt, name: 'map-marked-alt', color: 'text-green-500' },
+      ],
+    };
+
+    return sector ? iconSets[sector] || [] : [];
+  };
+
+  // الأيقونات المتاحة حسب القطاع المختار
+  const availableIcons = getIconsBySector(selectedSector);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/admin/login');
-        return;
-      }
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/admin/login');
+      return;
     }
+    
     if (id) {
       fetchAdvertiserData();
+      fetchPlans();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, router]);
 
+  // 🆕 تحميل بيانات المعلن الحالي
   const fetchAdvertiserData = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}` };
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
     try {
-      // Fetch plans first
-      const plansResponse = await axios.get(`${apiUrl}/plans`, { headers });
-      const uniquePlans = plansResponse.data.reduce((acc: any[], plan: any) => {
-        const exists = acc.find(p => p.name === plan.name && p.price === plan.price);
-        if (!exists) acc.push(plan);
-        return acc;
-      }, []);
-      setPlans(uniquePlans);
-
-      // Fetch advertiser data directly by ID
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      
+      // 1. تحميل بيانات المعلن
       const advertiserResponse = await axios.get(`${apiUrl}/advertisers/${id}`, { headers });
       const advertiser = advertiserResponse.data;
-
+      
       if (!advertiser) {
         toast.error('لم يتم العثور على المعلن');
         router.push('/admin/dashboard?tab=advertisers');
         return;
       }
-
-      // Fetch current active subscription for this advertiser
-      const subscriptionsResponse = await axios.get(`${apiUrl}/subscriptions?advertiser_id=${id}`, { headers });
-      const activeSubscriptions = subscriptionsResponse.data.filter((sub: Subscription) => sub.status === 'active');
-      const latestActiveSubscription = activeSubscriptions.length > 0
-        ? activeSubscriptions.sort((a: Subscription, b: Subscription) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())[0]
-        : null;
-      setCurrentSubscription(latestActiveSubscription);
       
+      // 2. تعبئة البيانات الأساسية
       setFormData(prev => ({
         ...prev,
         company_name: advertiser.company_name || '',
         phone: advertiser.phone || '',
         whatsapp: advertiser.whatsapp || '',
-        // email: advertiser.email || '', // Removed
         services: advertiser.services || '',
-        status: advertiser.status || 'active',
+        selected_icon: advertiser.icon_url || '',
+        customer_type: advertiser.customer_type || 'new',
+        payment_terms_days: advertiser.payment_terms_days || 0,
         include_vat: advertiser.include_vat || false,
-        // password: '', // Removed
-        // Pre-fill subscription data if available
-        plan_id: latestActiveSubscription?.plan_id?.toString() || (uniquePlans.length > 0 ? uniquePlans[0].id.toString() : ''),
-        selected_icon_name: advertiser.icon_url && !advertiser.icon_url.startsWith('/uploads/') ? advertiser.icon_url : '', // If icon_url is not a path, assume it's a preset name
-        duration_type: latestActiveSubscription ? 'preset' : 'preset',
-        base_price: latestActiveSubscription?.base_price || 0,
-        discount_amount: latestActiveSubscription?.discount_amount || 0,
-        discount_type: latestActiveSubscription?.discount_type || 'amount',
-        total_amount: latestActiveSubscription?.total_amount || 0,
-        paid_amount: latestActiveSubscription?.paid_amount || 0,
-        // Note: custom_start_date and custom_end_date are not pre-filled from existing subscription
-        // as "editing" a subscription usually implies new terms or a new period.
       }));
-
-      if (advertiser.icon_url) {
-        // If icon_url is not a path (i.e., it's a preset name), it's handled by selected_icon_name prefill.
-        // If it was an uploaded path, use it directly (Firebase Storage returns full URLs)
-        if (advertiser.icon_url) {
-           setCurrentIconUrl(advertiser.icon_url);
-        }
+      
+      // 3. تعيين القطاع
+      if (advertiser.sector) {
+        setSelectedSector(advertiser.sector as SectorType);
       }
       
-    } catch (error) {
-      console.error("Error fetching data for edit:", error);
-      toast.error('خطأ في تحميل بيانات المعلن أو الاشتراكات');
+      // 4. تحميل الاشتراكات لتحديد الباقات الحالية
+      const subsResponse = await axios.get(`${apiUrl}/subscriptions?advertiser_id=${id}`, { headers });
+      const activeSubscriptions = subsResponse.data.filter((sub: any) => 
+        sub.status === 'active' || sub.status === 'paused'
+      );
+      
+      // 5. تحويل الاشتراكات إلى باقات محددة
+      if (activeSubscriptions.length > 0 && plans.length > 0) {
+        const packages: SelectedPackage[] = activeSubscriptions.map((sub: any) => {
+          const plan = plans.find(p => p.id === sub.plan_id);
+          if (plan) {
+            return {
+              plan_id: plan.id.toString(),
+              plan: plan,
+              coverage_type: sub.coverage_area || 'kingdom',
+              city: sub.city || undefined
+            };
+          }
+          return null;
+        }).filter(Boolean);
+        
+        setSelectedPackages(packages);
+      }
+      
+    } catch (error: any) {
+      console.error('Error fetching advertiser data:', error);
+      toast.error('خطأ في تحميل بيانات المعلن');
+      router.push('/admin/dashboard?tab=advertisers');
     } finally {
       setLoading(false);
     }
   };
 
-  // The new handleInputChange with numeral conversion is below, this old/duplicate section is removed.
+  const fetchPlans = async () => {
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/plans`);
+      // إزالة التكرارات بناءً على الاسم والسعر
+      const uniquePlans = response.data.reduce((acc: any[], plan: any) => {
+        const exists = acc.find(p => p.name === plan.name && p.price === plan.price);
+        if (!exists) {
+          acc.push(plan);
+        }
+        return acc;
+      }, []);
+      setPlans(uniquePlans);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+      toast.error('خطأ في جلب الخطط');
+    }
+  };
+
+
+  const calculateEndDate = (startDate: string, days: number) => {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + days);
+    return date.toISOString().split('T')[0];
+  };
+
+  const calculateDays = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const calculateTotalAmount = () => {
+    // 🆕 حساب السعر الأساسي من جميع الباقات المختارة
+    let basePrice = selectedPackages.reduce((sum, pkg) => sum + pkg.plan.price, 0);
+    
+    // حساب الخصم
+    let discountValue = 0;
+    if (formData.discount_type === 'amount') {
+      discountValue = formData.discount_amount;
+    } else if (formData.discount_type === 'percentage') {
+      discountValue = (basePrice * formData.discount_amount) / 100;
+    }
+    
+    let totalAmount = Math.max(0, basePrice - discountValue);
+    
+    // إضافة ضريبة القيمة المضافة إذا تم تفعيلها
+    if (formData.include_vat) {
+      const vatAmount = totalAmount * 0.15; // 15%
+      totalAmount = totalAmount + vatAmount;
+    }
+    
+    totalAmount = Math.round(totalAmount * 100) / 100; // تقريب إلى منزلتين عشريتين
+    
+    setFormData(prev => ({
+      ...prev,
+      base_price: basePrice,
+      total_amount: totalAmount
+    }));
+  };
+
+  // 🆕 حساب المبلغ الكلي عند تغيير الباقات أو الخصم أو الضريبة
+  useEffect(() => {
+    calculateTotalAmount();
+  }, [selectedPackages, formData.discount_amount, formData.discount_type, formData.include_vat]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name } = e.target;
-    let { value } = e.target; // Make value mutable
-    const type = e.target.type; // Get type for numeric parsing
+    let { value } = e.target; // Make value mutable for potential conversion
 
     const fieldsForNumeralConversion = ['phone', 'whatsapp', 'discount_amount', 'paid_amount'];
 
@@ -224,230 +329,120 @@ export default function EditAdvertiser() {
       value = arabicToEnglishNumerals(value);
     }
     
-    // Handle parsing for number types, excluding phone/whatsapp which are kept as strings after conversion
-    if (type === 'number' && name !== 'phone' && name !== 'whatsapp') {
-      setFormData(prev => ({
+    if (name === 'paid_amount' || name === 'discount_amount') {
+      // Ensure that even after conversion, we attempt to parse it as a float.
+      // The arabicToEnglishNumerals function returns a string.
+      const numValue = parseFloat(value) || 0;
+      setFormData(prev => ({ // Use functional update for safety
         ...prev,
-        // For number inputs, if value is empty string after conversion, treat as 0 or allow empty if schema supports
-        // parseFloat('') is NaN. parseFloat(' ') is NaN.
-        // Let's ensure it becomes a valid number or an empty string if that's intended for clearing.
-        // For simplicity, let's default to 0 if parsing fails or empty, but allow empty string to clear.
-        [name]: value === '' ? '' : (parseFloat(value) || 0)
+        [name]: numValue,
       }));
     } else {
-      setFormData(prev => ({
+      setFormData(prev => ({ // Use functional update for safety
         ...prev,
         [name]: value,
       }));
     }
   };
- 
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => { // Removed
-  //   if (e.target.files && e.target.files[0]) {
-  //     const file = e.target.files[0];
-  //     // setFormData({ ...formData, icon: file }); // icon field removed from formData
-  //     // setPreviewIcon(URL.createObjectURL(file)); // previewIcon state removed
-  //   }
-  // };
-  
-  const toggleStatus = () => {
-    setFormData(prev => ({
-      ...prev,
-      status: prev.status === 'active' ? 'inactive' : 'active'
-    }));
-  };
-
-  // Financial Calculation Logic (ported from new.tsx)
-  const calculateDays = (startDate: string, endDate: string) => {
-    if (!startDate || !endDate) return 0;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return 0;
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const calculateTotalAmount = () => {
-    let newBasePrice = 0;
-    
-    // Ensure formData and plans are populated before calculating
-    if (!formData.duration_type || !formData.plan_id || plans.length === 0) {
-      // If critical data is missing, maybe set defaults or wait
-      // For now, let's ensure it doesn't crash if plans aren't loaded
-      // or if plan_id is not yet set from an existing subscription.
-      const initialPlan = plans.find(p => p.id.toString() === formData.plan_id);
-      newBasePrice = initialPlan?.price || formData.base_price || 0; // Use existing base_price if plan not found yet
-    } else if (formData.duration_type === 'preset') {
-      const selectedPlanObj = plans.find(p => p.id.toString() === formData.plan_id);
-      newBasePrice = selectedPlanObj?.price || 0;
-    } else if (formData.duration_type === 'custom' && formData.custom_start_date && formData.custom_end_date) {
-      const days = calculateDays(formData.custom_start_date, formData.custom_end_date);
-      newBasePrice = Math.round((800 / 30) * days);
-    }
-    
-    let discountValue = 0;
-    if (formData.discount_type === 'amount') {
-      discountValue = formData.discount_amount || 0;
-    } else if (formData.discount_type === 'percentage') {
-      discountValue = (newBasePrice * (formData.discount_amount || 0)) / 100;
-    }
-    
-    let newTotalAmount = Math.max(0, newBasePrice - discountValue);
-    
-    // إضافة ضريبة القيمة المضافة إذا تم تفعيلها
-    if (formData.include_vat) {
-      const vatAmount = newTotalAmount * 0.15; // 15%
-      newTotalAmount = newTotalAmount + vatAmount;
-    }
-    
-    newTotalAmount = Math.round(newTotalAmount * 100) / 100; // تقريب إلى منزلتين عشريتين
-    
-    // Only update if values have actually changed to prevent infinite loops
-    setFormData(prev => {
-      // If values haven't changed, return the same reference to prevent re-render
-      if (prev.base_price === newBasePrice && prev.total_amount === newTotalAmount) {
-        return prev;
-      }
-      return {
-        ...prev,
-        base_price: newBasePrice,
-        total_amount: newTotalAmount,
-      };
-    });
-  };
-
-  // Use ref to track previous calculation inputs to prevent infinite loop
-  const prevCalculationInputs = useRef<string>('');
-  
-  useEffect(() => {
-    if (!loading && plans.length > 0) {
-      // Create a stable key from calculation inputs
-      const currentInputs = JSON.stringify({
-        duration_type: formData.duration_type,
-        plan_id: formData.plan_id,
-        custom_start_date: formData.custom_start_date,
-        custom_end_date: formData.custom_end_date,
-        discount_amount: formData.discount_amount,
-        discount_type: formData.discount_type,
-        include_vat: formData.include_vat
-      });
-      
-      // Only recalculate if inputs actually changed
-      if (currentInputs !== prevCalculationInputs.current) {
-        prevCalculationInputs.current = currentInputs;
-        calculateTotalAmount();
-      }
-    }
-  }, [
-    formData.duration_type,
-    formData.plan_id,
-    formData.custom_start_date,
-    formData.custom_end_date,
-    formData.discount_amount,
-    formData.discount_type,
-    formData.include_vat,
-    plans.length,
-    loading
-  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    const token = localStorage.getItem('token');
-
-    // 1. Update Advertiser Profile Data
-    const advertiserProfileData = new FormData();
-    advertiserProfileData.append('company_name', formData.company_name || '');
-    advertiserProfileData.append('phone', formData.phone || '');
-    advertiserProfileData.append('whatsapp', formData.whatsapp || '');
-    // advertiserProfileData.append('email', formData.email || ''); // Removed
-    advertiserProfileData.append('services', formData.services || '');
-    advertiserProfileData.append('status', formData.status || 'active');
-    advertiserProfileData.append('include_vat', String(formData.include_vat || false));
-    // Password field and its related logic are fully removed.
     
-    // Icon handling: only selected_icon_name is now relevant from formData
-    if (formData.selected_icon_name && formData.selected_icon_name.trim() !== '') {
-      advertiserProfileData.append('selected_icon_name', formData.selected_icon_name);
+    // التحقق من اختيار القطاع
+    if (!selectedSector) {
+      toast.error('يرجى اختيار القطاع');
+      return;
     }
-    // If formData.selected_icon_name is empty or undefined, nothing is sent for the icon.
-    // The backend PUT /api/admin/advertisers/:id is already set up to only update icon_url
-    // if selected_icon_name (or a file, which is now removed from this form) is provided.
-    // This means if no new preset icon is selected, the existing icon on the server will be preserved.
+    
+    // التحقق من اختيار الباقات
+    if (selectedPackages.length === 0) {
+      toast.error('يرجى اختيار باقة واحدة على الأقل');
+      return;
+    }
+    
+    setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      await axios.put(`${apiUrl}/advertisers/${id}`, advertiserProfileData, {
+      const token = localStorage.getItem('token');
+      const startDate = new Date().toISOString().split('T')[0];
+
+      // 🆕 تحديد coverage_type بناءً على الباقات المختارة
+      let coverageType: 'kingdom' | 'city' | 'both' = 'kingdom';
+      const hasKingdom = selectedPackages.some(pkg => pkg.coverage_type === 'kingdom');
+      const hasCity = selectedPackages.some(pkg => pkg.coverage_type === 'city');
+      
+      if (hasKingdom && hasCity) {
+        coverageType = 'both';
+      } else if (hasCity) {
+        coverageType = 'city';
+      }
+
+      // استخراج المدن المختارة
+      const selectedCities = selectedPackages
+        .filter(pkg => pkg.coverage_type === 'city' && pkg.city)
+        .map(pkg => pkg.city as string);
+
+      // بيانات المعلن الأساسية
+    const advertiserData = {
+      company_name: formData.company_name,
+      phone: formData.phone,
+      whatsapp: formData.whatsapp || null,
+      services: formData.services || null,
+      selected_icon: formData.selected_icon || null,
+        status: 'active',
+        
+        // 🆕 القطاع
+        sector: selectedSector,
+        
+        // 🆕 التغطية الجغرافية
+        coverage_type: coverageType,
+        coverage_cities: selectedCities.length > 0 ? selectedCities : null,
+        
+        // تصنيف العميل
+        customer_type: formData.customer_type,
+        is_trusted: formData.customer_type === 'trusted' || formData.customer_type === 'vip',
+        payment_terms_days: formData.payment_terms_days,
+        
+        // الضريبة
+        include_vat: formData.include_vat,
+        
+        // 🆕 الباقات المختارة (سيتم إنشاء اشتراك لكل باقة)
+        packages: selectedPackages.map(pkg => ({
+          plan_id: pkg.plan_id,
+          coverage_type: pkg.coverage_type,
+          city: pkg.city || null,
+      start_date: startDate,
+          end_date: calculateEndDate(startDate, pkg.plan.duration_days),
+          base_price: pkg.plan.price,
+      discount_type: formData.discount_type,
+      discount_amount: formData.discount_amount,
+      total_amount: formData.total_amount,
+      paid_amount: formData.paid_amount,
+        }))
+    };
+
+      // 🆕 تحديث بيانات المعلن (PUT بدلاً من POST)
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers/${id}`, advertiserData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
-      toast.success('تم تحديث بيانات المعلن بنجاح');
-
-      // 2. Handle Subscription: Create a new subscription if details are present and valid
-      // This assumes "editing" subscription details means creating a new one.
-      // The backend POST /api/admin/subscriptions should handle deactivating old active subscriptions.
       
-      let newSubscriptionStartDate = '';
-      let newSubscriptionEndDate = '';
-
-      if (formData.duration_type === 'preset' && formData.plan_id && plans.length > 0) {
-        const plan = plans.find(p => p.id.toString() === formData.plan_id);
-        if (plan) {
-          newSubscriptionStartDate = formData.custom_start_date || new Date().toISOString().split('T')[0]; // Default to today or custom
-          const endDateObj = new Date(newSubscriptionStartDate);
-          endDateObj.setDate(endDateObj.getDate() + plan.duration_days);
-          newSubscriptionEndDate = endDateObj.toISOString().split('T')[0];
-        }
-      } else if (formData.duration_type === 'custom' && formData.custom_start_date && formData.custom_end_date) {
-        newSubscriptionStartDate = formData.custom_start_date;
-        newSubscriptionEndDate = formData.custom_end_date;
-      }
-      
-      // Check if there's enough data to create/update a subscription
-      // A simple check: if a plan is selected or custom dates are set.
-      const hasSubscriptionData = formData.plan_id || (formData.custom_start_date && formData.custom_end_date);
-
-      if (hasSubscriptionData && newSubscriptionStartDate && newSubscriptionEndDate) {
-        const subscriptionPayload = {
-          advertiser_id: id,
-          plan_id: formData.plan_id || '1', // Default if not set, though UI should ensure it
-          start_date: newSubscriptionStartDate,
-          end_date: newSubscriptionEndDate,
-          base_price: formData.base_price || 0,
-          discount_type: formData.discount_type || 'amount',
-          discount_amount: formData.discount_amount || 0,
-          total_amount: formData.total_amount || 0,
-          paid_amount: formData.paid_amount || 0,
-        };
-
-        await axios.post(`${apiUrl}/subscriptions`, subscriptionPayload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        toast.success('تم حفظ/تحديث بيانات الاشتراك بنجاح');
-      }
-      
+      toast.success('تم تحديث بيانات المعلن بنجاح!');
       router.push(`/admin/advertisers/${id}`);
-
     } catch (error: any) {
-      console.error("Error in handleSubmit:", error);
-      const errorMessage = error.response?.data?.error || error.message || 'خطأ في حفظ التعديلات';
-      toast.error(errorMessage);
+      console.error('Error updating advertiser:', error);
+      toast.error(error.response?.data?.error || 'خطأ في تحديث بيانات المعلن');
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
-  
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-500"></div></div>;
-  }
 
   return (
     <>
       <Head>
-        <title>تعديل المعلن: {formData.company_name} - لوحة التحكم</title>
+        <title>تعديل بيانات المعلن - لوحة التحكم</title>
       </Head>
 
       <div className="min-h-screen bg-gray-50">
@@ -455,14 +450,14 @@ export default function EditAdvertiser() {
         <header className="bg-white shadow-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gradient">تعديل: {formData.company_name}</h1>
+              <h1 className="text-2xl font-bold text-gradient">تعديل بيانات المعلن</h1>
               <Link href={`/admin/advertisers/${id}`}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors"
                 >
                   <FaArrowLeft />
-                  <span>العودة للتفاصيل</span>
+                  <span>العودة لصفحة المعلن</span>
                 </motion.button>
               </Link>
             </div>
@@ -489,6 +484,7 @@ export default function EditAdvertiser() {
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  placeholder="اسم شركة نقل العفش"
                 />
               </div>
 
@@ -505,13 +501,14 @@ export default function EditAdvertiser() {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    placeholder="05XXXXXXXX"
                     dir="ltr"
                   />
                 </div>
                 {/* WhatsApp */}
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2">
-                    <FaWhatsapp className="inline ml-2" /> رقم الواتساب
+                    <FaWhatsapp className="inline ml-2" /> رقم الواتساب (اختياري)
                   </label>
                   <input
                     type="tel"
@@ -519,32 +516,105 @@ export default function EditAdvertiser() {
                     value={formData.whatsapp}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    placeholder="05XXXXXXXX"
                     dir="ltr"
                   />
                 </div>
               </div>
 
-              {/* Email and Password fields are removed as per user request */}
-              
-              {/* Status Toggle */}
+              {/* 🆕 Customer Type - تصنيف العميل */}
               <div>
                 <label className="block text-gray-700 font-semibold mb-2">
-                  الحالة
+                  <FaUserTie className="inline ml-2" /> تصنيف العميل
                 </label>
-                <button
-                  type="button"
-                  onClick={toggleStatus}
-                  className={`w-full px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
-                    formData.status === 'active' 
-                    ? 'bg-green-500 text-white hover:bg-green-600' 
-                    : 'bg-red-500 text-white hover:bg-red-600'
-                  }`}
-                >
-                  {formData.status === 'active' ? <FaToggleOn /> : <FaToggleOff />}
-                  <span>{formData.status === 'active' ? 'نشط' : 'غير نشط'}</span>
-                </button>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div 
+                    onClick={() => setFormData({ ...formData, customer_type: 'new', payment_terms_days: 0 })}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      formData.customer_type === 'new' 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-300 hover:border-blue-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        formData.customer_type === 'new' 
+                          ? 'border-blue-500 bg-blue-500' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.customer_type === 'new' && (
+                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                        )}
+                      </div>
+                      <span className="font-semibold text-blue-700">عميل جديد</span>
+                    </div>
+                    <p className="text-xs text-gray-600">يجب الدفع لتفعيل الاشتراك</p>
+                  </div>
 
+                  <div 
+                    onClick={() => setFormData({ ...formData, customer_type: 'trusted', payment_terms_days: 7 })}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      formData.customer_type === 'trusted' 
+                        ? 'border-green-500 bg-green-50' 
+                        : 'border-gray-300 hover:border-green-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        formData.customer_type === 'trusted' 
+                          ? 'border-green-500 bg-green-500' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.customer_type === 'trusted' && (
+                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                        )}
+                      </div>
+                      <span className="font-semibold text-green-700">عميل موثوق</span>
+                    </div>
+                    <p className="text-xs text-gray-600">مهلة دفع 7 أيام - تفعيل فوري</p>
+                  </div>
+
+                  <div 
+                    onClick={() => setFormData({ ...formData, customer_type: 'vip', payment_terms_days: 14 })}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      formData.customer_type === 'vip' 
+                        ? 'border-amber-500 bg-amber-50' 
+                        : 'border-gray-300 hover:border-amber-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        formData.customer_type === 'vip' 
+                          ? 'border-amber-500 bg-amber-500' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.customer_type === 'vip' && (
+                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                        )}
+                      </div>
+                      <span className="font-semibold text-amber-700">⭐ عميل VIP</span>
+                    </div>
+                    <p className="text-xs text-gray-600">مهلة دفع 14 يوم - تفعيل فوري</p>
+                  </div>
+                </div>
+                
+                {/* معلومات إضافية حسب نوع العميل */}
+                {formData.customer_type === 'new' && (
+                  <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                    ℹ️ العميل الجديد: يتطلب دفع ريال واحد على الأقل لتفعيل الاشتراك فوراً
+                  </div>
+                )}
+                {formData.customer_type === 'trusted' && (
+                  <div className="mt-3 p-3 bg-green-50 rounded-lg text-sm text-green-800">
+                    ✅ العميل الموثوق: يتم تفعيل الاشتراك فوراً مع مهلة دفع 7 أيام
+                  </div>
+                )}
+                {formData.customer_type === 'vip' && (
+                  <div className="mt-3 p-3 bg-amber-50 rounded-lg text-sm text-amber-800">
+                    ⭐ العميل VIP: يتم تفعيل الاشتراك فوراً مع مهلة دفع 14 يوم وامتيازات خاصة
+                  </div>
+                )}
+              </div>
 
               {/* Services */}
               <div>
@@ -557,163 +627,115 @@ export default function EditAdvertiser() {
                   onChange={handleInputChange}
                   rows={3}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+                  placeholder="مثال: نقل عفش، فك وتركيب، تغليف احترافي..."
                 />
               </div>
 
-              {/* Icon Selection (Enhanced) */}
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  <FaImage className="inline ml-2" /> أيقونة الشركة
-                </label>
-                <div className="mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
-                  <p className="text-sm text-gray-600 mb-2">اختر أيقونة جاهزة:</p>
-                  <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
-                    {availableIcons.map((iconItem) => {
-                      const IconComponent = iconItem.icon;
-                      return (
-                        <motion.button
-                          key={iconItem.name}
-                          type="button"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, selected_icon_name: iconItem.name }));
-                            // setPreviewIcon(null); // Removed
-                            // setCurrentIconUrl(null); // Optionally clear current server icon preview
-                          }}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            formData.selected_icon_name === iconItem.name
-                              ? 'border-primary-500 bg-primary-50 shadow-lg'
-                              : 'border-gray-200 hover:border-gray-300 bg-white'
-                          }`}
-                        >
-                          <IconComponent className={`text-2xl ${iconItem.color}`} />
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </div>
 
-                {/* Custom file upload removed */}
-                
-                 {/* Preview for selected preset icon */}
-                 {formData.selected_icon_name && (() => {
-                  const selectedIconDetails = availableIcons.find(i => i.name === formData.selected_icon_name);
-                  if (selectedIconDetails) {
-                    const IconComp = selectedIconDetails.icon;
+              {/* 🆕 Sector Selection - STEP 1 */}
+              <div className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg">
+                <SectorSelector
+                  selectedSector={selectedSector}
+                  onSectorChange={setSelectedSector}
+                />
+              </div>
+
+              {/* 🆕 Icon Selection - STEP 2 - يظهر فقط بعد اختيار القطاع */}
+              {selectedSector && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-xl p-6 border-2 border-gray-200 shadow-md"
+                >
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white font-bold text-lg shadow-lg">
+                      2
+                    </div>
+              <div>
+                      <h3 className="text-xl font-bold text-gray-800">
+                        اختر أيقونة مناسبة للشركة
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        اختر أيقونة تُمثل الشركة بشكل مناسب
+                      </p>
+                    </div>
+                  </div>
+
+                  {availableIcons.length > 0 ? (
+                <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
+                  {availableIcons.map((iconItem: any) => {
+                    const IconComponent = iconItem.icon;
                     return (
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-600 mb-1">الأيقونة المختارة:</p>
-                        <div className={`w-24 h-24 flex items-center justify-center rounded-lg shadow-md border-2 border-primary-500 bg-primary-50`}>
-                           <IconComp className={`text-5xl ${selectedIconDetails.color}`} />
-                        </div>
-                      </div>
+                      <motion.button
+                        key={iconItem.name}
+                        type="button"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setFormData({ ...formData, selected_icon: iconItem.name })}
+                            className={`p-4 rounded-xl border-2 transition-all ${
+                          formData.selected_icon === iconItem.name
+                                ? 'border-primary-500 bg-primary-50 shadow-lg ring-2 ring-primary-200'
+                                : 'border-gray-200 hover:border-primary-300 bg-white hover:shadow-md'
+                        }`}
+                      >
+                        <IconComponent className={`text-2xl ${iconItem.color}`} />
+                      </motion.button>
                     );
-                  }
-                  return null;
-                })()}
-              </div>
-
-{/* --- Subscription Management UI (Ported from new.tsx) --- */}
-
-              {/* Package/Plan Selection */}
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  <FaBox className="inline ml-2" /> الباقة الحالية/الجديدة
-                </label>
-                
-                {/* Duration Type Toggle */}
-                <div className="flex gap-4 mb-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="duration_type"
-                      value="preset"
-                      checked={formData.duration_type === 'preset'}
-                      onChange={handleInputChange}
-                      className="ml-2"
-                    />
-                    <span>باقة محددة مسبقاً</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="duration_type"
-                      value="custom"
-                      checked={formData.duration_type === 'custom'}
-                      onChange={handleInputChange}
-                      className="ml-2"
-                    />
-                    <span>تحديد مدة مخصصة</span>
-                  </label>
+                  })}
                 </div>
-
-                {formData.duration_type === 'preset' ? (
-                  <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {plans.map((plan) => (
-                        <motion.div
-                          key={plan.id}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => {
-                            setFormData(prev => ({
-                              ...prev,
-                              plan_id: plan.id.toString(),
-                              // base_price will be updated by calculateTotalAmount via useEffect
-                            }));
-                          }}
-                          className={`cursor-pointer p-4 rounded-lg border-2 transition-all ${
-                            formData.plan_id === plan.id.toString()
-                              ? 'border-primary-500 bg-primary-50 shadow-lg'
-                              : 'border-gray-200 hover:border-gray-300 bg-white'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-semibold text-gray-800">{plan.name}</h4>
-                              <p className="text-sm text-gray-600 mt-1">المدة: {plan.duration_days} يوم</p>
-                              {plan.features && (
-                                <p className="text-xs text-gray-500 mt-2">{plan.features}</p>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-primary-600">{plan.price}</p>
-                              <p className="text-sm text-gray-600">ريال</p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-gray-600 text-sm mb-1">تاريخ البداية المقترح</label>
-                      <input
-                        type="date"
-                        name="custom_start_date"
-                        value={formData.custom_start_date || ''}
-                        onChange={handleInputChange}
-                        required={formData.duration_type === 'custom'}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-600 text-sm mb-1">تاريخ النهاية المقترح</label>
-                      <input
-                        type="date"
-                        name="custom_end_date"
-                        value={formData.custom_end_date || ''}
-                        onChange={handleInputChange}
-                        required={formData.duration_type === 'custom'}
-                        min={formData.custom_start_date}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>لا توجد أيقونات متاحة لهذا القطاع</p>
               </div>
+                  )}
+
+                  {formData.selected_icon && (
+                        <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-4 text-center"
+                    >
+                      <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold text-sm">
+                        ✅ تم اختيار الأيقونة
+                      </span>
+                    </motion.div>
+                  )}
+                        </motion.div>
+              )}
+
+              {/* 🆕 Package/Plan Selection - STEP 3 & 4 - يظهر فقط بعد اختيار القطاع */}
+              {selectedSector && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6 border-2 border-gray-200"
+                >
+                  <div className="mb-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold text-lg shadow-lg">
+                        3
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                          <FaBox className="text-primary-500" />
+                          اختيار التغطية الجغرافية والباقات
+                        </h3>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      حدد نوع التغطية المطلوبة ثم اختر الباقات المناسبة لقطاع <strong>{selectedSector === 'movers' ? 'نقل العفش' : selectedSector === 'cleaning' ? 'النظافة' : selectedSector === 'water-leaks' ? 'كشف تسربات المياه' : 'مكافحة الحشرات'}</strong>
+                    </p>
+                  </div>
+                  
+                  <CoverageAndPackageSelector
+                    plans={plans}
+                    onSelectionChange={handlePackagesChange}
+                    sector={selectedSector}
+                  />
+                </motion.div>
+              )}
 
               {/* Discount Section */}
               <div className="bg-yellow-50 rounded-lg p-6 space-y-4">
@@ -726,7 +748,7 @@ export default function EditAdvertiser() {
                     <label className="block text-gray-700 font-semibold mb-2">نوع الخصم</label>
                     <select
                       name="discount_type"
-                      value={formData.discount_type || 'amount'}
+                      value={formData.discount_type}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                     >
@@ -741,10 +763,10 @@ export default function EditAdvertiser() {
                     <input
                       type="number"
                       name="discount_amount"
-                      value={formData.discount_amount || 0}
+                      value={formData.discount_amount}
                       onChange={handleInputChange}
                       min="0"
-                      max={formData.discount_type === 'percentage' ? 100 : (formData.base_price || 0)}
+                      max={formData.discount_type === 'percentage' ? 100 : formData.base_price}
                       step={formData.discount_type === 'percentage' ? '1' : '0.01'}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                       placeholder="0"
@@ -752,13 +774,14 @@ export default function EditAdvertiser() {
                   </div>
                 </div>
                 
-                {(formData.discount_amount || 0) > 0 && (
+                {/* عرض تأثير الخصم */}
+                {formData.discount_amount > 0 && (
                   <div className="mt-4 p-3 bg-yellow-100 rounded-lg">
                     <p className="text-sm text-gray-700">
                       <span className="font-semibold">قيمة الخصم: </span>
                       {formData.discount_type === 'amount'
-                        ? `${formData.discount_amount || 0} ريال`
-                        : `${formData.discount_amount || 0}% = ${Math.round(((formData.base_price || 0) * (formData.discount_amount || 0)) / 100)} ريال`
+                        ? `${formData.discount_amount} ريال`
+                        : `${formData.discount_amount}% = ${Math.round((formData.base_price * formData.discount_amount) / 100)} ريال`
                       }
                     </p>
                   </div>
@@ -775,8 +798,8 @@ export default function EditAdvertiser() {
                   <input
                     type="checkbox"
                     name="include_vat"
-                    checked={formData.include_vat || false}
-                    onChange={(e) => setFormData(prev => ({ ...prev, include_vat: e.target.checked }))}
+                    checked={formData.include_vat}
+                    onChange={(e) => setFormData({ ...formData, include_vat: e.target.checked })}
                     className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 ml-3"
                   />
                   <span className="text-gray-700">
@@ -788,7 +811,7 @@ export default function EditAdvertiser() {
                   <div className="mt-4 p-3 bg-purple-100 rounded-lg">
                     <p className="text-sm text-gray-700">
                       <span className="font-semibold">قيمة الضريبة: </span>
-                      {Math.round((formData.total_amount || 0) / 1.15 * 0.15 * 100) / 100} ريال (15%)
+                      {Math.round((formData.total_amount / 1.15) * 0.15 * 100) / 100} ريال (15%)
                     </p>
                   </div>
                 )}
@@ -797,42 +820,61 @@ export default function EditAdvertiser() {
               {/* Payment Information */}
               <div className="bg-blue-50 rounded-lg p-6 space-y-4">
                 <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <FaMoneyBillWave className="ml-2 text-blue-600" /> معلومات الدفع للاشتراك الجديد/المعدل
+                  <FaMoneyBillWave className="ml-2 text-blue-600" /> معلومات الدفع
                 </h3>
                 
+                {/* ملخص الحساب */}
                 <div className="bg-white rounded-lg p-4 space-y-3">
                   <div className="flex justify-between items-center pb-3 border-b">
                     <span className="text-gray-600">السعر الأساسي:</span>
-                    <span className="font-semibold text-gray-800">{formData.base_price || 0} ريال</span>
+                    <span className="font-semibold text-gray-800">{formData.base_price} ريال</span>
                   </div>
                   
-                  {(formData.discount_amount || 0) > 0 && (
+                  {formData.discount_amount > 0 && (
                     <div className="flex justify-between items-center pb-3 border-b text-green-600">
                       <span>الخصم:</span>
                       <span className="font-semibold">
                         -{formData.discount_type === 'amount'
-                          ? `${formData.discount_amount || 0}`
-                          : `${Math.round(((formData.base_price || 0) * (formData.discount_amount || 0)) / 100)}`
+                          ? `${formData.discount_amount}`
+                          : `${Math.round((formData.base_price * formData.discount_amount) / 100)}`
                         } ريال
                       </span>
                     </div>
                   )}
                   
+                  {formData.include_vat && (
+                    <>
+                      <div className="flex justify-between items-center pb-3 border-b">
+                        <span className="text-gray-600">المبلغ قبل الضريبة:</span>
+                        <span className="font-semibold text-gray-800">
+                          {Math.round((formData.total_amount / 1.15) * 100) / 100} ريال
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pb-3 border-b text-purple-600">
+                        <span>ضريبة القيمة المضافة (15%):</span>
+                        <span className="font-semibold">
+                          +{Math.round((formData.total_amount / 1.15) * 0.15 * 100) / 100} ريال
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  
                   <div className="flex justify-between items-center text-lg font-bold">
-                    <span className="text-gray-800">المجموع:</span>
-                    <span className="text-primary-600">{formData.total_amount || 0} ريال</span>
+                    <span className="text-gray-800">المجموع {formData.include_vat ? 'شامل الضريبة' : ''}:</span>
+                    <span className="text-primary-600">{formData.total_amount} ريال</span>
                   </div>
                 </div>
                 
+                {/* المبلغ المدفوع */}
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">المبلغ المدفوع (للاشتراك الجديد/المعدل)</label>
+                  <label className="block text-gray-700 font-semibold mb-2">المبلغ المدفوع</label>
                   <input
                     type="number"
                     name="paid_amount"
-                    value={formData.paid_amount || 0}
+                    value={formData.paid_amount}
                     onChange={handleInputChange}
                     min="0"
-                    max={formData.total_amount || 0}
+                    max={formData.total_amount}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                     placeholder="0"
                   />
@@ -841,25 +883,24 @@ export default function EditAdvertiser() {
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-gray-700">المبلغ المتبقي:</span>
-                    <span className="text-2xl font-bold text-red-600">{(formData.total_amount || 0) - (formData.paid_amount || 0)} ريال</span>
+                    <span className="text-2xl font-bold text-red-600">{formData.total_amount - formData.paid_amount} ريال</span>
                   </div>
                 </div>
               </div>
-              {/* --- End of Subscription Management UI --- */}
 
               {/* Submit Button */}
               <motion.button
                 type="submit"
-                disabled={saving}
+                disabled={loading}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full py-3 rounded-lg font-bold text-lg transition-all flex items-center justify-center gap-2 ${
-                  saving
+                  loading
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-gradient-to-r from-primary-600 to-secondary-600 text-white hover:shadow-xl'
                 }`}
               >
-                {saving ? (
+                {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     <span>جاري الحفظ...</span>
@@ -867,7 +908,7 @@ export default function EditAdvertiser() {
                 ) : (
                   <>
                     <FaSave />
-                    <span>حفظ التعديلات</span>
+                    <span>حفظ المعلن</span>
                   </>
                 )}
               </motion.button>

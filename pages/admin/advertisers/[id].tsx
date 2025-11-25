@@ -19,6 +19,12 @@ interface Advertiser {
   services?: string;
   icon_url?: string;
   status: string;
+  sector?: 'movers' | 'cleaning' | 'water-leaks' | 'pest-control';
+  coverage_type?: 'kingdom' | 'city' | 'both';
+  coverage_cities?: string[];
+  customer_type?: 'new' | 'trusted' | 'vip';
+  is_trusted?: boolean;
+  payment_terms_days?: number;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +46,9 @@ interface Subscription {
   grace_period_end_date?: string;
   grace_period_days?: number;
   total_grace_extensions?: number;
+  // Coverage info
+  coverage_area?: 'kingdom' | 'city';
+  city?: string;
 }
 
 interface Invoice {
@@ -180,6 +189,44 @@ export default function AdvertiserDetails() {
       console.error('Error formatting date:', timestamp, error);
       return '-';
     }
+  };
+
+  // Helper functions for translations
+  const getSectorName = (sector?: string) => {
+    const sectors: Record<string, string> = {
+      'movers': 'نقل العفش',
+      'cleaning': 'النظافة',
+      'water-leaks': 'كشف تسربات المياه',
+      'pest-control': 'مكافحة الحشرات'
+    };
+    return sector ? sectors[sector] || sector : 'غير محدد';
+  };
+
+  const getCoverageTypeName = (type?: string) => {
+    const types: Record<string, string> = {
+      'kingdom': 'المملكة كاملة',
+      'city': 'مدن محددة',
+      'both': 'المملكة + مدن محددة'
+    };
+    return type ? types[type] || type : 'غير محدد';
+  };
+
+  const getCityName = (city: string) => {
+    const cities: Record<string, string> = {
+      'jeddah': 'جدة',
+      'riyadh': 'الرياض',
+      'dammam': 'الدمام'
+    };
+    return cities[city] || city;
+  };
+
+  const getCustomerTypeName = (type?: string) => {
+    const types: Record<string, string> = {
+      'new': 'عميل جديد',
+      'trusted': 'عميل موثوق',
+      'vip': '⭐ عميل VIP'
+    };
+    return type ? types[type] || type : 'عميل جديد';
   };
 
   useEffect(() => {
@@ -388,7 +435,44 @@ export default function AdvertiserDetails() {
                 <p><strong>البريد الإلكتروني:</strong> <a href={`mailto:${advertiser.email}`} className="text-blue-600 hover:underline">{advertiser.email}</a></p>
                 <p><strong>الحالة:</strong> <span className={`px-2 py-1 rounded-full text-xs ${advertiser.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{advertiser.status === 'active' ? 'نشط' : 'غير نشط'}</span></p>
                 <p><strong>الخدمات:</strong> {advertiser.services || 'غير محدد'}</p>
-                <p className="text-sm text-gray-500 mt-2">تاريخ الإنشاء: {formatDate(advertiser.created_at, 'dd/MM/yyyy HH:mm')}</p>
+                
+                {/* القطاع */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <p className="mb-2"><strong>القطاع:</strong> <span className="px-3 py-1 rounded-lg bg-purple-100 text-purple-800 text-sm font-semibold">{getSectorName(advertiser.sector)}</span></p>
+                  
+                  {/* التغطية الجغرافية */}
+                  <p className="mb-2"><strong>التغطية:</strong> <span className="px-3 py-1 rounded-lg bg-blue-100 text-blue-800 text-sm font-semibold">{getCoverageTypeName(advertiser.coverage_type)}</span></p>
+                  
+                  {/* المدن المغطاة */}
+                  {advertiser.coverage_cities && advertiser.coverage_cities.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm font-semibold text-gray-700 mb-1">المدن المغطاة:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {advertiser.coverage_cities.map((city) => (
+                          <span key={city} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                            {getCityName(city)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* تصنيف العميل */}
+                  {advertiser.customer_type && (
+                    <p className="mt-2"><strong>تصنيف العميل:</strong> <span className={`px-3 py-1 rounded-lg text-sm font-semibold ${
+                      advertiser.customer_type === 'vip' ? 'bg-amber-100 text-amber-800' :
+                      advertiser.customer_type === 'trusted' ? 'bg-green-100 text-green-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>{getCustomerTypeName(advertiser.customer_type)}</span></p>
+                  )}
+                  
+                  {/* مهلة الدفع */}
+                  {advertiser.payment_terms_days && advertiser.payment_terms_days > 0 && (
+                    <p className="mt-2 text-sm"><strong>مهلة الدفع:</strong> <span className="text-orange-600 font-semibold">{advertiser.payment_terms_days} يوم</span></p>
+                  )}
+                </div>
+                
+                <p className="text-sm text-gray-500 mt-4">تاريخ الإنشاء: {formatDate(advertiser.created_at, 'dd/MM/yyyy HH:mm')}</p>
                 <p className="text-sm text-gray-500">آخر تحديث: {formatDate(advertiser.updated_at, 'dd/MM/yyyy HH:mm')}</p>
                 <div className="mt-6 flex gap-3">
                   <Link href={`/admin/advertisers/${advertiser.id}/edit`}>
@@ -449,6 +533,17 @@ export default function AdvertiserDetails() {
                         <div className="text-sm text-gray-600">
                           <p>من: {formatDate(sub.start_date, 'dd/MM/yyyy')} إلى: {formatDate(sub.end_date, 'dd/MM/yyyy')}</p>
                           <p>المبلغ الإجمالي: {sub.total_amount} ريال | المدفوع: {sub.paid_amount} ريال | المتبقي: {sub.remaining_amount} ريال</p>
+                          {/* التغطية */}
+                          {sub.coverage_area && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="font-semibold">التغطية:</span>
+                              <span className={`px-2 py-1 rounded-md text-xs font-semibold ${
+                                sub.coverage_area === 'kingdom' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {sub.coverage_area === 'kingdom' ? '🇸🇦 المملكة' : sub.city ? `🏙️ ${getCityName(sub.city)}` : 'مدينة محددة'}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         
                         {/* Status Manager Component */}

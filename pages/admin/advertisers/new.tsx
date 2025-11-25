@@ -83,25 +83,25 @@ export default function NewAdvertiser() {
   const getIconsBySector = (sector: SectorType) => {
     const iconSets = {
       movers: [
-        { icon: FaTruck, name: 'truck', color: 'text-blue-600' },
-        { icon: FaBoxes, name: 'boxes', color: 'text-amber-600' },
-        { icon: FaHome, name: 'home', color: 'text-green-600' },
-        { icon: FaDolly, name: 'dolly', color: 'text-purple-600' },
-        { icon: FaShippingFast, name: 'shipping-fast', color: 'text-red-600' },
-        { icon: FaWarehouse, name: 'warehouse', color: 'text-indigo-600' },
-        { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
-        { icon: FaPeopleCarry, name: 'people-carry', color: 'text-pink-600' },
-        { icon: FaRoute, name: 'route', color: 'text-cyan-600' },
+    { icon: FaTruck, name: 'truck', color: 'text-blue-600' },
+    { icon: FaBoxes, name: 'boxes', color: 'text-amber-600' },
+    { icon: FaHome, name: 'home', color: 'text-green-600' },
+    { icon: FaDolly, name: 'dolly', color: 'text-purple-600' },
+    { icon: FaShippingFast, name: 'shipping-fast', color: 'text-red-600' },
+    { icon: FaWarehouse, name: 'warehouse', color: 'text-indigo-600' },
+    { icon: FaHandshake, name: 'handshake', color: 'text-teal-600' },
+    { icon: FaPeopleCarry, name: 'people-carry', color: 'text-pink-600' },
+    { icon: FaRoute, name: 'route', color: 'text-cyan-600' },
         { icon: FaBoxOpen, name: 'box-open', color: 'text-amber-700' },
         { icon: FaTruckLoading, name: 'truck-loading', color: 'text-red-700' },
         { icon: FaMapMarkedAlt, name: 'map-marked-alt', color: 'text-green-500' },
-        { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
-        { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
-        { icon: FaAward, name: 'award', color: 'text-yellow-500' },
-        { icon: FaStar, name: 'star', color: 'text-yellow-400' },
-        { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
-        { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
-        { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
+    { icon: FaClock, name: 'clock', color: 'text-yellow-600' },
+    { icon: FaShieldAlt, name: 'shield-alt', color: 'text-gray-600' },
+    { icon: FaAward, name: 'award', color: 'text-yellow-500' },
+    { icon: FaStar, name: 'star', color: 'text-yellow-400' },
+    { icon: FaHeadset, name: 'headset', color: 'text-blue-500' },
+    { icon: FaUserTie, name: 'user-tie', color: 'text-gray-700' },
+    { icon: FaClipboardCheck, name: 'clipboard-check', color: 'text-green-700' },
         { icon: FaTools, name: 'tools', color: 'text-orange-600' },
       ],
       cleaning: [
@@ -338,12 +338,12 @@ export default function NewAdvertiser() {
         .map(pkg => pkg.city as string);
 
       // بيانات المعلن الأساسية
-      const advertiserData = {
-        company_name: formData.company_name,
-        phone: formData.phone,
-        whatsapp: formData.whatsapp || null,
-        services: formData.services || null,
-        selected_icon: formData.selected_icon || null,
+    const advertiserData = {
+      company_name: formData.company_name,
+      phone: formData.phone,
+      whatsapp: formData.whatsapp || null,
+      services: formData.services || null,
+      selected_icon: formData.selected_icon || null,
         status: 'active',
         
         // 🆕 القطاع
@@ -366,15 +366,15 @@ export default function NewAdvertiser() {
           plan_id: pkg.plan_id,
           coverage_type: pkg.coverage_type,
           city: pkg.city || null,
-          start_date: startDate,
+      start_date: startDate,
           end_date: calculateEndDate(startDate, pkg.plan.duration_days),
           base_price: pkg.plan.price,
-          discount_type: formData.discount_type,
-          discount_amount: formData.discount_amount,
-          total_amount: formData.total_amount,
-          paid_amount: formData.paid_amount,
+      discount_type: formData.discount_type,
+      discount_amount: formData.discount_amount,
+      total_amount: formData.total_amount,
+      paid_amount: formData.paid_amount,
         }))
-      };
+    };
 
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, advertiserData, {
         headers: {
@@ -642,7 +642,7 @@ export default function NewAdvertiser() {
                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white font-bold text-lg shadow-lg">
                       2
                     </div>
-                    <div>
+              <div>
                       <h3 className="text-xl font-bold text-gray-800">
                         اختر أيقونة مناسبة للشركة
                       </h3>
@@ -653,35 +653,35 @@ export default function NewAdvertiser() {
                   </div>
 
                   {availableIcons.length > 0 ? (
-                    <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
-                      {availableIcons.map((iconItem) => {
-                        const IconComponent = iconItem.icon;
-                        return (
-                          <motion.button
-                            key={iconItem.name}
-                            type="button"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setFormData({ ...formData, selected_icon: iconItem.name })}
+                <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
+                  {availableIcons.map((iconItem) => {
+                    const IconComponent = iconItem.icon;
+                    return (
+                      <motion.button
+                        key={iconItem.name}
+                        type="button"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setFormData({ ...formData, selected_icon: iconItem.name })}
                             className={`p-4 rounded-xl border-2 transition-all ${
-                              formData.selected_icon === iconItem.name
+                          formData.selected_icon === iconItem.name
                                 ? 'border-primary-500 bg-primary-50 shadow-lg ring-2 ring-primary-200'
                                 : 'border-gray-200 hover:border-primary-300 bg-white hover:shadow-md'
-                            }`}
-                          >
-                            <IconComponent className={`text-2xl ${iconItem.color}`} />
-                          </motion.button>
-                        );
-                      })}
-                    </div>
+                        }`}
+                      >
+                        <IconComponent className={`text-2xl ${iconItem.color}`} />
+                      </motion.button>
+                    );
+                  })}
+                </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <p>لا توجد أيقونات متاحة لهذا القطاع</p>
-                    </div>
+              </div>
                   )}
 
                   {formData.selected_icon && (
-                    <motion.div 
+                        <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="mt-4 text-center"
@@ -691,7 +691,7 @@ export default function NewAdvertiser() {
                       </span>
                     </motion.div>
                   )}
-                </motion.div>
+                        </motion.div>
               )}
 
               {/* 🆕 Package/Plan Selection - STEP 3 & 4 - يظهر فقط بعد اختيار القطاع */}
@@ -706,8 +706,8 @@ export default function NewAdvertiser() {
                     <div className="flex items-center gap-3 mb-4">
                       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold text-lg shadow-lg">
                         3
-                      </div>
-                      <div>
+                    </div>
+                    <div>
                         <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                           <FaBox className="text-primary-500" />
                           اختيار التغطية الجغرافية والباقات
