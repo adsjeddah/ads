@@ -21,7 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 // تهيئة Firebase Admin
-const serviceAccountPath = path.join(__dirname, '..', 'jeddah-ads-46daa-firebase-adminsdk-key.json');
+const serviceAccountPath = path.join(__dirname, '..', 'serviceAccountKey.json');
 
 if (!fs.existsSync(serviceAccountPath)) {
   console.error('❌ خطأ: لم يتم العثور على ملف Firebase Admin SDK');
@@ -37,12 +37,12 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// السياسة الجديدة للأسعار
+// السياسة الجديدة للأسعار - موحدة لجميع المدن والقطاعات
 const NEW_PRICING = {
   city: {
-    week: 400,
-    two_weeks: 800,
-    month: 1500
+    week: 400,        // أسبوع
+    two_weeks: 800,   // أسبوعين
+    month: 1500       // شهر
   },
   kingdom: {
     week: 850,

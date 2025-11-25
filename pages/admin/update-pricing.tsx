@@ -3,12 +3,12 @@ import { collection, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/f
 import { db } from '@/lib/firebase';
 import { FaSync, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
-// السياسة الجديدة للأسعار
+// السياسة الجديدة للأسعار - موحدة لجميع المدن والقطاعات
 const NEW_PRICING = {
   city: {
-    week: 400,
-    two_weeks: 800,
-    month: 1500
+    week: 400,        // أسبوع
+    two_weeks: 800,   // أسبوعين
+    month: 1500       // شهر
   },
   kingdom: {
     week: 850,
