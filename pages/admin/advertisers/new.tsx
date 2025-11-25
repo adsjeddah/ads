@@ -8,6 +8,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import CoverageAndPackageSelector, { SelectedPackage } from '../../../components/admin/CoverageAndPackageSelector';
 import SectorSelector, { SectorType } from '../../../components/admin/SectorSelector';
+import { formatNumber, formatPrice, toEnglishNumerals } from '@/lib/utils/numbers';
 
 interface ExistingAdvertiser {
   id: number;
@@ -462,7 +463,7 @@ export default function NewAdvertiser() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all english-numbers"
                     placeholder="05XXXXXXXX"
                     dir="ltr"
                   />
@@ -477,7 +478,7 @@ export default function NewAdvertiser() {
                     name="whatsapp"
                     value={formData.whatsapp}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all english-numbers"
                     placeholder="05XXXXXXXX"
                     dir="ltr"
                   />
@@ -766,7 +767,7 @@ export default function NewAdvertiser() {
                       min="0"
                       max={formData.discount_type === 'percentage' ? 100 : formData.base_price}
                       step={formData.discount_type === 'percentage' ? '1' : '0.01'}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all english-numbers"
                       placeholder="0"
                     />
                   </div>
@@ -775,11 +776,11 @@ export default function NewAdvertiser() {
                 {/* عرض تأثير الخصم */}
                 {formData.discount_amount > 0 && (
                   <div className="mt-4 p-3 bg-yellow-100 rounded-lg">
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-gray-700 english-numbers">
                       <span className="font-semibold">قيمة الخصم: </span>
                       {formData.discount_type === 'amount'
-                        ? `${formData.discount_amount} ريال`
-                        : `${formData.discount_amount}% = ${Math.round((formData.base_price * formData.discount_amount) / 100)} ريال`
+                        ? formatPrice(formData.discount_amount)
+                        : `${formatNumber(formData.discount_amount)}% = ${formatPrice(Math.round((formData.base_price * formData.discount_amount) / 100))}`
                       }
                     </p>
                   </div>
@@ -807,9 +808,9 @@ export default function NewAdvertiser() {
                 
                 {formData.include_vat && (
                   <div className="mt-4 p-3 bg-purple-100 rounded-lg">
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-gray-700 english-numbers">
                       <span className="font-semibold">قيمة الضريبة: </span>
-                      {Math.round((formData.total_amount / 1.15) * 0.15 * 100) / 100} ريال (15%)
+                      {formatPrice(Math.round((formData.total_amount / 1.15) * 0.15 * 100) / 100)} (15%)
                     </p>
                   </div>
                 )}
@@ -822,10 +823,10 @@ export default function NewAdvertiser() {
                 </h3>
                 
                 {/* ملخص الحساب */}
-                <div className="bg-white rounded-lg p-4 space-y-3">
+                <div className="bg-white rounded-lg p-4 space-y-3 english-numbers">
                   <div className="flex justify-between items-center pb-3 border-b">
                     <span className="text-gray-600">السعر الأساسي:</span>
-                    <span className="font-semibold text-gray-800">{formData.base_price} ريال</span>
+                    <span className="font-semibold text-gray-800">{formatPrice(formData.base_price)}</span>
                   </div>
                   
                   {formData.discount_amount > 0 && (
@@ -833,9 +834,9 @@ export default function NewAdvertiser() {
                       <span>الخصم:</span>
                       <span className="font-semibold">
                         -{formData.discount_type === 'amount'
-                          ? `${formData.discount_amount}`
-                          : `${Math.round((formData.base_price * formData.discount_amount) / 100)}`
-                        } ريال
+                          ? formatPrice(formData.discount_amount)
+                          : formatPrice(Math.round((formData.base_price * formData.discount_amount) / 100))
+                        }
                       </span>
                     </div>
                   )}
@@ -845,13 +846,13 @@ export default function NewAdvertiser() {
                       <div className="flex justify-between items-center pb-3 border-b">
                         <span className="text-gray-600">المبلغ قبل الضريبة:</span>
                         <span className="font-semibold text-gray-800">
-                          {Math.round((formData.total_amount / 1.15) * 100) / 100} ريال
+                          {formatPrice(Math.round((formData.total_amount / 1.15) * 100) / 100)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center pb-3 border-b text-purple-600">
                         <span>ضريبة القيمة المضافة (15%):</span>
                         <span className="font-semibold">
-                          +{Math.round((formData.total_amount / 1.15) * 0.15 * 100) / 100} ريال
+                          +{formatPrice(Math.round((formData.total_amount / 1.15) * 0.15 * 100) / 100)}
                         </span>
                       </div>
                     </>
@@ -859,7 +860,7 @@ export default function NewAdvertiser() {
                   
                   <div className="flex justify-between items-center text-lg font-bold">
                     <span className="text-gray-800">المجموع {formData.include_vat ? 'شامل الضريبة' : ''}:</span>
-                    <span className="text-primary-600">{formData.total_amount} ريال</span>
+                    <span className="text-primary-600">{formatPrice(formData.total_amount)}</span>
                   </div>
                 </div>
                 
@@ -873,15 +874,15 @@ export default function NewAdvertiser() {
                     onChange={handleInputChange}
                     min="0"
                     max={formData.total_amount}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all english-numbers"
                     placeholder="0"
                   />
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center english-numbers">
                     <span className="text-lg font-semibold text-gray-700">المبلغ المتبقي:</span>
-                    <span className="text-2xl font-bold text-red-600">{formData.total_amount - formData.paid_amount} ريال</span>
+                    <span className="text-2xl font-bold text-red-600">{formatPrice(formData.total_amount - formData.paid_amount)}</span>
                   </div>
                 </div>
               </div>

@@ -34,6 +34,7 @@ import {
   FaArrowDown,
   FaCheck
 } from 'react-icons/fa';
+import { formatNumber, formatPrice } from '@/lib/utils/numbers';
 
 export type CoverageType = 'kingdom' | 'city' | 'both' | null;
 
@@ -384,13 +385,13 @@ export default function CoverageAndPackageSelector({
 
                         {/* Price */}
                         <div className="bg-primary-50 rounded-lg p-3 mb-3">
-                          <div className="flex items-baseline justify-center gap-2">
+                          <div className="flex items-baseline justify-center gap-2 english-numbers">
                             <span className="text-4xl font-bold text-primary-600">
-                              {plan.price.toLocaleString('ar-SA')}
+                              {formatNumber(plan.price)}
                             </span>
                             <span className="text-gray-700 font-semibold">ريال</span>
                           </div>
-                          <div className="text-center text-sm text-gray-600 mt-1">
+                          <div className="text-center text-sm text-gray-600 mt-1 english-numbers">
                             <FaBox className="inline ml-1" />
                             المدة: <span className="font-semibold">{plan.duration_days} يوم</span>
                           </div>
@@ -541,13 +542,13 @@ export default function CoverageAndPackageSelector({
 
                         {/* Price */}
                         <div className="bg-blue-50 rounded-lg p-3 mb-3">
-                          <div className="flex items-baseline justify-center gap-2">
+                          <div className="flex items-baseline justify-center gap-2 english-numbers">
                             <span className="text-4xl font-bold text-blue-600">
-                              {plan.price.toLocaleString('ar-SA')}
+                              {formatNumber(plan.price)}
                             </span>
                             <span className="text-gray-700 font-semibold">ريال</span>
                           </div>
-                          <div className="text-center text-sm text-gray-600 mt-1">
+                          <div className="text-center text-sm text-gray-600 mt-1 english-numbers">
                             <FaBox className="inline ml-1" />
                             المدة: <span className="font-semibold">{plan.duration_days} يوم</span>
                           </div>
@@ -619,7 +620,7 @@ export default function CoverageAndPackageSelector({
                             <div className="font-bold text-lg text-gray-800">
                               {selectedKingdomPlan.name}
                             </div>
-                            <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap">
+                            <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap english-numbers">
                               <FaGlobe className="text-primary-500" />
                               <span>تغطية المملكة</span>
                               <span className="text-gray-400">•</span>
@@ -638,9 +639,9 @@ export default function CoverageAndPackageSelector({
                             </div>
                           </div>
                         </div>
-                        <div className="text-left">
+                        <div className="text-left english-numbers">
                           <div className="text-2xl font-bold text-primary-600">
-                            {selectedKingdomPlan.price.toLocaleString('ar-SA')}
+                            {formatNumber(selectedKingdomPlan.price)}
                           </div>
                           <div className="text-sm text-gray-600">ريال</div>
                         </div>
@@ -665,7 +666,7 @@ export default function CoverageAndPackageSelector({
                             <div className="font-bold text-lg text-gray-800">
                               {selectedCityPlan.name}
                             </div>
-                            <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap">
+                            <div className="text-sm text-gray-600 flex items-center gap-2 flex-wrap english-numbers">
                               <FaMapMarkerAlt className="text-blue-500" />
                               <span>
                                 {AVAILABLE_CITIES.find(c => c.id === selectedCity)?.name || selectedCity}
@@ -686,9 +687,9 @@ export default function CoverageAndPackageSelector({
                             </div>
                           </div>
                         </div>
-                        <div className="text-left">
+                        <div className="text-left english-numbers">
                           <div className="text-2xl font-bold text-blue-600">
-                            {selectedCityPlan.price.toLocaleString('ar-SA')}
+                            {formatNumber(selectedCityPlan.price)}
                           </div>
                           <div className="text-sm text-gray-600">ريال</div>
                         </div>
@@ -706,9 +707,9 @@ export default function CoverageAndPackageSelector({
                         قبل الخصومات والضريبة
                       </div>
                     </div>
-                    <div className="text-left">
+                    <div className="text-left english-numbers">
                       <div className="text-4xl font-bold">
-                        {totalAmount.toLocaleString('ar-SA')}
+                        {formatNumber(totalAmount)}
                       </div>
                       <div className="text-lg font-semibold">ريال سعودي</div>
                     </div>

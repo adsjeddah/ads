@@ -13,6 +13,23 @@
     @apply font-arabic;
     direction: rtl;
   }
+
+  /* فرض استخدام الأرقام الإنجليزية في جميع أنحاء الموقع */
+  * {
+    font-variant-numeric: lining-nums;
+    -moz-font-feature-settings: "lnum" 1;
+    -webkit-font-feature-settings: "lnum" 1;
+    font-feature-settings: "lnum" 1;
+  }
+  
+  /* منع تحويل الأرقام للعربية */
+  html {
+    -webkit-locale: "en";
+  }
+  
+  body {
+    -webkit-locale: "en";
+  }
 }
 
 @layer components {
@@ -50,6 +67,14 @@
   
   .animation-delay-4000 {
     animation-delay: 4s;
+  }
+
+  /* فرض الأرقام الإنجليزية */
+  .english-numbers {
+    font-variant-numeric: lining-nums;
+    -moz-font-feature-settings: "lnum" 1;
+    -webkit-font-feature-settings: "lnum" 1;
+    font-feature-settings: "lnum" 1;
   }
 }
 
@@ -135,4 +160,26 @@ body.menu-open {
     background: rgba(0, 0, 0, 0.5);
     z-index: 40;
   }
+}
+
+/* فرض الأرقام الإنجليزية في العناصر المهمة */
+input[type="number"],
+input[type="tel"],
+.price,
+.amount,
+.invoice,
+.total,
+.currency,
+table td,
+table th,
+.stat-value,
+.count,
+.duration {
+  font-variant-numeric: lining-nums !important;
+  -moz-font-feature-settings: "lnum" 1 !important;
+  -webkit-font-feature-settings: "lnum" 1 !important;
+  font-feature-settings: "lnum" 1 !important;
+  unicode-bidi: embed !important;
+  direction: ltr !important;
+  text-align: inherit !important;
 }

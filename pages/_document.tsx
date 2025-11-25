@@ -19,6 +19,10 @@ export default function Document() {
         <meta property="og:type" content="website" />
         <meta name="theme-color" content="#3b82f6" />
         
+        {/* فرض استخدام الأرقام الإنجليزية */}
+        <meta httpEquiv="Content-Language" content="ar" />
+        <meta name="format-detection" content="telephone=no" />
+        
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />

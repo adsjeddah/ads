@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { AdvertiserService } from '../../../lib/services/advertiser.service';
 import { AdvertiserAdminService } from '../../../lib/services/advertiser-admin.service';
 import { FinancialService } from '../../../lib/services/financial.service';
+import { GoogleSheetsService } from '../../../lib/services/google-sheets.service';
+import { PlansAdminService } from '../../../lib/services/plans-admin.service';
 import { Advertiser } from '../../../types/models';
 import { verifyAdminToken } from '../../../lib/firebase-admin'; // Assuming admin-only access for POST
 
@@ -116,6 +118,7 @@ export default async function handler(
       
       // 🆕 إنشاء اشتراكات متعددة من الباقات المختارة
       const createdSubscriptions = [];
+      const sheetsPackages = []; // للحفظ في Google Sheets
       
       if (packages && packages.length > 0) {
         // النظام الجديد: باقات متعددة
@@ -143,6 +146,22 @@ export default async function handler(
               subscription_id: financialResult.subscription_id
             });
             
+            // جلب معلومات الباقة للحفظ في Sheets
+            try {
+              const plan = await PlansAdminService.getById(pkg.plan_id);
+              if (plan) {
+                sheetsPackages.push({
+                  plan_name: plan.name || `${plan.duration_days} يوم`,
+                  start_date: pkg.start_date,
+                  end_date: pkg.end_date,
+                  total_amount: pkg.total_amount || 0,
+                  paid_amount: pkg.paid_amount || 0
+                });
+              }
+            } catch (planError) {
+              console.error('خطأ في جلب معلومات الباقة:', planError);
+            }
+            
             console.log(`✅ اشتراك ${pkg.coverage_type} تم إنشاؤه بنجاح:`, financialResult.subscription_id);
           } catch (subError: any) {
             console.error(`❌ خطأ في إنشاء اشتراك ${pkg.coverage_type}:`, subError);
@@ -168,10 +187,42 @@ export default async function handler(
             subscription_id: financialResult.subscription_id
           });
           
+          // جلب معلومات الباقة للحفظ في Sheets
+          try {
+            const plan = await PlansAdminService.getById(plan_id);
+            if (plan) {
+              sheetsPackages.push({
+                plan_name: plan.name || `${plan.duration_days} يوم`,
+                start_date: start_date,
+                end_date: end_date || start_date,
+                total_amount: total_amount || 0,
+                paid_amount: paid_amount || 0
+              });
+            }
+          } catch (planError) {
+            console.error('خطأ في جلب معلومات الباقة:', planError);
+          }
+          
           console.log('✅ Subscription + Invoice + Payment created (legacy):', financialResult);
         } catch (subError: any) {
           console.error('❌ Error creating subscription with invoice:', subError);
         }
+      }
+      
+      // 📊 حفظ المعلن في Google Sheets (للأرشفة فقط)
+      try {
+        await GoogleSheetsService.addAdvertiserToArchive({
+          advertiser_id: newAdvertiserId,
+          company_name,
+          phone,
+          sector: sector || 'غير محدد',
+          coverage_type: coverage_type || 'kingdom',
+          coverage_cities: coverage_cities,
+          packages: sheetsPackages
+        });
+      } catch (sheetsError) {
+        // نسجل الخطأ فقط ولا نوقف العملية
+        console.error('⚠️ لم يتم حفظ المعلن في Google Sheets:', sheetsError);
       }
       
       // استجابة محسنة تشمل معلومات الاشتراكات
