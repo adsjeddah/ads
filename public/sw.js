@@ -1,86 +1,60 @@
-// Service Worker for caching and performance
-const CACHE_NAME = 'ads-cache-v1';
+// Service Worker للـ Caching المحسّن
+// يساعد في تحميل الصفحات بشكل أسرع للزوار المتكررين
+
+const CACHE_NAME = 'prokr-cache-v1';
 const urlsToCache = [
   '/',
-  '/styles/globals.css',
-  '/images/reviews/mohamed.jpg',
-  '/images/reviews/asmaa.webp',
-  '/images/reviews/khaled.jpg',
-  '/images/reviews/doha.jpg',
-  '/images/reviews/abdallah.png',
-  '/images/reviews/hagar.jpg',
-  '/images/reviews/ali.jpg',
-  '/images/reviews/mohanad.jpg',
-  '/images/reviews/osama.png',
-  '/images/reviews/hany.jpg',
-  '/images/reviews/otibi.jpg',
-  '/images/reviews/marawan.webp',
-  '/images/reviews/rihana.webp'
+  '/movers',
+  '/cleaning',
+  '/water-leaks',
+  '/pest-control',
+  '/advertise',
 ];
 
-self.addEventListener('install', event => {
+// Install event
+self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        // Cache each URL individually to handle failures gracefully
-        return Promise.all(
-          urlsToCache.map(url => {
-            return cache.add(url).catch(err => {
-              console.warn('Failed to cache:', url, err);
-            });
-          })
-        );
+      .then((cache) => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
       })
   );
+  self.skipWaiting();
 });
 
-self.addEventListener('fetch', event => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') {
-    return;
-  }
-  
+// Fetch event - Network First, then Cache
+self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Return cached response if found
-        if (response) {
-          return response;
-        }
-        
-        // Clone the request for caching
-        const fetchRequest = event.request.clone();
-        
-        return fetch(fetchRequest).then(response => {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          
-          // Clone the response for caching
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          
-          return response;
+    fetch(event.request)
+      .then((response) => {
+        // Cache the new response
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseClone);
         });
+        return response;
       })
-      .catch(err => {
-        console.error('Fetch failed:', err);
+      .catch(() => {
+        // If network fails, try cache
+        return caches.match(event.request);
       })
   );
 });
 
-self.addEventListener('activate', event => {
+// Activate event - Clean old caches
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.filter(cacheName => cacheName !== CACHE_NAME)
-          .map(cacheName => caches.delete(cacheName))
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
       );
     })
   );
+  self.clients.claim();
 });

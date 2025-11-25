@@ -376,6 +376,14 @@ export default function NewAdvertiser() {
         }))
     };
 
+      // 🔍 Log للتحقق من البيانات المرسلة
+      console.log('📤 إرسال بيانات المعلن:', {
+        sector: advertiserData.sector,
+        coverage_type: advertiserData.coverage_type,
+        coverage_cities: advertiserData.coverage_cities,
+        packages_count: advertiserData.packages.length
+      });
+
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, advertiserData, {
         headers: {
           Authorization: `Bearer ${token}`,

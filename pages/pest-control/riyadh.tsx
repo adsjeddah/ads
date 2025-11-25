@@ -821,9 +821,9 @@ export default function PestControlRiyadh() {
               >
                 <div className="flex items-center gap-3 mb-3">
                   <FaCheckCircle className="text-green-500 text-2xl" />
-                  <h3 className="font-bold text-lg">ضمان عدم الخدش أو الكسر</h3>
+                  <h3 className="font-bold text-lg">ضمان القضاء الكامل</h3>
                 </div>
-                <p className="text-gray-600 text-sm">تعويض فوري عن أي ضرر يحدث لأثاثك أثناء النقل</p>
+                <p className="text-gray-600 text-sm">نستخدم أحدث المبيدات الفعّالة والآمنة للقضاء التام على الحشرات</p>
               </motion.div>
 
               <motion.div
@@ -836,7 +836,7 @@ export default function PestControlRiyadh() {
                   <FaUsers className="text-blue-500 text-2xl" />
                   <h3 className="font-bold text-lg">فريق محترف ومدرب</h3>
                 </div>
-                <p className="text-gray-600 text-sm">عمال مدربون على أعلى مستوى للتعامل مع جميع أنواع الأثاث</p>
+                <p className="text-gray-600 text-sm">فنيون متخصصون في مكافحة جميع أنواع الحشرات والقوارض</p>
               </motion.div>
 
               <motion.div
@@ -860,9 +860,9 @@ export default function PestControlRiyadh() {
               >
                 <div className="flex items-center gap-3 mb-3">
                   <FaClock className="text-orange-500 text-2xl" />
-                  <h3 className="font-bold text-lg">التزام بالمواعيد أو خصم 20%</h3>
+                  <h3 className="font-bold text-lg">مواد آمنة ومعتمدة</h3>
                 </div>
-                <p className="text-gray-600 text-sm">نضمن الوصول في الوقت المحدد أو تحصل على خصم فوري</p>
+                <p className="text-gray-600 text-sm">نستخدم مبيدات معتمدة من وزارة الصحة وآمنة على الأطفال والحيوانات</p>
               </motion.div>
             </div>
           </div>
@@ -877,9 +877,9 @@ export default function PestControlRiyadh() {
               className="text-center mb-12"
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="text-gradient">دليلك لنقل آمن وسليم</span>
+                <span className="text-gradient">دليلك للحماية من الحشرات</span>
               </h2>
-              <p className="text-xl text-gray-600">نصائح مهمة لضمان نقل أثاثك بأمان</p>
+              <p className="text-xl text-gray-600">نصائح مهمة للوقاية والتخلص من الحشرات</p>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -891,24 +891,24 @@ export default function PestControlRiyadh() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-primary-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">1</div>
-                  <h3 className="font-bold text-lg">كيف تختار شركة النقل المناسبة؟</h3>
+                  <h3 className="font-bold text-lg">قبل المكافحة</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>تحقق من التراخيص والتأمينات</span>
+                    <span>حدد نوع الحشرات الموجودة (صراصير، نمل، بق، إلخ)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>اقرأ تقييمات العملاء السابقين</span>
+                    <span>نظف المنزل وأزل بقايا الطعام</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>قارن بين عروض الأسعار</span>
+                    <span>أغلق الثقوب والشقوق التي قد تدخل منها الحشرات</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>اسأل عن خبرتهم ومعداتهم</span>
+                    <span>ابعد الأطفال والحيوانات الأليفة عن منطقة الرش</span>
                   </li>
                 </ul>
               </motion.div>
@@ -921,24 +921,24 @@ export default function PestControlRiyadh() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-secondary-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">2</div>
-                  <h3 className="font-bold text-lg">نصائح لحماية أثاثك أثناء النقل</h3>
+                  <h3 className="font-bold text-lg">أثناء عملية المكافحة</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>استخدم مواد تغليف عالية الجودة</span>
+                    <span>اترك المنزل لمدة 2-4 ساعات بعد الرش</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>قم بتفكيك القطع الكبيرة</span>
+                    <span>غطِ أواني الطعام والمشروبات</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>ضع علامات على الصناديق الهشة</span>
+                    <span>أغلق النوافذ أثناء الرش</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>احتفظ بالأشياء الثمينة معك</span>
+                    <span>اتبع تعليمات فريق المكافحة بدقة</span>
                   </li>
                 </ul>
               </motion.div>
@@ -951,24 +951,24 @@ export default function PestControlRiyadh() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-accent-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">3</div>
-                  <h3 className="font-bold text-lg">قائمة التحقق قبل النقل</h3>
+                  <h3 className="font-bold text-lg">بعد المكافحة</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>جرد جميع الأغراض وتصويرها</span>
+                    <span>هوّ المنزل جيداً قبل العودة</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>تنظيف الأثاث قبل التغليف</span>
+                    <span>لا تنظف الأسطح المرشوشة لمدة أسبوع</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>فصل الأجهزة الكهربائية</span>
+                    <span>راقب ظهور أي حشرات وأبلغ الشركة</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>تجهيز المنزل الجديد</span>
+                    <span>احجز جلسة متابعة بعد شهر للتأكد</span>
                   </li>
                 </ul>
               </motion.div>
@@ -985,7 +985,7 @@ export default function PestControlRiyadh() {
                 <h3 className="font-bold text-xl text-yellow-800">نصيحة ذهبية</h3>
               </div>
               <p className="text-yellow-700">
-                احجز موعد النقل مسبقاً بأسبوع على الأقل لضمان توفر أفضل الفرق والمعدات
+                المكافحة الدورية كل 3-6 أشهر تمنع عودة الحشرات وتحافظ على صحة عائلتك
               </p>
             </motion.div>
           </div>
@@ -1004,10 +1004,10 @@ export default function PestControlRiyadh() {
               whileInView={{ opacity: 1, y: 0 }}
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                هل تملك شركة نقل عفش في الرياض؟
+                هل تملك شركة تقدم خدمات في المملكة؟
               </h2>
               <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                انضم إلى دليلنا واحصل على عملاء جدد يومياً
+                انضم إلى دليل الشركات الأول في المملكة واحصل على عملاء جدد يومياً
               </p>
               <Link href="/advertise">
                 <motion.button

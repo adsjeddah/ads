@@ -813,46 +813,7 @@ export default function WaterLeaksIndex() {
                 <span className="text-gray-800">في المملكة العربية السعودية</span>
               </h1>
 
-              {/* City Selection */}
-              <div className="mt-6 mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">اختر مدينتك</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                  <Link href="/water-leaks/jeddah">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-primary-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">جدة</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات كشف تسربات المياه في جدة</p>
-                    </motion.div>
-                  </Link>
-
-                  <Link href="/water-leaks/riyadh">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-secondary-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">الرياض</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات كشف تسربات المياه في الرياض</p>
-                    </motion.div>
-                  </Link>
-
-                  <Link href="/water-leaks/dammam">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-accent-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">الدمام</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات كشف تسربات المياه في الدمام</p>
-                    </motion.div>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Advertisers Section - MOVED HERE */}
+              {/* Advertisers Section - Priority Display */}
               <div className="mt-4 md:mt-12"> {/* Reduced margin on mobile for above the fold */}
                 {loading ? (
                   <div className="flex justify-center items-center py-10"> {/* Reduced py for hero section */}
@@ -941,7 +902,47 @@ export default function WaterLeaksIndex() {
                   </div>
                 )}
               </div>
-              {/* End of Moved Advertisers Section */}
+              {/* End of Advertisers Section */}
+
+              {/* City Selection - Moved After Advertisers */}
+              <div className="mt-12 mb-8">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">اختر مدينتك</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                  <Link href="/water-leaks/jeddah">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-primary-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">جدة</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات كشف تسربات المياه في جدة</p>
+                    </motion.div>
+                  </Link>
+
+                  <Link href="/water-leaks/riyadh">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-secondary-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">الرياض</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات كشف تسربات المياه في الرياض</p>
+                    </motion.div>
+                  </Link>
+
+                  <Link href="/water-leaks/dammam">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-accent-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">الدمام</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات كشف تسربات المياه في الدمام</p>
+                    </motion.div>
+                  </Link>
+                </div>
+              </div>
+
             </motion.div>
           </div>
         </section>
@@ -1046,24 +1047,24 @@ export default function WaterLeaksIndex() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-primary-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">1</div>
-                  <h3 className="font-bold text-lg">كيف تختار شركة النقل المناسبة؟</h3>
+                  <h3 className="font-bold text-lg">قبل الكشف عن التسربات</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>تحقق من التراخيص والتأمينات</span>
+                    <span>افحص فواتير المياه للتأكد من عدم وجود ارتفاع غير مبرر</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>اقرأ تقييمات العملاء السابقين</span>
+                    <span>راقب العدادات للتحقق من وجود استهلاك غير طبيعي</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>قارن بين عروض الأسعار</span>
+                    <span>ابحث عن علامات الرطوبة في الجدران والأسقف</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>اسأل عن خبرتهم ومعداتهم</span>
+                    <span>تحقق من وجود روائح غريبة قد تشير لتسرب</span>
                   </li>
                 </ul>
               </motion.div>
@@ -1076,24 +1077,24 @@ export default function WaterLeaksIndex() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-secondary-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">2</div>
-                  <h3 className="font-bold text-lg">نصائح لحماية أثاثك أثناء النقل</h3>
+                  <h3 className="font-bold text-lg">أثناء عملية الكشف</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>استخدم مواد تغليف عالية الجودة</span>
+                    <span>وفر الوصول لجميع المناطق المشتبه بها</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>قم بتفكيك القطع الكبيرة</span>
+                    <span>أطفئ مصادر المياه غير الضرورية</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>ضع علامات على الصناديق الهشة</span>
+                    <span>وثق المناطق المتضررة بالصور</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>احتفظ بالأشياء الثمينة معك</span>
+                    <span>اطرح الأسئلة واستفسر عن أي شيء غير واضح</span>
                   </li>
                 </ul>
               </motion.div>
@@ -1106,24 +1107,24 @@ export default function WaterLeaksIndex() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-accent-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">3</div>
-                  <h3 className="font-bold text-lg">قائمة التحقق قبل النقل</h3>
+                  <h3 className="font-bold text-lg">بعد إصلاح التسربات</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>جرد جميع الأغراض وتصويرها</span>
+                    <span>راقب المناطق المصلحة للتأكد من عدم عودة المشكلة</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>تنظيف الأثاث قبل التغليف</span>
+                    <span>احتفظ بتقرير الكشف والإصلاح</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>فصل الأجهزة الكهربائية</span>
+                    <span>قم بفحص دوري كل 6 أشهر</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>تجهيز المنزل الجديد</span>
+                    <span>اعزل الخزانات والأسطح سنوياً</span>
                   </li>
                 </ul>
               </motion.div>
@@ -1141,7 +1142,7 @@ export default function WaterLeaksIndex() {
                 <h3 className="font-bold text-xl text-yellow-800">نصيحة ذهبية</h3>
               </div>
               <p className="text-yellow-700">
-                احجز موعد النقل مسبقاً بأسبوع على الأقل لضمان توفر أفضل الفرق والمعدات
+                لا تؤجل كشف التسربات! التأخير قد يؤدي إلى أضرار كبيرة وتكاليف باهظة
               </p>
             </motion.div>
           </div>
@@ -1160,10 +1161,10 @@ export default function WaterLeaksIndex() {
               whileInView={{ opacity: 1, y: 0 }}
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                هل تملك شركة نقل عفش في المملكة؟
+                هل تملك شركة تقدم خدمات في المملكة؟
               </h2>
               <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                انضم إلى دليلنا واحصل على عملاء جدد يومياً
+                انضم إلى دليل الشركات الأول في المملكة واحصل على عملاء جدد يومياً
               </p>
               <Link href="/advertise">
                 <motion.button

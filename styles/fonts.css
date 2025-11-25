@@ -1,0 +1,41 @@
+/* 
+ * تحسين الخطوط للأداء العالي
+ * استخدام Font Display: Swap لتجنب FOIT
+ */
+
+/* Tajawal - خط عربي محسّن */
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Tajawal Regular'), local('Tajawal-Regular'),
+       url('https://fonts.gstatic.com/s/tajawal/v3/Iura6YBj_oCad4k1nzSBC45I.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+FB50-FDFF, U+FE80-FEFC;
+}
+
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Tajawal Bold'), local('Tajawal-Bold'),
+       url('https://fonts.gstatic.com/s/tajawal/v3/Iurf6YBj_oCad4k1l5qjHrRpiYlJ.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+FB50-FDFF, U+FE80-FEFC;
+}
+
+/* تطبيق الخط على العناصر العربية */
+body {
+  font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* تحسين عرض النص */
+* {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+

@@ -813,46 +813,7 @@ export default function MoversIndex() {
                 <span className="text-gray-800">في المملكة العربية السعودية</span>
               </h1>
 
-              {/* City Selection */}
-              <div className="mt-6 mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">اختر مدينتك</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                  <Link href="/movers/jeddah">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-primary-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">جدة</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات نقل العفش في جدة</p>
-                    </motion.div>
-                  </Link>
-
-                  <Link href="/movers/riyadh">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-secondary-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">الرياض</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات نقل العفش في الرياض</p>
-                    </motion.div>
-                  </Link>
-
-                  <Link href="/movers/dammam">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-accent-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">الدمام</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات نقل العفش في الدمام</p>
-                    </motion.div>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Advertisers Section - MOVED HERE */}
+              {/* Advertisers Section - Priority Display */}
               <div className="mt-4 md:mt-12"> {/* Reduced margin on mobile for above the fold */}
                 {loading ? (
                   <div className="flex justify-center items-center py-10"> {/* Reduced py for hero section */}
@@ -941,7 +902,47 @@ export default function MoversIndex() {
                   </div>
                 )}
               </div>
-              {/* End of Moved Advertisers Section */}
+              {/* End of Advertisers Section */}
+
+              {/* City Selection - Moved After Advertisers */}
+              <div className="mt-12 mb-8">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">اختر مدينتك</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                  <Link href="/movers/jeddah">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-primary-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">جدة</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات نقل العفش في جدة</p>
+                    </motion.div>
+                  </Link>
+
+                  <Link href="/movers/riyadh">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-secondary-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">الرياض</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات نقل العفش في الرياض</p>
+                    </motion.div>
+                  </Link>
+
+                  <Link href="/movers/dammam">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-accent-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">الدمام</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات نقل العفش في الدمام</p>
+                    </motion.div>
+                  </Link>
+                </div>
+              </div>
+
             </motion.div>
           </div>
         </section>
@@ -1160,10 +1161,10 @@ export default function MoversIndex() {
               whileInView={{ opacity: 1, y: 0 }}
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                هل تملك شركة نقل عفش في المملكة؟
+                هل تملك شركة تقدم خدمات في المملكة؟
               </h2>
               <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                انضم إلى دليلنا واحصل على عملاء جدد يومياً
+                انضم إلى دليل الشركات الأول في المملكة واحصل على عملاء جدد يومياً
               </p>
               <Link href="/advertise">
                 <motion.button

@@ -51,17 +51,12 @@ export default function Advertise() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedPlan) {
-      toast.error('يرجى اختيار خطة الإعلان');
-      return;
-    }
 
     setLoading(true);
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/ad-requests`, {
         ...formData,
-        plan_id: selectedPlan
+        plan_id: selectedPlan || null
       });
       
       toast.success('تم إرسال طلبك بنجاح! سنتواصل معك قريباً');
@@ -124,8 +119,8 @@ export default function Advertise() {
   return (
     <>
       <Head>
-        <title>أعلن معنا - دليل شركات نقل العفش في جدة</title>
-        <meta name="description" content="انضم إلى دليل شركات نقل العفش في جدة واحصل على عملاء جدد يومياً" />
+        <title>أعلن معنا - دليل الشركات في المملكة العربية السعودية</title>
+        <meta name="description" content="انضم إلى دليل الشركات الأول في المملكة واحصل على عملاء جدد يومياً من جميع أنحاء السعودية" />
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -138,7 +133,7 @@ export default function Advertise() {
                   whileHover={{ scale: 1.05 }}
                   className="text-2xl font-bold text-gradient cursor-pointer"
                 >
-                  دليل نقل العفش - جدة
+                  دليل الشركات - المملكة
                 </motion.div>
               </Link>
               <Link href="/">
@@ -166,10 +161,10 @@ export default function Advertise() {
               <h1 className="text-5xl md:text-6xl font-bold mb-6">
                 <span className="text-gradient">انضم إلى أكبر دليل</span>
                 <br />
-                <span className="text-gray-800">لشركات نقل العفش في جدة</span>
+                <span className="text-gray-800">للشركات في المملكة العربية السعودية</span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 mb-8">
-                احصل على عملاء جدد يومياً من خلال إعلانات Google المُحسّنة
+                احصل على عملاء جدد من جميع أنحاء المملكة يومياً
                 <br />
                 وزد من أرباحك بنسبة تصل إلى 300%
               </p>
@@ -243,8 +238,8 @@ export default function Advertise() {
           </div>
         </section>
 
-        {/* Pricing Plans */}
-        <section className="py-20 bg-white/80 backdrop-blur-sm">
+        {/* Pricing Plans - Hidden */}
+        <section className="py-20 bg-white/80 backdrop-blur-sm" style={{ display: 'none' }}>
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -327,8 +322,8 @@ export default function Advertise() {
             >
               <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
                 <div className="bg-gradient-to-r from-primary-600 via-secondary-600 to-accent-600 text-white p-8 text-center">
-                  <h2 className="text-3xl font-bold mb-2">سجل شركتك الآن</h2>
-                  <p className="text-lg opacity-90">املأ البيانات وسنتواصل معك خلال 24 ساعة</p>
+                  <h2 className="text-3xl font-bold mb-2">انضم إلى دليل الشركات في المملكة</h2>
+                  <p className="text-lg opacity-90">املأ البيانات وسنتواصل معك خلال 24 ساعة لتوفير أفضل حلول الإعلان لشركتك</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -345,7 +340,7 @@ export default function Advertise() {
                         onChange={handleInputChange}
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                        placeholder="شركة نقل العفش المتميزة"
+                        placeholder="مثال: شركة الخدمات المتميزة"
                       />
                     </div>
 
@@ -409,25 +404,17 @@ export default function Advertise() {
                       onChange={handleInputChange}
                       rows={4}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
-                      placeholder="أخبرنا المزيد عن شركتك وخدماتك..."
+                      placeholder="أخبرنا عن نوع خدماتك، المدن التي تغطيها، وأي معلومات إضافية تود إضافتها..."
                     />
                   </div>
 
-                  {selectedPlan && (
-                    <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-300 rounded-lg p-4">
-                      <p className="text-green-800 font-semibold">
-                        الخطة المختارة: {plans.find(p => p.id === selectedPlan)?.name}
-                      </p>
-                    </div>
-                  )}
-
                   <motion.button
                     type="submit"
-                    disabled={loading || !selectedPlan}
+                    disabled={loading}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className={`w-full py-4 rounded-lg font-bold text-lg transition-all ${
-                      loading || !selectedPlan
+                      loading
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-primary-600 to-secondary-600 text-white hover:shadow-xl'
                     }`}
@@ -505,7 +492,7 @@ export default function Advertise() {
                   +966 54 892 3300
                 </a>
               </div>
-              <p className="text-gray-400">جميع الحقوق محفوظة © 2024 دليل شركات نقل العفش في جدة</p>
+              <p className="text-gray-400">جميع الحقوق محفوظة © 2024 دليل الشركات في المملكة العربية السعودية</p>
             </div>
           </div>
         </footer>

@@ -8,8 +8,8 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Head>
-        <title>سياسة الخصوصية - دليل شركات نقل العفش في جدة</title>
-        <meta name="description" content="سياسة الخصوصية لموقع دليل شركات نقل العفش في جدة." />
+        <title>سياسة الخصوصية - دليل الشركات في المملكة العربية السعودية</title>
+        <meta name="description" content="سياسة الخصوصية لموقع دليل الشركات في المملكة العربية السعودية." />
       </Head>
 
       <div className="min-h-screen bg-gray-50">
@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
                   whileHover={{ scale: 1.05 }}
                   className="text-2xl font-bold text-gradient cursor-pointer"
                 >
-                  دليل نقل العفش - جدة
+                  دليل الشركات - المملكة
                 </motion.div>
               </Link>
               <Link href="/">
@@ -50,7 +50,7 @@ export default function PrivacyPolicy() {
             <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed" dir="rtl">
               <p>آخر تحديث: 1 يوليو 2025</p>
 
-              <p>نحن في "دليل شركات نقل العفش في جدة" (المشار إليه فيما يلي بـ "الموقع") نلتزم بحماية خصوصية زوارنا ومستخدمينا. توضح سياسة الخصوصية هذه كيف نجمع ونستخدم ونحمي معلوماتك الشخصية.</p>
+              <p>نحن في "دليل الشركات في المملكة العربية السعودية" (المشار إليه فيما يلي بـ "الموقع" أو "المنصة") نلتزم بحماية خصوصية زوارنا ومستخدمينا. توضح سياسة الخصوصية هذه كيف نجمع ونستخدم ونحمي معلوماتك الشخصية عند استخدام منصتنا للبحث عن الخدمات أو الإعلان عن شركتك.</p>
 
               <h2 className="text-2xl font-semibold mt-6 mb-3">1. المعلومات التي نجمعها</h2>
               <p>قد نجمع الأنواع التالية من المعلومات:</p>
@@ -104,7 +104,7 @@ export default function PrivacyPolicy() {
         {/* Footer */}
         <footer className="bg-gray-900 text-white py-8 mt-12">
           <div className="container mx-auto px-4 text-center">
-            <p>جميع الحقوق محفوظة © {new Date().getFullYear()} دليل شركات نقل العفش في جدة</p>
+            <p>جميع الحقوق محفوظة © {new Date().getFullYear()} دليل الشركات في المملكة العربية السعودية</p>
           </div>
         </footer>
       </div>

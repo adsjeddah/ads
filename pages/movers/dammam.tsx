@@ -1004,10 +1004,10 @@ export default function MoversDammam() {
               whileInView={{ opacity: 1, y: 0 }}
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                هل تملك شركة نقل عفش في الدمام؟
+                هل تملك شركة تقدم خدمات في المملكة؟
               </h2>
               <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                انضم إلى دليلنا واحصل على عملاء جدد يومياً
+                انضم إلى دليل الشركات الأول في المملكة واحصل على عملاء جدد يومياً
               </p>
               <Link href="/advertise">
                 <motion.button

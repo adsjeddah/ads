@@ -2,10 +2,14 @@ import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { Toaster } from 'react-hot-toast'
 import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
   
   useEffect(() => {
+    // 🚀 Performance Optimizations
+    
     // Register Service Worker for caching
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker.register('/sw.js').catch(err =>
@@ -13,12 +17,16 @@ export default function App({ Component, pageProps }: AppProps) {
       );
     }
 
-    // Preconnect to external domains
-    const link = document.createElement('link');
-    link.rel = 'preconnect';
-    link.href = 'https://fonts.googleapis.com';
-    document.head.appendChild(link);
-  }, []);
+    // ⚡ Prefetch important routes للتحميل الأسرع
+    const importantRoutes = ['/movers', '/cleaning', '/water-leaks', '/pest-control', '/advertise'];
+    importantRoutes.forEach(route => {
+      router.prefetch(route);
+    });
+    
+    // 📊 Google Analytics (إذا كنت تستخدمه)
+    // يمكنك إضافة tracking للزوار من Google Ads هنا
+    
+  }, [router]);
 
   return (
     <>
@@ -26,7 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <Toaster
         position="top-center"
         toastOptions={{
-          duration: 4000,
+          duration: 3000, // تقليل المدة قليلاً
           style: {
             background: '#363636',
             color: '#fff',

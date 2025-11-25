@@ -813,46 +813,7 @@ export default function CleaningIndex() {
                 <span className="text-gray-800">في المملكة العربية السعودية</span>
               </h1>
 
-              {/* City Selection */}
-              <div className="mt-6 mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">اختر مدينتك</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                  <Link href="/cleaning/jeddah">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-primary-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">جدة</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات النظافة في جدة</p>
-                    </motion.div>
-                  </Link>
-
-                  <Link href="/cleaning/riyadh">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-secondary-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">الرياض</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات النظافة في الرياض</p>
-                    </motion.div>
-                  </Link>
-
-                  <Link href="/cleaning/dammam">
-                    <motion.div
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
-                    >
-                      <FaMapMarkerAlt className="text-4xl text-accent-500 mx-auto mb-3" />
-                      <h3 className="text-xl font-bold text-gray-800">الدمام</h3>
-                      <p className="text-sm text-gray-600 mt-2">شركات النظافة في الدمام</p>
-                    </motion.div>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Advertisers Section - MOVED HERE */}
+              {/* Advertisers Section - Priority Display */}
               <div className="mt-4 md:mt-12"> {/* Reduced margin on mobile for above the fold */}
                 {loading ? (
                   <div className="flex justify-center items-center py-10"> {/* Reduced py for hero section */}
@@ -941,7 +902,47 @@ export default function CleaningIndex() {
                   </div>
                 )}
               </div>
-              {/* End of Moved Advertisers Section */}
+              {/* End of Advertisers Section */}
+
+              {/* City Selection - Moved After Advertisers */}
+              <div className="mt-12 mb-8">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">اختر مدينتك</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                  <Link href="/cleaning/jeddah">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-primary-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">جدة</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات النظافة في جدة</p>
+                    </motion.div>
+                  </Link>
+
+                  <Link href="/cleaning/riyadh">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-secondary-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">الرياض</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات النظافة في الرياض</p>
+                    </motion.div>
+                  </Link>
+
+                  <Link href="/cleaning/dammam">
+                    <motion.div
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer border-2 border-transparent hover:border-primary-500 transition-all"
+                    >
+                      <FaMapMarkerAlt className="text-4xl text-accent-500 mx-auto mb-3" />
+                      <h3 className="text-xl font-bold text-gray-800">الدمام</h3>
+                      <p className="text-sm text-gray-600 mt-2">شركات النظافة في الدمام</p>
+                    </motion.div>
+                  </Link>
+                </div>
+              </div>
+
             </motion.div>
           </div>
         </section>
@@ -976,9 +977,9 @@ export default function CleaningIndex() {
               >
                 <div className="flex items-center gap-3 mb-3">
                   <FaCheckCircle className="text-green-500 text-2xl" />
-                  <h3 className="font-bold text-lg">ضمان عدم الخدش أو الكسر</h3>
+                  <h3 className="font-bold text-lg">نظافة شاملة ومضمونة</h3>
                 </div>
-                <p className="text-gray-600 text-sm">تعويض فوري عن أي ضرر يحدث لأثاثك أثناء النقل</p>
+                <p className="text-gray-600 text-sm">نستخدم أفضل المواد والمعدات لضمان نظافة عميقة وفعّالة</p>
               </motion.div>
 
               <motion.div
@@ -991,7 +992,7 @@ export default function CleaningIndex() {
                   <FaUsers className="text-blue-500 text-2xl" />
                   <h3 className="font-bold text-lg">فريق محترف ومدرب</h3>
                 </div>
-                <p className="text-gray-600 text-sm">عمال مدربون على أعلى مستوى للتعامل مع جميع أنواع الأثاث</p>
+                <p className="text-gray-600 text-sm">عمال مدربون على أعلى مستوى مع خبرة في جميع أنواع التنظيف</p>
               </motion.div>
 
               <motion.div
@@ -1015,9 +1016,9 @@ export default function CleaningIndex() {
               >
                 <div className="flex items-center gap-3 mb-3">
                   <FaClock className="text-orange-500 text-2xl" />
-                  <h3 className="font-bold text-lg">التزام بالمواعيد أو خصم 20%</h3>
+                  <h3 className="font-bold text-lg">مواد آمنة وصديقة للبيئة</h3>
                 </div>
-                <p className="text-gray-600 text-sm">نضمن الوصول في الوقت المحدد أو تحصل على خصم فوري</p>
+                <p className="text-gray-600 text-sm">نستخدم مواد تنظيف آمنة على الصحة والبيئة</p>
               </motion.div>
             </div>
           </div>
@@ -1032,9 +1033,9 @@ export default function CleaningIndex() {
               className="text-center mb-12"
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="text-gradient">دليلك لنقل آمن وسليم</span>
+                <span className="text-gradient">دليلك للحصول على نظافة مثالية</span>
               </h2>
-              <p className="text-xl text-gray-600">نصائح مهمة لضمان نقل أثاثك بأمان</p>
+              <p className="text-xl text-gray-600">نصائح مهمة للحفاظ على نظافة منزلك</p>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1046,24 +1047,24 @@ export default function CleaningIndex() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-primary-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">1</div>
-                  <h3 className="font-bold text-lg">كيف تختار شركة النقل المناسبة؟</h3>
+                  <h3 className="font-bold text-lg">قبل البدء بالتنظيف</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>تحقق من التراخيص والتأمينات</span>
+                    <span>حدد نوع الخدمة المطلوبة (تنظيف شامل، يومي، إلخ)</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>اقرأ تقييمات العملاء السابقين</span>
+                    <span>رتب الأغراض الشخصية والقيمة في مكان آمن</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>قارن بين عروض الأسعار</span>
+                    <span>تأكد من توفر الكهرباء والماء</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
-                    <span>اسأل عن خبرتهم ومعداتهم</span>
+                    <span>حدد المناطق التي تحتاج عناية خاصة</span>
                   </li>
                 </ul>
               </motion.div>
@@ -1076,24 +1077,24 @@ export default function CleaningIndex() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-secondary-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">2</div>
-                  <h3 className="font-bold text-lg">نصائح لحماية أثاثك أثناء النقل</h3>
+                  <h3 className="font-bold text-lg">أثناء عملية التنظيف</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>استخدم مواد تغليف عالية الجودة</span>
+                    <span>وفر الوصول لجميع الغرف والمناطق</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>قم بتفكيك القطع الكبيرة</span>
+                    <span>أبلغ الفريق عن أي أسطح حساسة</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>ضع علامات على الصناديق الهشة</span>
+                    <span>احتفظ بالحيوانات الأليفة في مكان آمن</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaBoxes className="text-blue-500 mt-1 flex-shrink-0" />
-                    <span>احتفظ بالأشياء الثمينة معك</span>
+                    <span>راقب جودة العمل واطرح أسئلتك</span>
                   </li>
                 </ul>
               </motion.div>
@@ -1106,24 +1107,24 @@ export default function CleaningIndex() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-accent-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold">3</div>
-                  <h3 className="font-bold text-lg">قائمة التحقق قبل النقل</h3>
+                  <h3 className="font-bold text-lg">بعد انتهاء التنظيف</h3>
                 </div>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>جرد جميع الأغراض وتصويرها</span>
+                    <span>افحص جميع المناطق للتأكد من النظافة</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>تنظيف الأثاث قبل التغليف</span>
+                    <span>تهوية المكان جيداً</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>فصل الأجهزة الكهربائية</span>
+                    <span>احتفظ بنصائح الصيانة من الفريق</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <FaClipboardCheck className="text-purple-500 mt-1 flex-shrink-0" />
-                    <span>تجهيز المنزل الجديد</span>
+                    <span>جدول تنظيف دوري للحفاظ على النظافة</span>
                   </li>
                 </ul>
               </motion.div>
@@ -1141,7 +1142,7 @@ export default function CleaningIndex() {
                 <h3 className="font-bold text-xl text-yellow-800">نصيحة ذهبية</h3>
               </div>
               <p className="text-yellow-700">
-                احجز موعد النقل مسبقاً بأسبوع على الأقل لضمان توفر أفضل الفرق والمعدات
+                التنظيف الدوري يحافظ على صحتك وصحة عائلتك ويطيل عمر الأثاث والمفروشات
               </p>
             </motion.div>
           </div>
@@ -1160,10 +1161,10 @@ export default function CleaningIndex() {
               whileInView={{ opacity: 1, y: 0 }}
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                هل تملك شركة نقل عفش في المملكة؟
+                هل تملك شركة تقدم خدمات في المملكة؟
               </h2>
               <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                انضم إلى دليلنا واحصل على عملاء جدد يومياً
+                انضم إلى دليل الشركات الأول في المملكة واحصل على عملاء جدد يومياً
               </p>
               <Link href="/advertise">
                 <motion.button

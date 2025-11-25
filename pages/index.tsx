@@ -55,60 +55,60 @@ function ReviewsSection() {
       name: "محمد الغامدي",
       image: "/images/reviews/mohamed.jpg",
       rating: 5,
-      text: "دليل ممتاز! ساعدني في العثور على شركة نقل محترفة بسرعة. الشركة اللي اخترتها من الدليل كانت دقيقة في المواعيد والتعامل راقي جداً. أنصح الجميع بالاستفادة من هذا الدليل",
+      text: "دليل بروكر منصة احترافية حقيقية! استخدمته لنقل العفش والنظافة، وكلتا الشركتين كانتا ممتازة. الدليل وفر علي وقت البحث والمقارنة. كل الشركات موثوقة ومرخصة",
       date: "منذ أسبوع",
-      service: "نقل داخل جدة",
-      cost: "1,200 ريال"
+      service: "نقل عفش + نظافة",
+      cost: "2,800 ريال"
     },
     {
       id: 2,
       name: "أسماء العتيبي",
       image: "/images/reviews/asmaa.webp",
       rating: 5,
-      text: "تجربة رائعة! كنت خايفة على أثاثي لأنه غالي، بس الحمدلله الشركة اللي حصلتها من الدليل كانت محترفة جداً. غلفوا كل شيء بعناية ووصل كله سليم",
+      text: "تجربة رائعة مع بروكر! كنت محتاجة شركة تنظيف موثوقة، ولقيت أفضل الخيارات في الدليل. الشركة كانت محترفة جداً والخدمة فاقت التوقعات. شكراً بروكر!",
       date: "منذ 3 أيام",
-      service: "نقل أثاث فاخر",
-      cost: "2,500 ريال"
+      service: "خدمات نظافة",
+      cost: "850 ريال"
     },
     {
       id: 3,
       name: "خالد الحربي",
       image: "/images/reviews/khaled.jpg",
       rating: 5,
-      text: "أفضل دليل لشركات النقل! وفر علي وقت البحث والمقارنة. كل الشركات الموجودة موثوقة ومرخصة. نقلت عفشي من جدة للرياض والحمدلله كل شيء تمام",
+      text: "أفضل دليل للخدمات في المملكة! استخدمته لكشف تسربات المياه، والشركة حلت المشكلة بسرعة واحترافية. الأسعار واضحة والتعامل ممتاز. أنصح الجميع باستخدامه",
       date: "منذ أسبوعين",
-      service: "نقل بين المدن",
-      cost: "3,800 ريال"
+      service: "كشف تسربات",
+      cost: "1,200 ريال"
     },
     {
       id: 4,
       name: "ضحى السالم",
       image: "/images/reviews/doha.jpg",
       rating: 5,
-      text: "خدمة ممتازة! الدليل سهل الاستخدام وكل المعلومات واضحة. اتصلت على شركة من الدليل وجاوني بنفس اليوم. الأسعار معقولة والشغل نظيف",
+      text: "منصة بروكر سهلة الاستخدام وفعالة! احتجت خدمة مكافحة حشرات عاجلة، ولقيت الشركة المناسبة بسرعة. جاوني بنفس اليوم والخدمة كانت ممتازة. أنصح بالمنصة بقوة",
       date: "منذ 5 أيام",
-      service: "نقل عاجل",
-      cost: "1,500 ريال"
+      service: "مكافحة حشرات",
+      cost: "600 ريال"
     },
     {
       id: 5,
       name: "عبدالله الشمري",
       image: "/images/reviews/abdallah.png",
       rating: 5,
-      text: "تجربتي كانت ممتازة! الدليل وفر علي عناء البحث. الشركة جات في الوقت المحدد وعندهم معدات حديثة. حتى ساعدوني في الفك والتركيب",
+      text: "تجربتي مع بروكر كانت ممتازة! استخدمته لأكثر من خدمة: نقل عفش، تنظيف، وكشف تسربات. كل الشركات كانت احترافية ومحترمة. الدليل فعلاً يوفر الوقت والجهد",
       date: "منذ يومين",
-      service: "نقل مع فك وتركيب",
-      cost: "1,800 ريال"
+      service: "خدمات متنوعة",
+      cost: "3,500 ريال"
     },
     {
       id: 6,
       name: "هاجر القحطاني",
       image: "/images/reviews/hagar.jpg",
-      rating: 4,
-      text: "الدليل مفيد جداً والشركات كلها محترمة. بس تأخروا علي شوي عن الموعد المحدد، غير كذا كل شيء كان ممتاز",
+      rating: 5,
+      text: "صراحة منصة رائعة! كنت محتاجة شركة تنظيف موثوقة بعد الانتقال للمنزل الجديد. بروكر ساعدني ألقى أفضل الشركات بأسعار مناسبة. الخدمة كانت احترافية جداً",
       date: "منذ شهر",
-      service: "نقل شقة كاملة",
-      cost: "2,200 ريال"
+      service: "تنظيف شامل",
+      cost: "1,400 ريال"
     },
     {
       id: 7,
@@ -256,7 +256,7 @@ function ReviewsSection() {
             transition={{ delay: 0.9 }}
             className="text-xl text-gray-300 max-w-3xl mx-auto"
           >
-            تجارب حقيقية من عملاء استخدموا دليلنا للوصول إلى أفضل شركات نقل العفش في المملكة
+            تجارب حقيقية من عملاء استخدموا بروكر للوصول إلى أفضل الشركات الموثوقة في جميع أنحاء المملكة
           </motion.p>
         </motion.div>
 
@@ -532,73 +532,18 @@ function CounterSection() {
   );
 }
 
-interface Advertiser {
-  id: string;
-  company_name: string;
-  phone: string;
-  whatsapp?: string;
-  services?: string;
-  icon_url?: string;
-}
+
 
 export default function Home() {
-  const [advertisers, setAdvertisers] = useState<Advertiser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [shuffledAdvertisers, setShuffledAdvertisers] = useState<Advertiser[]>([]);
+  
+  
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // تعريف الأيقونات المتاحة
-  const iconComponents: { [key: string]: any } = {
-    'truck': FaTruck,
-    'boxes': FaBoxes,
-    'home': FaHome,
-    'dolly': FaDolly,
-    'shipping-fast': FaShippingFast,
-    'warehouse': FaWarehouse,
-    'handshake': FaHandshake,
-    'tools': FaTools,
-    'people-carry': FaPeopleCarry,
-    'route': FaRoute,
-    'clock': FaClock,
-    'shield-alt': FaShieldAlt,
-    'award': FaAward,
-    'star': FaStar,
-    'map-marked-alt': FaMapMarkedAlt,
-    'headset': FaHeadset,
-    'user-tie': FaUserTie,
-    'clipboard-check': FaClipboardCheck,
-    'truck-loading': FaTruckLoading,
-    'box-open': FaBoxOpen,
-  };
-
-  const iconColors: { [key: string]: string } = {
-    'truck': 'text-blue-600',
-    'boxes': 'text-amber-600',
-    'home': 'text-green-600',
-    'dolly': 'text-purple-600',
-    'shipping-fast': 'text-red-600',
-    'warehouse': 'text-indigo-600',
-    'handshake': 'text-teal-600',
-    'tools': 'text-orange-600',
-    'people-carry': 'text-pink-600',
-    'route': 'text-cyan-600',
-    'clock': 'text-yellow-600',
-    'shield-alt': 'text-gray-600',
-    'award': 'text-yellow-500',
-    'star': 'text-yellow-400',
-    'map-marked-alt': 'text-green-500',
-    'headset': 'text-blue-500',
-    'user-tie': 'text-gray-700',
-    'clipboard-check': 'text-green-700',
-    'truck-loading': 'text-red-700',
-    'box-open': 'text-amber-700',
-  };
-
+  
   useEffect(() => {
-    fetchAdvertisers();
-    
-    // Handle scroll event
+        // Handle scroll event
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
@@ -607,74 +552,25 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const fetchAdvertisers = async () => {
-    try {
-      // 🆕 الصفحة الرئيسية: نقل العفش في المملكة فقط
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/advertisers`, {
-        params: {
-          status: 'active',
-          sector: 'movers' // فقط نقل العفش
-        }
-      });
-      
-      // فلترة إضافية: فقط معلني المملكة أو كلاهما
-      const kingdomAdvertisers = response.data.filter((adv: any) => 
-        adv.coverage_type === 'kingdom' || adv.coverage_type === 'both'
-      );
-      
-      setAdvertisers(kingdomAdvertisers);
-      // خلط الإعلانات مرة واحدة عند تحميل البيانات
-      const shuffled = shuffleAdvertisers(kingdomAdvertisers);
-      setShuffledAdvertisers(shuffled);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching advertisers:', error);
-      setLoading(false);
-    }
-  };
+  
 
   // دالة لخلط ترتيب المعلنين بشكل عشوائي
-  const shuffleAdvertisers = (ads: Advertiser[]) => {
-    const shuffled = [...ads];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
+  
 
   // الحصول على المعلنين بالترتيب المخلوط
-  const getRotatedAdvertisers = () => {
-    return shuffledAdvertisers;
-  };
+  
 
-  const handleCall = async (phone: string, advertiserId: string) => {
-    // تتبع النقرة على زر الاتصال
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/statistics/record`, {
-        advertiserId,
-        type: 'call',
-        phone
-      });
-    } catch (error) {
-      console.error('Error recording call:', error);
-    }
-    
-    // فتح تطبيق الاتصال
-    window.location.href = `tel:${phone}`;
-  };
+  
 
-  const handleWhatsApp = (whatsapp: string, companyName: string) => {
-    const message = encodeURIComponent(`مرحباً، أريد الاستفسار عن خدمات نقل العفش - ${companyName}`);
-    window.open(`https://wa.me/${whatsapp}?text=${message}`, '_blank');
-  };
+  
 
   return (
     <>
       <Head>
-        <title>دليل شركات نقل العفش في جدة | أفضل خدمات نقل الأثاث</title>
-        <meta name="description" content="اعثر على أفضل شركات نقل العفش في جدة. خدمات احترافية، أسعار منافسة، وضمان سلامة أثاثك." />
+        <title>بروكر - دليل الشركات والخدمات في المملكة العربية السعودية</title>
+        <meta name="description" content="دليلك الشامل للوصول إلى أفضل الشركات والخدمات في المملكة. نقل عفش، نظافة، كشف تسربات، مكافحة حشرات وغيرها. خدمات موثوقة ومرخصة." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="keywords" content="دليل شركات المملكة, خدمات السعودية, نقل عفش, تنظيف, كشف تسربات, مكافحة حشرات, شركات موثوقة" />
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -693,9 +589,9 @@ export default function Home() {
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
-                    <FaTruck className="text-white text-xl" />
+                    <FaStar className="text-white text-xl" />
                   </div>
-                  <span className={`font-bold text-lg hidden sm:block ${scrolled ? 'text-white' : 'text-gray-900'}`}>دليل نقل العفش</span>
+                  <span className={`font-bold text-lg hidden sm:block ${scrolled ? 'text-white' : 'text-gray-900'}`}>بروكر</span>
                 </motion.div>
               </Link>
 
@@ -807,102 +703,149 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="text-center"
             >
-              <h1 className="text-3xl md:text-5xl font-bold mb-3 md:mb-6">
-                <span className="text-gradient">دليل شركات نقل العفش</span>
+              <h1 className="text-3xl md:text-6xl font-bold mb-3 md:mb-6">
+                <span className="text-gradient">بروكر</span>
                 <br />
-                <span className="text-gray-800">في مدينة جدة</span>
+                <span className="text-gray-800">دليلك الشامل للخدمات في المملكة</span>
               </h1>
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-6 md:mb-8">
+                نربطك بأفضل الشركات الموثوقة والمرخصة في جميع أنحاء المملكة
+              </p>
+              
+              {/* Services Quick Links */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="flex flex-wrap justify-center gap-3 md:gap-4 mb-8 md:mb-12"
+              >
+                <Link href="/movers">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base cursor-pointer"
+                  >
+                    <FaTruck />
+                    نقل العفش
+                  </motion.div>
+                </Link>
+                <Link href="/cleaning">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base cursor-pointer"
+                  >
+                    <FaTools />
+                    النظافة
+                  </motion.div>
+                </Link>
+                <Link href="/water-leaks">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-cyan-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base cursor-pointer"
+                  >
+                    <FaShieldAlt />
+                    كشف التسربات
+                  </motion.div>
+                </Link>
+                <Link href="/pest-control">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base cursor-pointer"
+                  >
+                    <FaAward />
+                    مكافحة الحشرات
+                  </motion.div>
+                </Link>
+              </motion.div>
 
-              {/* Advertisers Section - MOVED HERE */}
-              <div className="mt-4 md:mt-12"> {/* Reduced margin on mobile for above the fold */}
-                {loading ? (
-                  <div className="flex justify-center items-center py-10"> {/* Reduced py for hero section */}
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary-500"></div> {/* Adjusted spinner size */}
-                  </div>
-                ) : (
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key="advertisers-grid"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.5 }}
-                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6"
+              {/* Features Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="mt-8 md:mt-16"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+                  {/* Feature 1 */}
+                  <motion.div
+                    whileHover={{ y: -5 }}
+                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-xl border border-gray-100"
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                        <FaShieldAlt className="text-3xl md:text-4xl text-white" />
+                      </div>
+                      <h3 className="text-xl md:text-2xl font-bold mb-3 text-gray-800">
+                        شركات موثوقة ومرخصة
+                      </h3>
+                      <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                        جميع الشركات في دليلنا تم فحصها والتأكد من تراخيصها لضمان خدمة آمنة وموثوقة
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* Feature 2 */}
+                  <motion.div
+                    whileHover={{ y: -5 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-xl border border-gray-100"
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                        <FaClock className="text-3xl md:text-4xl text-white" />
+                      </div>
+                      <h3 className="text-xl md:text-2xl font-bold mb-3 text-gray-800">
+                        خدمة سريعة ومتاحة
+                      </h3>
+                      <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                        تواصل فوري مع الشركات المتخصصة في جميع أنحاء المملكة على مدار الساعة
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* Feature 3 */}
+                  <motion.div
+                    whileHover={{ y: -5 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-xl border border-gray-100"
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                        <FaStar className="text-3xl md:text-4xl text-white" />
+                      </div>
+                      <h3 className="text-xl md:text-2xl font-bold mb-3 text-gray-800">
+                        أفضل الأسعار
+                      </h3>
+                      <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                        قارن بين عروض متعددة واختر الأنسب لميزانيتك بكل شفافية ووضوح
+                      </p>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* CTA Button */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  className="text-center mt-8 md:mt-12"
+                >
+                  <Link href="/advertise">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-flex items-center gap-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-bold text-lg md:text-xl shadow-2xl hover:shadow-3xl transition-all"
                     >
-                      {getRotatedAdvertisers().map((advertiser, index) => (
-                        <motion.div
-                          key={advertiser.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="relative"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-secondary-500/20 to-accent-500/20 rounded-lg md:rounded-2xl blur-xl"></div>
-                          <div className="relative bg-white rounded-lg md:rounded-2xl shadow-xl overflow-hidden">
-                            {/* Header with gradient */}
-                            <div className="h-0.5 md:h-2 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500"></div>
-                            
-                            <div className="p-2 md:p-4">
-                              {/* Company Icon/Logo */}
-                              <div className="flex justify-center mb-1.5 md:mb-2">
-                                {advertiser.icon_url && iconComponents[advertiser.icon_url] ? (
-                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100">
-                                    {React.createElement(iconComponents[advertiser.icon_url], {
-                                      className: `text-lg md:text-3xl ${iconColors[advertiser.icon_url] || 'text-primary-600'}`
-                                    })}
-                                  </div>
-                                ) : (
-                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white text-base md:text-2xl font-bold shadow-md">
-                                    {advertiser.company_name.charAt(0)}
-                                  </div>
-                                )}
-                              </div>
-    
-                              {/* Company Name */}
-                              <h3 className="text-base md:text-2xl font-bold text-center mb-1.5 md:mb-2 text-gray-800 leading-tight">
-                                {advertiser.company_name}
-                              </h3>
-    
-                              {/* Services */}
-                              {advertiser.services && (
-                                <div className="mb-2 text-center hidden md:block"> {/* إخفاء الخدمات على الموبايل */}
-                                  <p className="text-base text-gray-600 leading-relaxed line-clamp-2">
-                                    {advertiser.services.split('،').map(s => s.trim()).join(' • ')}
-                                  </p>
-                                </div>
-                              )}
-    
-                              {/* Contact Buttons */}
-                              <div className="space-y-1.5 md:space-y-2">
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => handleCall(advertiser.phone, advertiser.id)}
-                                  className="w-full flex items-center justify-center gap-1 md:gap-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white py-1.5 md:py-2.5 px-2 md:px-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden text-[13px] md:text-lg"
-                                >
-                                  <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
-                                  <FaPhone className="relative animate-bounce text-[12px] md:text-lg" />
-                                  <span className="relative font-bold tracking-wider text-[16px] md:text-xl" dir="ltr">
-                                    {advertiser.phone}
-                                  </span>
-                                  <FaBolt className="relative text-yellow-300 animate-pulse text-[12px] md:text-lg" />
-                                </motion.button>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  </AnimatePresence>
-                )}
-
-                {advertisers.length === 0 && !loading && (
-                  <div className="text-center py-10"> {/* Reduced py */}
-                    <p className="text-xl text-gray-500">لا توجد شركات متاحة حالياً</p> {/* Adjusted text size */}
-                  </div>
-                )}
-              </div>
-              {/* End of Moved Advertisers Section */}
+                      <FaBell className="text-2xl animate-pulse" />
+                      <span>أعلن عن شركتك الآن</span>
+                      <FaArrowLeft />
+                    </motion.button>
+                  </Link>
+                </motion.div>
+              </motion.div>
             </motion.div>
           </div>
         </section>
@@ -1121,10 +1064,10 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                هل تملك شركة نقل عفش في جدة؟
+                هل تملك شركة تقدم خدمات في المملكة؟
               </h2>
               <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                انضم إلى دليلنا واحصل على عملاء جدد يومياً
+                انضم إلى دليل الشركات الأول في المملكة واحصل على عملاء جدد يومياً
               </p>
               <Link href="/advertise">
                 <motion.button
@@ -1145,9 +1088,9 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
               {/* About Section */}
               <div className="text-center md:text-right">
-                <h3 className="font-bold text-xl mb-4">عن الدليل</h3>
+                <h3 className="font-bold text-xl mb-4">عن بروكر</h3>
                 <p className="text-gray-300 mb-4">
-                  دليل شامل لأفضل شركات نقل العفش في جدة، نساعدك في العثور على الشركة المناسبة لاحتياجاتك.
+                  دليلك الشامل للوصول إلى أفضل الشركات الموثوقة والمرخصة في جميع أنحاء المملكة. نربطك بمقدمي الخدمات المحترفين في كافة المجالات.
                 </p>
               </div>
               
@@ -1188,7 +1131,7 @@ export default function Home() {
             </div>
             
             <div className="border-t border-gray-800 pt-8 text-center">
-              <p className="text-gray-400">جميع الحقوق محفوظة © 2025 دليل شركات نقل العفش في جدة</p>
+              <p className="text-gray-400">جميع الحقوق محفوظة © 2025 بروكر - دليل الشركات في المملكة العربية السعودية</p>
             </div>
           </div>
         </footer>
