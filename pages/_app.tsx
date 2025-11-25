@@ -10,13 +10,6 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     // 🚀 Performance Optimizations
     
-    // Register Service Worker for caching
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      navigator.serviceWorker.register('/sw.js').catch(err =>
-        console.error('Service Worker registration failed:', err)
-      );
-    }
-
     // ⚡ Prefetch important routes للتحميل الأسرع
     const importantRoutes = ['/movers', '/cleaning', '/water-leaks', '/pest-control', '/advertise'];
     importantRoutes.forEach(route => {
