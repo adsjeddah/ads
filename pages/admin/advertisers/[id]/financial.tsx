@@ -137,7 +137,8 @@ export default function AdvertiserFinancial() {
     
     const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/admin/login');
+      // استخدام window.location بدلاً من router.push لتجنب مشاكل التوقيت
+      window.location.href = '/admin/login';
       return;
     }
     // Wait for router to be ready and ensure id is valid
