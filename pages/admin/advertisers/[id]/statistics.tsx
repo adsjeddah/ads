@@ -129,10 +129,12 @@ export default function AdvertiserStatistics() {
 
   // دمج جميع تفاصيل المكالمات من كل الأيام
   const allCallDetails = statistics.flatMap(stat => 
-    (stat.call_details || []).map(call => ({
-      ...call,
-      date: stat.date
-    }))
+    (stat.call_details || [])
+      .filter(call => call && call.timestamp) // فلترة المكالمات التي لها timestamp
+      .map(call => ({
+        ...call,
+        date: stat.date
+      }))
   );
 
   // فلترة تفاصيل المكالمات
@@ -154,9 +156,26 @@ export default function AdvertiserStatistics() {
   const formatDateTime = (timestamp: any) => {
     if (!timestamp) return 'N/A';
     try {
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      let date: Date;
+      
+      // إذا كان Firestore Timestamp (يحتوي على toDate)
+      if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      }
+      // إذا كان object بصيغة {_seconds, _nanoseconds}
+      else if (timestamp._seconds || timestamp.seconds) {
+        const seconds = timestamp._seconds || timestamp.seconds;
+        date = new Date(seconds * 1000);
+      }
+      // إذا كان string أو number
+      else {
+        date = new Date(timestamp);
+      }
+      
+      if (isNaN(date.getTime())) return 'N/A';
       return format(date, 'dd/MM/yyyy - hh:mm:ss a', { locale: ar });
-    } catch {
+    } catch (error) {
+      console.error('Error formatting datetime:', error, timestamp);
       return 'N/A';
     }
   };
@@ -165,9 +184,54 @@ export default function AdvertiserStatistics() {
   const formatTime = (timestamp: any) => {
     if (!timestamp) return 'N/A';
     try {
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      let date: Date;
+      
+      // إذا كان Firestore Timestamp (يحتوي على toDate)
+      if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      }
+      // إذا كان object بصيغة {_seconds, _nanoseconds}
+      else if (timestamp._seconds || timestamp.seconds) {
+        const seconds = timestamp._seconds || timestamp.seconds;
+        date = new Date(seconds * 1000);
+      }
+      // إذا كان string أو number
+      else {
+        date = new Date(timestamp);
+      }
+      
+      if (isNaN(date.getTime())) return 'N/A';
       return format(date, 'hh:mm:ss a', { locale: ar });
-    } catch {
+    } catch (error) {
+      console.error('Error formatting time:', error, timestamp);
+      return 'N/A';
+    }
+  };
+  
+  // دالة لتنسيق التاريخ فقط
+  const formatDateOnly = (timestamp: any) => {
+    if (!timestamp) return 'N/A';
+    try {
+      let date: Date;
+      
+      // إذا كان Firestore Timestamp (يحتوي على toDate)
+      if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      }
+      // إذا كان object بصيغة {_seconds, _nanoseconds}
+      else if (timestamp._seconds || timestamp.seconds) {
+        const seconds = timestamp._seconds || timestamp.seconds;
+        date = new Date(seconds * 1000);
+      }
+      // إذا كان string أو number
+      else {
+        date = new Date(timestamp);
+      }
+      
+      if (isNaN(date.getTime())) return 'N/A';
+      return format(date, 'dd/MM/yyyy', { locale: ar });
+    } catch (error) {
+      console.error('Error formatting date:', error, timestamp);
       return 'N/A';
     }
   };
@@ -412,8 +476,19 @@ export default function AdvertiserStatistics() {
                 <tbody>
                   {filteredCallDetails.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-8 text-gray-500">
-                        لا توجد مكالمات في الفترة المحددة
+                      <td colSpan={7} className="text-center py-8">
+                        <div className="flex flex-col items-center gap-3">
+                          <FaPhone className="text-4xl text-gray-300" />
+                          <div className="text-gray-500">
+                            <p className="font-semibold">لا توجد مكالمات مسجلة بعد</p>
+                            <p className="text-sm mt-1">
+                              سيتم عرض التفاصيل هنا عندما يتصل العملاء بهذا المعلن
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              💡 نظام التتبع المتقدم نشط الآن ويسجل جميع التفاصيل
+                            </p>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ) : (
@@ -431,11 +506,7 @@ export default function AdvertiserStatistics() {
                               {formatTime(call.timestamp)}
                             </span>
                             <span className="text-xs text-gray-500">
-                              {format(
-                                call.timestamp?.toDate ? call.timestamp.toDate() : new Date(call.timestamp),
-                                'dd/MM/yyyy',
-                                { locale: ar }
-                              )}
+                              {formatDateOnly(call.timestamp)}
                             </span>
                           </div>
                         </td>

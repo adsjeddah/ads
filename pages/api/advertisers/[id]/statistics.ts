@@ -38,18 +38,46 @@ export default async function handler(
     const startDate = addDays(now, -days);
     const startTimestamp = Timestamp.fromDate(startDate);
 
-    // جلب الإحصائيات
+    // جلب الإحصائيات (استعلام بسيط بدون composite index)
     const statsSnapshot = await adminDb
       .collection('statistics')
       .where('advertiser_id', '==', id)
-      .where('date', '>=', startTimestamp)
-      .orderBy('date', 'desc')
       .get();
 
-    const statistics = statsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    // فلترة وترتيب النتائج في الذاكرة
+    const statistics = statsSnapshot.docs
+      .map(doc => {
+        const data = doc.data();
+        
+        // تحويل call_details timestamps إلى صيغة قابلة للقراءة
+        if (data.call_details && Array.isArray(data.call_details)) {
+          data.call_details = data.call_details.map((call: any) => ({
+            ...call,
+            // تحويل Firestore Timestamp إلى object بسيط
+            timestamp: call.timestamp ? {
+              seconds: call.timestamp.seconds || call.timestamp._seconds,
+              nanoseconds: call.timestamp.nanoseconds || call.timestamp._nanoseconds
+            } : null
+          }));
+        }
+        
+        return {
+          id: doc.id,
+          ...data
+        };
+      })
+      .filter((stat: any) => {
+        // فلترة حسب التاريخ
+        const statDate = stat.date;
+        if (!statDate || !statDate.seconds) return false;
+        return statDate.seconds >= startTimestamp.seconds;
+      })
+      .sort((a: any, b: any) => {
+        // ترتيب تنازلي (الأحدث أولاً)
+        const dateA = a.date?.seconds || 0;
+        const dateB = b.date?.seconds || 0;
+        return dateB - dateA;
+      });
 
     return res.status(200).json(statistics);
   } catch (error: any) {
