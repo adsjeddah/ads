@@ -20,68 +20,12 @@ export class PaymentAdminService {
     
     const docRef = await adminDb.collection('payments').add(paymentData);
     
-    // 🆕 تحديث الاشتراك تلقائياً بعد تسجيل الدفعة
-    await this.updateSubscriptionAfterPayment(data.subscription_id, data.amount);
+    // ⚠️ لا نحدث الاشتراك هنا لأن FinancialService.recordPayment يقوم بذلك
+    // تجنباً للتحديث المكرر الذي يضاعف المبلغ
     
     return docRef.id;
   }
 
-  /**
-   * 🆕 تحديث الاشتراك تلقائياً بعد تسجيل الدفعة
-   * - يحدث paid_amount و remaining_amount
-   * - يفعّل الاشتراك إذا كان معلقاً (pending_payment)
-   * - يحدث payment_status
-   */
-  private static async updateSubscriptionAfterPayment(
-    subscriptionId: string,
-    paymentAmount: number
-  ): Promise<void> {
-    const subRef = adminDb.collection('subscriptions').doc(subscriptionId);
-    const subDoc = await subRef.get();
-    
-    if (!subDoc.exists) {
-      console.error('Subscription not found:', subscriptionId);
-      return;
-    }
-    
-    const subscription = subDoc.data() as any;
-    
-    // حساب المبالغ الجديدة
-    const currentPaid = subscription.paid_amount || 0;
-    const newPaidAmount = currentPaid + paymentAmount;
-    const totalAmount = subscription.total_amount || 0;
-    const newRemainingAmount = Math.max(0, totalAmount - newPaidAmount);
-    
-    // تحديد حالة الدفع الجديدة
-    let newPaymentStatus: 'paid' | 'partial' | 'pending' = 'pending';
-    if (newPaidAmount >= totalAmount) {
-      newPaymentStatus = 'paid';
-    } else if (newPaidAmount > 0) {
-      newPaymentStatus = 'partial';
-    }
-    
-    // 🎯 المنطق الأساسي: تفعيل الاشتراك بأول دفعة (حتى ريال واحد)
-    let newStatus = subscription.status;
-    if (subscription.status === 'pending_payment' && newPaidAmount >= 1) {
-      newStatus = 'active';
-    }
-    
-    // تحديث الاشتراك
-    await subRef.update({
-      paid_amount: newPaidAmount,
-      remaining_amount: newRemainingAmount,
-      payment_status: newPaymentStatus,
-      status: newStatus,
-      updated_at: FieldValue.serverTimestamp()
-    });
-    
-    console.log(`✅ Subscription ${subscriptionId} updated after payment:`, {
-      paid_amount: newPaidAmount,
-      remaining_amount: newRemainingAmount,
-      payment_status: newPaymentStatus,
-      status: newStatus
-    });
-  }
 
   // جلب جميع الدفعات
   static async getAll(): Promise<Payment[]> {

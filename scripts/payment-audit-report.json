@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-11-26T11:49:23.920Z",
+  "summary": {
+    "total_checked": 10,
+    "total_fixed": 6,
+    "total_errors": 0,
+    "total_correct": 4
+  },
+  "issues": [
+    {
+      "subscription_id": "696iZ2R9LjKVutDL7vKb",
+      "advertiser_id": "6pRlcjFEHgNeRLUo2uAV",
+      "old_paid": 1000,
+      "new_paid": 500,
+      "old_remaining": 500,
+      "new_remaining": 1000,
+      "old_status": "partial",
+      "new_status": "partial",
+      "payments_count": 1,
+      "fixed": true
+    },
+    {
+      "subscription_id": "8KrKjhXECgQcECoCSUsa",
+      "advertiser_id": "avpH81pHpclmV26clBwp",
+      "old_paid": 2000,
+      "new_paid": 1000,
+      "old_remaining": 1500,
+      "new_remaining": 500,
+      "old_status": "paid",
+      "new_status": "partial",
+      "payments_count": 2,
+      "fixed": true
+    },
+    {
+      "subscription_id": "9tms4XU1JsJmlAtzvRfV",
+      "advertiser_id": "G3xQc8XqoOykN55wNRiv",
+      "old_paid": 1000,
+      "new_paid": 500,
+      "old_remaining": 500,
+      "new_remaining": 1000,
+      "old_status": "partial",
+      "new_status": "partial",
+      "payments_count": 1,
+      "fixed": true
+    },
+    {
+      "subscription_id": "ashBosUa8io3c14qnWdC",
+      "advertiser_id": "Agt3n6RmCVXS1isIQ6F1",
+      "old_paid": 1000,
+      "new_paid": 500,
+      "old_remaining": 500,
+      "new_remaining": 1000,
+      "old_status": "partial",
+      "new_status": "partial",
+      "payments_count": 1,
+      "fixed": true
+    },
+    {
+      "subscription_id": "jb6zaWCgnKYWXTsbameh",
+      "advertiser_id": "Jrdz42SEsyt8RlM7qA8w",
+      "old_paid": 1000,
+      "new_paid": 500,
+      "old_remaining": 500,
+      "new_remaining": 1000,
+      "old_status": "partial",
+      "new_status": "partial",
+      "payments_count": 1,
+      "fixed": true
+    },
+    {
+      "subscription_id": "xUGtlUSvmZ3OgkA0XYeH",
+      "advertiser_id": "adRrvIuHNfzJB9fkFlOe",
+      "old_paid": 1000,
+      "new_paid": 500,
+      "old_remaining": 500,
+      "new_remaining": 1000,
+      "old_status": "partial",
+      "new_status": "partial",
+      "payments_count": 1,
+      "fixed": true
+    }
+  ]
+}

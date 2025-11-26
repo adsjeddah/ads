@@ -297,8 +297,16 @@ export class FinancialService {
     }
 
     // 3. حساب المبالغ الجديدة
-    const newPaidAmount = subscription.paid_amount + data.amount;
+    const oldPaidAmount = subscription.paid_amount || 0;
+    const newPaidAmount = oldPaidAmount + data.amount;
     const newRemainingAmount = subscription.total_amount - newPaidAmount;
+
+    console.log(`💰 حساب الدفعة الجديدة للاشتراك ${data.subscription_id}:`);
+    console.log(`   - المبلغ الكلي: ${subscription.total_amount} ريال`);
+    console.log(`   - المدفوع السابق: ${oldPaidAmount} ريال`);
+    console.log(`   - الدفعة الجديدة: ${data.amount} ريال`);
+    console.log(`   - المدفوع الإجمالي: ${newPaidAmount} ريال`);
+    console.log(`   - المتبقي: ${Math.max(0, newRemainingAmount)} ريال`);
 
     // تحديد حالة الدفع الجديدة
     let newPaymentStatus: 'paid' | 'partial' | 'pending';
@@ -310,12 +318,16 @@ export class FinancialService {
       newPaymentStatus = 'pending';
     }
 
+    console.log(`   - حالة الدفع الجديدة: ${newPaymentStatus}`);
+
     // 4. تحديث الاشتراك
     await SubscriptionAdminService.update(data.subscription_id, {
       paid_amount: newPaidAmount,
       remaining_amount: Math.max(0, newRemainingAmount), // تأكد أن لا تكون سالبة
       payment_status: newPaymentStatus
     });
+
+    console.log(`✅ تم تحديث الاشتراك ${data.subscription_id} بنجاح`);
 
     // 5. تحديث الفاتورة إذا تم تحديدها
     if (data.invoice_id) {
