@@ -16,6 +16,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
         {/* End Google Tag Manager */}
 
+        {/* Google Ads (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-933899057" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'AW-933899057');`,
+          }}
+        />
+        {/* End Google Ads */}
+
         {/* 🚀 Performance Optimization */}
         {/* DNS Prefetch & Preconnect للموارد الخارجية */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
