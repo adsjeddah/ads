@@ -478,8 +478,8 @@ export default function AdvertiserDetails() {
                 <p className="text-sm text-gray-500 mt-4">تاريخ الإنشاء: {formatDate(advertiser.created_at, 'dd/MM/yyyy HH:mm')}</p>
                 <p className="text-sm text-gray-500">آخر تحديث: {formatDate(advertiser.updated_at, 'dd/MM/yyyy HH:mm')}</p>
                 <div className="mt-6 flex gap-3">
-                  <Link href={`/admin/advertisers/${advertiser.id}/edit`}>
-                    <motion.button whileHover={{scale: 1.05}} className="btn-primary flex-1 flex items-center justify-center gap-2"><FaEdit /> تعديل</motion.button>
+                  <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
+                    <motion.button whileHover={{scale: 1.05}} className="btn-primary flex-1 flex items-center justify-center gap-2"><FaEdit /> تعديل البيانات</motion.button>
                   </Link>
                   <motion.button onClick={handleDeleteAdvertiser} whileHover={{scale: 1.05}} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center gap-2"><FaTrash /> حذف</motion.button>
                 </div>
