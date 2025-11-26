@@ -729,26 +729,26 @@ export default function MoversDammam() {
                         >
                           <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-secondary-500/20 to-accent-500/20 rounded-lg md:rounded-2xl blur-xl"></div>
                           <div className="relative bg-white rounded-lg md:rounded-2xl shadow-xl overflow-hidden">
-                            <div className="h-0.5 md:h-2 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500"></div>
+                            <div className="h-1.5 md:h-2 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500"></div>
                             
                             <div className="p-2 md:p-4">
-                              <div className="flex justify-center mb-1.5 md:mb-2">
+                              <div className="flex items-center justify-center gap-2 md:gap-3 mb-1.5 md:mb-2">
                                 {advertiser.icon_url && iconComponents[advertiser.icon_url] ? (
-                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100">
+                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100 flex-shrink-0">
                                     {React.createElement(iconComponents[advertiser.icon_url], {
                                       className: `text-lg md:text-3xl ${iconColors[advertiser.icon_url] || 'text-primary-600'}`
                                     })}
                                   </div>
                                 ) : (
-                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white text-base md:text-2xl font-bold shadow-md">
+                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white text-base md:text-2xl font-bold shadow-md flex-shrink-0">
                                     {advertiser.company_name.charAt(0)}
                                   </div>
                                 )}
+                                
+                                <h3 className="text-2xl md:text-3xl font-bold text-gray-800 leading-tight">
+                                  {advertiser.company_name}
+                                </h3>
                               </div>
-
-                              <h3 className="text-2xl md:text-3xl font-bold text-center mb-1.5 md:mb-2 text-gray-800 leading-tight">
-                                {advertiser.company_name}
-                              </h3>
 
                               {advertiser.services && (
                                 <div className="mb-2 text-center hidden md:block">
@@ -767,7 +767,7 @@ export default function MoversDammam() {
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
                                   <FaPhone className="relative animate-bounce text-[12px] md:text-lg" />
-                                  <span className="relative font-bold tracking-wider text-[16px] md:text-xl" dir="ltr">
+                                  <span className="relative font-bold tracking-wider text-lg md:text-xl" dir="ltr">
                                     {advertiser.phone}
                                   </span>
                                   <FaBolt className="relative text-yellow-300 animate-pulse text-[12px] md:text-lg" />
