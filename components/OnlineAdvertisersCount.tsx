@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTruck } from 'react-icons/fa';
+import { FaTruck, FaTimes } from 'react-icons/fa';
 
 interface OnlineAdvertisersCountProps {
   totalAdvertisers: number;
@@ -12,8 +12,19 @@ const OnlineAdvertisersCount: React.FC<OnlineAdvertisersCountProps> = ({
   onlineAdvertisers
 }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
+    // التحقق من localStorage إذا كان المستخدم قد أخفى الإشعار
+    const hidden = localStorage.getItem('hideAdvertisersCount');
+    if (hidden === 'true') {
+      setIsHidden(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isHidden) return;
+
     // إخفاء وإظهار بشكل دوري (كل 20 ثانية يختفي لمدة 5 ثواني)
     const interval = setInterval(() => {
       setIsVisible(false);
@@ -21,10 +32,17 @@ const OnlineAdvertisersCount: React.FC<OnlineAdvertisersCountProps> = ({
     }, 20000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isHidden]);
+
+  const handleHide = () => {
+    setIsHidden(true);
+    localStorage.setItem('hideAdvertisersCount', 'true');
+  };
+
+  if (isHidden) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 pointer-events-none">
+    <div className="fixed bottom-4 right-4 z-40">
       <AnimatePresence>
         {isVisible && (
           <motion.div
@@ -32,8 +50,16 @@ const OnlineAdvertisersCount: React.FC<OnlineAdvertisersCountProps> = ({
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 100, scale: 0.8 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="bg-white rounded-lg shadow-lg px-3 py-2 flex items-center gap-2 border-r-4 border-green-500 max-w-[180px]"
+            className="bg-white rounded-lg shadow-lg px-3 py-2 flex items-center gap-2 border-r-4 border-green-500 max-w-[180px] relative"
           >
+            {/* زر الإخفاء */}
+            <button
+              onClick={handleHide}
+              className="absolute -top-1 -left-1 bg-gray-600 hover:bg-gray-700 text-white rounded-full w-4 h-4 flex items-center justify-center transition-colors pointer-events-auto"
+              title="إخفاء"
+            >
+              <FaTimes className="text-[8px]" />
+            </button>
             <div className="bg-green-100 rounded-full p-1.5 flex-shrink-0">
               <FaTruck className="text-green-600 text-sm" />
             </div>
