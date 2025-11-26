@@ -31,7 +31,7 @@ export default async function handler(
 
     return res.status(200).json({
       success: true,
-      message: `Updated ${result.updated} expired subscriptions and checked grace periods`,
+      message: `✅ تم تحديث ${result.updated} اشتراك - انتهى ${result.expired_subscriptions.length} بدون سماح، فعّل ${result.grace_period_activated.length} فترة سماح تلقائية`,
       data: result
     });
   } catch (error: any) {

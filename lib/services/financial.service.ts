@@ -372,15 +372,18 @@ export class FinancialService {
   /**
    * التحقق من صلاحية الاشتراكات وتحديث الحالات
    * ⚠️ تحديث: يأخذ في الاعتبار الاشتراكات المتوقفة مؤقتاً
+   * ⚠️ تحديث جديد: يطبق فترة السماح التلقائية حسب نوع العميل فقط عند عدم وجود دفعات
    */
   static async checkAndUpdateSubscriptionStatuses(): Promise<{
     updated: number;
     expired_subscriptions: string[];
+    grace_period_activated: string[];
   }> {
     const now = getSaudiNow();
     const activeSubscriptions = await SubscriptionAdminService.getActiveSubscriptions();
     
     const expiredSubscriptions: string[] = [];
+    const gracePeriodActivated: string[] = [];
     let updatedCount = 0;
 
     for (const subscription of activeSubscriptions) {
@@ -394,18 +397,65 @@ export class FinancialService {
       
       // إذا انتهى تاريخ الاشتراك (فقط للاشتراكات النشطة)
       if (endDate < now && subscription.id && subscription.status === 'active') {
-        await SubscriptionAdminService.update(subscription.id, {
-          status: 'expired',
-          actual_end_date: now
-        });
-        expiredSubscriptions.push(subscription.id);
-        updatedCount++;
+        const paidAmount = subscription.paid_amount || 0;
+        
+        // ✅ إذا تم دفع أي مبلغ: الإعلان يتوقف بدون فترة سماح
+        if (paidAmount > 0) {
+          await SubscriptionAdminService.update(subscription.id, {
+            status: 'expired',
+            actual_end_date: now
+          });
+          expiredSubscriptions.push(subscription.id);
+          updatedCount++;
+          
+          console.log(`✅ اشتراك ${subscription.id} انتهى بدون فترة سماح (تم دفع ${paidAmount} ريال)`);
+        } 
+        // ✅ إذا لم يتم دفع أي مبلغ: تطبيق فترة سماح تلقائية حسب نوع العميل
+        else {
+          // الحصول على معلومات المعلن لمعرفة نوع العميل
+          const advertiserDoc = await adminDb.collection('advertisers').doc(subscription.advertiser_id).get();
+          const advertiser = advertiserDoc.data();
+          
+          // تحديد عدد أيام السماح حسب نوع العميل
+          let graceDays = 3; // افتراضي للعملاء الجدد
+          
+          if (advertiser?.customer_type === 'vip') {
+            graceDays = 14; // VIP: 14 يوم
+          } else if (advertiser?.customer_type === 'trusted') {
+            graceDays = 7; // موثوق: 7 أيام
+          } else if (advertiser?.customer_type === 'new') {
+            graceDays = 3; // جديد: 3 أيام
+          } else {
+            graceDays = 3; // افتراضي: 3 أيام
+          }
+          
+          const gracePeriodEndDate = addDays(now, graceDays);
+          
+          // تفعيل فترة السماح التلقائية
+          await SubscriptionAdminService.update(subscription.id, {
+            is_in_grace_period: true,
+            grace_period_days: graceDays,
+            grace_period_end_date: gracePeriodEndDate,
+            grace_period_started_at: now,
+            updated_at: now
+          });
+          
+          gracePeriodActivated.push(subscription.id);
+          updatedCount++;
+          
+          const customerTypeAr = advertiser?.customer_type === 'vip' ? 'VIP' : 
+                                 advertiser?.customer_type === 'trusted' ? 'موثوق' : 
+                                 advertiser?.customer_type === 'new' ? 'جديد' : 'عادي';
+          
+          console.log(`✅ اشتراك ${subscription.id} دخل فترة سماح (${graceDays} يوم) - نوع العميل: ${customerTypeAr}`);
+        }
       }
     }
 
     return {
       updated: updatedCount,
-      expired_subscriptions: expiredSubscriptions
+      expired_subscriptions: expiredSubscriptions,
+      grace_period_activated: gracePeriodActivated
     };
   }
 
