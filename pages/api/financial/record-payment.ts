@@ -25,10 +25,21 @@ export default async function handler(
     // 1. التحقق من صلاحيات الأدمن
     const token = req.headers.authorization?.split('Bearer ')[1];
     if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        details: 'لم يتم العثور على token المصادقة. يرجى تسجيل الدخول مرة أخرى.'
+      });
     }
     
-    await verifyAdminToken(token);
+    try {
+      await verifyAdminToken(token);
+    } catch (tokenError: any) {
+      console.error('Token verification failed:', tokenError.message);
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        details: 'انتهت صلاحية الجلسة. يرجى تسجيل الخروج ثم الدخول مرة أخرى.'
+      });
+    }
     
     // 2. استخراج البيانات
     const {

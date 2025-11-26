@@ -42,8 +42,9 @@ export async function verifyAdminToken(token: string) {
       return decodedToken;
     }
     throw new Error('User is not an admin');
-  } catch (error) {
-    throw new Error('Invalid or expired token');
+  } catch (error: any) {
+    console.error('Token verification error:', error.message);
+    throw new Error(`Invalid or expired token: ${error.message || 'Unknown error'}`);
   }
 }
 

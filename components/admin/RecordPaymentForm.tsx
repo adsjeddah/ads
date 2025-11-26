@@ -100,7 +100,21 @@ export default function RecordPaymentForm({
       }
     } catch (error: any) {
       console.error('Error recording payment:', error);
-      toast.error(error.response?.data?.details || 'فشل تسجيل الدفعة');
+      const errorMessage = error.response?.data?.details || error.response?.data?.error || 'فشل تسجيل الدفعة';
+      
+      // إذا كان الخطأ 401 (Unauthorized)، نعرض رسالة واضحة
+      if (error.response?.status === 401) {
+        toast.error(errorMessage, { duration: 6000 });
+        // بعد 3 ثواني، نعيد التوجيه لصفحة تسجيل الدخول
+        setTimeout(() => {
+          if (confirm('انتهت صلاحية الجلسة. هل تريد تسجيل الدخول مرة أخرى؟')) {
+            localStorage.removeItem('token');
+            window.location.href = '/admin/login';
+          }
+        }, 2000);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
