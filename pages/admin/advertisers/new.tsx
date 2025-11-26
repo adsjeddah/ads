@@ -36,7 +36,7 @@ export default function NewAdvertiser() {
     selected_icon: '',
     plan_id: '',
     duration_type: 'preset', // 'preset' or 'custom'
-    preset_duration: '30', // 15, 30, 90
+    preset_duration: '30', // 7, 14, 30
     custom_start_date: '',
     custom_end_date: '',
     base_price: 0,
