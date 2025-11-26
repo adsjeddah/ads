@@ -846,13 +846,13 @@ export default function WaterLeaksIndex() {
                               {/* Company Icon/Logo & Name */}
                               <div className="flex items-center justify-center gap-2 md:gap-3 mb-1.5 md:mb-2">
                                 {advertiser.icon_url && iconComponents[advertiser.icon_url] ? (
-                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100 flex-shrink-0">
+                                  <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-100 flex-shrink-0">
                                     {React.createElement(iconComponents[advertiser.icon_url], {
                                       className: `text-lg md:text-3xl ${iconColors[advertiser.icon_url] || 'text-primary-600'}`
                                     })}
                                   </div>
                                 ) : (
-                                  <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white text-base md:text-2xl font-bold shadow-md flex-shrink-0">
+                                  <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-primary-400 to-secondary-400 rounded-full flex items-center justify-center text-white text-base md:text-2xl font-bold shadow-md flex-shrink-0">
                                     {advertiser.company_name.charAt(0)}
                                   </div>
                                 )}
