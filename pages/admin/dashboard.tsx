@@ -956,7 +956,7 @@ export default function AdminDashboard() {
                                   <FaEye />
                                 </button>
                               </Link>
-                              <Link href={`/admin/advertisers/${advertiser.id}/edit`}>
+                              <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
                                 <button className="text-green-600 hover:text-green-800">
                                   <FaEdit />
                                 </button>
@@ -1055,7 +1055,7 @@ export default function AdminDashboard() {
                                   <FaEye />
                                 </button>
                               </Link>
-                              <Link href={`/admin/advertisers/${advertiser.id}/edit`}>
+                              <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
                                 <button className="text-green-600 hover:text-green-800">
                                   <FaEdit />
                                 </button>
