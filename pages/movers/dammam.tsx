@@ -642,25 +642,25 @@ export default function MoversDammam() {
               >
                 <nav className="container mx-auto px-4 py-4">
                   <Link href="/">
-                    <motion.a
+                    <motion.div
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block py-3 px-4 rounded-lg font-medium transition-colors hover:bg-gray-50 text-gray-700"
+                      className="block py-3 px-4 rounded-lg font-medium transition-colors hover:bg-gray-50 text-gray-700 cursor-pointer"
                     >
                       <FaHome className="inline-block ml-2" />
                       الرئيسية
-                    </motion.a>
+                    </motion.div>
                   </Link>
                   
                   <Link href="/advertise">
-                    <motion.a
+                    <motion.div
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block py-3 px-4 rounded-lg font-medium transition-colors hover:bg-gray-50 text-gray-700"
+                      className="block py-3 px-4 rounded-lg font-medium transition-colors hover:bg-gray-50 text-gray-700 cursor-pointer"
                     >
                       <FaBell className="inline-block ml-2" />
                       أعلن معنا
-                    </motion.a>
+                    </motion.div>
                   </Link>
                   
                   <motion.a
