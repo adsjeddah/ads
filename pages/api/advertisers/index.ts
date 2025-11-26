@@ -45,6 +45,29 @@ export default async function handler(
         // Create a map of plans for quick lookup
         const plansMap = new Map(allPlans.map(plan => [plan.id, plan]));
         
+        // Helper function to convert Firestore Timestamp to ISO string
+        const toISOString = (timestamp: any): string | null => {
+          if (!timestamp) return null;
+          try {
+            if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+              return timestamp.toDate().toISOString();
+            }
+            if (timestamp.seconds !== undefined) {
+              return new Date(timestamp.seconds * 1000).toISOString();
+            }
+            if (timestamp._seconds !== undefined) {
+              return new Date(timestamp._seconds * 1000).toISOString();
+            }
+            if (timestamp instanceof Date) {
+              return timestamp.toISOString();
+            }
+            return new Date(timestamp).toISOString();
+          } catch (e) {
+            console.error('Error converting timestamp:', e);
+            return null;
+          }
+        };
+        
         // Enrich advertisers with subscription data
         advertisers = advertisers.map(adv => {
           const advSubscriptions = allSubscriptions.filter(sub => sub.advertiser_id === adv.id);
@@ -62,8 +85,8 @@ export default async function handler(
             
             return {
               ...adv,
-              subscription_start_date: activeSubscription.start_date,
-              subscription_end_date: activeSubscription.end_date,
+              subscription_start_date: toISOString(activeSubscription.start_date),
+              subscription_end_date: toISOString(activeSubscription.end_date),
               subscription_status: activeSubscription.status,
               plan_name: plan?.name || 'غير محدد',
               plan_type: plan?.plan_type || activeSubscription.coverage_area || 'kingdom',
