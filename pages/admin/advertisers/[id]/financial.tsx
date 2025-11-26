@@ -127,6 +127,7 @@ export default function AdvertiserFinancial() {
   const [loading, setLoading] = useState(true);
   const [showCreateSubscription, setShowCreateSubscription] = useState(false);
   const [showRecordPayment, setShowRecordPayment] = useState(false);
+  const [showSubscriptionSelector, setShowSubscriptionSelector] = useState(false);
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<string | null>(null);
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -377,8 +378,23 @@ export default function AdvertiserFinancial() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setShowRecordPayment(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              onClick={() => {
+                // إذا كان هناك اشتراك نشط واحد فقط، نختاره تلقائياً
+                const activeSubscriptions = subscriptions.filter(
+                  s => s.status === 'active' && s.remaining_amount > 0
+                );
+                if (activeSubscriptions.length === 1) {
+                  setSelectedSubscription(activeSubscriptions[0]);
+                  setShowRecordPayment(true);
+                } else if (activeSubscriptions.length > 1) {
+                  // إذا كان هناك أكثر من اشتراك، نعرض Modal لاختيار الاشتراك
+                  setShowSubscriptionSelector(true);
+                } else {
+                  toast.error('لا توجد اشتراكات نشطة بمبالغ متبقية');
+                }
+              }}
+              disabled={subscriptions.filter(s => s.status === 'active' && s.remaining_amount > 0).length === 0}
+              className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FaMoneyBillWave />
               تسجيل دفعة
@@ -584,6 +600,81 @@ export default function AdvertiserFinancial() {
         </div>
       )}
 
+      {/* Subscription Selector Modal */}
+      {showSubscriptionSelector && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+          >
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-800">اختر الاشتراك لتسجيل الدفعة</h3>
+              <button
+                onClick={() => setShowSubscriptionSelector(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                {subscriptions
+                  .filter(s => s.status === 'active' && s.remaining_amount > 0)
+                  .map(subscription => {
+                    const plan = plans.find(p => p.id === subscription.plan_id);
+                    return (
+                      <motion.div
+                        key={subscription.id}
+                        whileHover={{ scale: 1.02 }}
+                        onClick={() => {
+                          setSelectedSubscription(subscription);
+                          setShowSubscriptionSelector(false);
+                          setShowRecordPayment(true);
+                        }}
+                        className="border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h4 className="font-bold text-lg text-gray-800">
+                              {plan?.name || 'باقة غير معروفة'}
+                            </h4>
+                            <div className="grid grid-cols-2 gap-3 mt-3 text-sm">
+                              <div>
+                                <span className="text-gray-600">إجمالي:</span>
+                                <span className="font-semibold text-gray-900 mr-2">
+                                  {subscription.total_amount.toLocaleString('ar-SA')} ريال
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">المدفوع:</span>
+                                <span className="font-semibold text-green-600 mr-2">
+                                  {subscription.paid_amount.toLocaleString('ar-SA')} ريال
+                                </span>
+                              </div>
+                              <div className="col-span-2">
+                                <span className="text-gray-600">المتبقي:</span>
+                                <span className="font-bold text-red-600 mr-2 text-lg">
+                                  {subscription.remaining_amount.toLocaleString('ar-SA')} ريال
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mr-4">
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                              نشط
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {/* Record Payment Modal */}
       {showRecordPayment && selectedSubscription && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -607,6 +698,7 @@ export default function AdvertiserFinancial() {
             <div className="p-6">
               <RecordPaymentForm
                 subscription={selectedSubscription}
+                invoices={invoices.map(inv => ({ ...inv, invoice_number: inv.invoice_number, amount: inv.amount, status: inv.status }))}
                 onSuccess={handlePaymentRecorded}
                 onCancel={() => {
                   setShowRecordPayment(false);

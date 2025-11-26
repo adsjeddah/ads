@@ -81,6 +81,7 @@ export default function RecordPaymentForm({
     
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const token = localStorage.getItem('token');
       const response = await axios.post(`${apiUrl}/financial/record-payment`, {
         subscription_id: subscription.id,
         invoice_id: invoiceId || undefined,
@@ -89,6 +90,8 @@ export default function RecordPaymentForm({
         payment_method: paymentMethod,
         transaction_id: transactionId || undefined,
         notes: notes || undefined
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.data.success) {
