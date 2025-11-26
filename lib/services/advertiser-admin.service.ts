@@ -26,6 +26,11 @@ export class AdvertiserAdminService {
     if (data.include_vat !== undefined) advertiserData.include_vat = data.include_vat;
     if (data.vat_percentage !== undefined) advertiserData.vat_percentage = data.vat_percentage;
     
+    // 🆕 حقول القطاع والتغطية الجغرافية (مهمة جداً!)
+    if ((data as any).sector) advertiserData.sector = (data as any).sector;
+    if ((data as any).coverage_type) advertiserData.coverage_type = (data as any).coverage_type;
+    if ((data as any).coverage_cities) advertiserData.coverage_cities = (data as any).coverage_cities;
+    
     // 🆕 حقول تصنيف العملاء
     if ((data as any).customer_type) advertiserData.customer_type = (data as any).customer_type;
     if ((data as any).is_trusted !== undefined) advertiserData.is_trusted = (data as any).is_trusted;
