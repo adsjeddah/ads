@@ -378,9 +378,9 @@ export default function AdvertiserDetails() {
   }
 
   const InfoCard = ({ title, children, icon: Icon }: { title: string, children: React.ReactNode, icon: React.ElementType }) => (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="flex items-center text-xl font-semibold text-gray-700 mb-4">
-        <Icon className="mr-3 text-primary-500" />
+    <div className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg p-4 md:p-6">
+      <div className="flex items-center text-base md:text-xl font-semibold text-gray-700 mb-3 md:mb-4">
+        <Icon className="mr-2 md:mr-3 text-primary-500 text-lg md:text-xl" />
         {title}
       </div>
       {children}
@@ -396,16 +396,17 @@ export default function AdvertiserDetails() {
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gradient">{advertiser.company_name}</h1>
+              <h1 className="text-lg md:text-2xl font-bold text-gradient truncate max-w-[200px] md:max-w-none">{advertiser.company_name}</h1>
               <Link href="/admin/dashboard?tab=advertisers">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors"
+                  className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-primary-600 transition-colors text-sm md:text-base"
                 >
                   <FaArrowLeft />
-                  <span>العودة للمعلنين</span>
+                  <span className="hidden sm:inline">العودة للمعلنين</span>
+                  <span className="sm:hidden">رجوع</span>
                 </motion.button>
               </Link>
             </div>
@@ -413,10 +414,10 @@ export default function AdvertiserDetails() {
         </header>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
             {/* Left Column: Advertiser Info & Actions */}
-            <div className="lg:col-span-1 space-y-8">
+            <div className="lg:col-span-1 space-y-4 md:space-y-8">
               <InfoCard title="معلومات الشركة" icon={FaBuilding}>
                 {/* عرض الأيقونة */}
                 <div className="mb-6 flex justify-center">
@@ -477,25 +478,25 @@ export default function AdvertiserDetails() {
                 
                 <p className="text-sm text-gray-500 mt-4">تاريخ الإنشاء: {formatDate(advertiser.created_at, 'dd/MM/yyyy HH:mm')}</p>
                 <p className="text-sm text-gray-500">آخر تحديث: {formatDate(advertiser.updated_at, 'dd/MM/yyyy HH:mm')}</p>
-                <div className="mt-6 flex flex-col gap-3">
-                  <div className="flex gap-3">
-                    <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
-                      <motion.button whileHover={{scale: 1.05}} className="btn-primary flex-1 flex items-center justify-center gap-2"><FaEdit /> تعديل البيانات</motion.button>
+                <div className="mt-4 md:mt-6 flex flex-col gap-2 md:gap-3">
+                  <div className="flex gap-2 md:gap-3">
+                    <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`} className="flex-1">
+                      <motion.button whileHover={{scale: 1.05}} className="btn-primary w-full flex items-center justify-center gap-1 md:gap-2 text-sm md:text-base py-2 md:py-2.5"><FaEdit /> <span className="hidden sm:inline">تعديل</span><span className="sm:hidden">تعديل</span></motion.button>
                     </Link>
-                    <motion.button onClick={handleDeleteAdvertiser} whileHover={{scale: 1.05}} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center gap-2"><FaTrash /> حذف</motion.button>
+                    <motion.button onClick={handleDeleteAdvertiser} whileHover={{scale: 1.05}} className="bg-red-500 hover:bg-red-600 text-white px-3 md:px-4 py-2 rounded-lg flex-1 flex items-center justify-center gap-1 md:gap-2 text-sm md:text-base"><FaTrash /> حذف</motion.button>
                   </div>
                   <Link href={`/admin/advertisers/${advertiser.id}/statistics`}>
-                    <motion.button whileHover={{scale: 1.05}} className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg w-full flex items-center justify-center gap-2"><FaChartLine /> إحصائيات تفصيلية متقدمة</motion.button>
+                    <motion.button whileHover={{scale: 1.05}} className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-3 md:px-4 py-2 rounded-lg w-full flex items-center justify-center gap-1 md:gap-2 text-sm md:text-base"><FaChartLine /> <span className="hidden sm:inline">إحصائيات تفصيلية</span><span className="sm:hidden">الإحصائيات</span></motion.button>
                   </Link>
                 </div>
               </InfoCard>
 
-              <InfoCard title="الإدارة المالية المتكاملة" icon={FaMoneyBillWave}>
-                <p className="text-gray-600 mb-4">إدارة كاملة للاشتراكات والفواتير والمدفوعات</p>
+              <InfoCard title="الإدارة المالية" icon={FaMoneyBillWave}>
+                <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base">إدارة الاشتراكات والفواتير والمدفوعات</p>
                 <Link href={`/admin/advertisers/${advertiser.id}/financial`}>
                   <motion.button 
                     whileHover={{scale: 1.05}} 
-                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl transition-all"
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-3 md:px-4 py-2.5 md:py-3 rounded-lg flex items-center justify-center gap-1 md:gap-2 font-semibold shadow-lg hover:shadow-xl transition-all text-sm md:text-base"
                   >
                     <FaMoneyBillWave />
                     فتح النظام المالي
@@ -505,7 +506,7 @@ export default function AdvertiserDetails() {
             </div>
 
             {/* Right Column: Subscriptions, Invoices, Stats */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-4 md:space-y-8">
               <InfoCard title="الاشتراكات" icon={FaCalendarAlt}>
                 {subscriptions.length > 0 ? (
                   <div className="space-y-6">
@@ -569,27 +570,27 @@ export default function AdvertiserDetails() {
 
               <InfoCard title="الفواتير" icon={FaFileInvoice}>
                 {invoices.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                  <div className="overflow-x-auto -mx-4 md:mx-0">
+                    <table className="w-full text-xs md:text-sm min-w-[500px]">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-right py-2 px-3">رقم الفاتورة</th>
-                          <th className="text-right py-2 px-3">المبلغ</th>
-                          <th className="text-right py-2 px-3">الحالة</th>
-                          <th className="text-right py-2 px-3">تاريخ الإصدار</th>
-                          <th className="text-right py-2 px-3">تاريخ الاستحقاق</th>
-                          <th className="text-center py-2 px-3">الإجراءات</th>
+                          <th className="text-right py-2 px-2 md:px-3">الفاتورة</th>
+                          <th className="text-right py-2 px-2 md:px-3">المبلغ</th>
+                          <th className="text-right py-2 px-2 md:px-3">الحالة</th>
+                          <th className="text-right py-2 px-2 md:px-3 hidden sm:table-cell">الإصدار</th>
+                          <th className="text-right py-2 px-2 md:px-3 hidden md:table-cell">الاستحقاق</th>
+                          <th className="text-center py-2 px-2 md:px-3">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody>
                         {invoices.map(inv => (
                           <tr key={inv.id} className="border-b hover:bg-gray-50">
-                            <td className="py-2 px-3">{inv.invoice_number}</td>
-                            <td className="py-2 px-3 font-semibold">{inv.amount.toLocaleString('ar-SA')} ريال</td>
-                            <td className="py-2 px-3"><span className={`px-2 py-1 rounded-full text-xs ${inv.status === 'paid' ? 'bg-green-100 text-green-800' : (inv.status === 'unpaid' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')}`}>{inv.status === 'paid' ? 'مدفوعة' : (inv.status === 'unpaid' ? 'غير مدفوعة' : 'معلقة')}</span></td>
-                            <td className="py-2 px-3">{formatDate(inv.issued_date, 'dd/MM/yyyy')}</td>
-                            <td className="py-2 px-3">{formatDate(inv.due_date, 'dd/MM/yyyy')}</td>
-                            <td className="py-2 px-3 text-center">
+                            <td className="py-2 px-2 md:px-3 text-xs md:text-sm">{inv.invoice_number}</td>
+                            <td className="py-2 px-2 md:px-3 font-semibold text-xs md:text-sm">{inv.amount.toLocaleString('ar-SA')}</td>
+                            <td className="py-2 px-2 md:px-3"><span className={`px-1.5 md:px-2 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs ${inv.status === 'paid' ? 'bg-green-100 text-green-800' : (inv.status === 'unpaid' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')}`}>{inv.status === 'paid' ? 'مدفوع' : (inv.status === 'unpaid' ? 'غير مدفوع' : 'معلق')}</span></td>
+                            <td className="py-2 px-2 md:px-3 hidden sm:table-cell text-xs">{formatDate(inv.issued_date, 'dd/MM/yyyy')}</td>
+                            <td className="py-2 px-2 md:px-3 hidden md:table-cell text-xs">{formatDate(inv.due_date, 'dd/MM/yyyy')}</td>
+                            <td className="py-2 px-2 md:px-3 text-center">
                               {inv.status !== 'paid' && (
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
@@ -605,17 +606,17 @@ export default function AdvertiserDetails() {
                                       toast.error('لم يتم العثور على الاشتراك المرتبط');
                                     }
                                   }}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm"
+                                  className="inline-flex items-center gap-0.5 md:gap-1 px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white text-[10px] md:text-xs font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm"
                                   title="تسجيل دفعة"
                                 >
-                                  <FaMoneyBillWave />
-                                  <span>تسجيل دفعة</span>
+                                  <FaMoneyBillWave className="text-xs" />
+                                  <span className="hidden sm:inline">دفعة</span>
                                 </motion.button>
                               )}
                               {inv.status === 'paid' && (
-                                <span className="text-green-600 text-xs flex items-center justify-center gap-1">
-                                  <FaCheckCircle />
-                                  <span>مكتمل</span>
+                                <span className="text-green-600 text-[10px] md:text-xs flex items-center justify-center gap-0.5">
+                                  <FaCheckCircle className="text-xs" />
+                                  <span className="hidden sm:inline">مكتمل</span>
                                 </span>
                               )}
                             </td>
@@ -629,24 +630,24 @@ export default function AdvertiserDetails() {
 
               <InfoCard title="الإحصائيات (آخر 30 يوم)" icon={FaChartLine}>
                 {statistics.length > 0 ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6">
                     {/* Summary Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <div className="text-sm text-blue-600 mb-1">إجمالي المشاهدات</div>
-                        <div className="text-3xl font-bold text-blue-800">
+                    <div className="grid grid-cols-3 gap-2 md:gap-4">
+                      <div className="bg-blue-50 p-2 md:p-4 rounded-lg border border-blue-200">
+                        <div className="text-xs md:text-sm text-blue-600 mb-0.5 md:mb-1">المشاهدات</div>
+                        <div className="text-lg md:text-3xl font-bold text-blue-800">
                           {statistics.reduce((sum, stat) => sum + (stat.views || 0), 0)}
                         </div>
                       </div>
-                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <div className="text-sm text-green-600 mb-1">إجمالي النقرات</div>
-                        <div className="text-3xl font-bold text-green-800">
+                      <div className="bg-green-50 p-2 md:p-4 rounded-lg border border-green-200">
+                        <div className="text-xs md:text-sm text-green-600 mb-0.5 md:mb-1">النقرات</div>
+                        <div className="text-lg md:text-3xl font-bold text-green-800">
                           {statistics.reduce((sum, stat) => sum + (stat.clicks || 0), 0)}
                         </div>
                       </div>
-                      <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                        <div className="text-sm text-purple-600 mb-1">إجمالي المكالمات</div>
-                        <div className="text-3xl font-bold text-purple-800">
+                      <div className="bg-purple-50 p-2 md:p-4 rounded-lg border border-purple-200">
+                        <div className="text-xs md:text-sm text-purple-600 mb-0.5 md:mb-1">المكالمات</div>
+                        <div className="text-lg md:text-3xl font-bold text-purple-800">
                           {statistics.reduce((sum, stat) => sum + (stat.calls || 0), 0)}
                         </div>
                       </div>

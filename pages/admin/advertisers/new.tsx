@@ -411,16 +411,17 @@ export default function NewAdvertiser() {
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gradient">إضافة معلن جديد</h1>
+              <h1 className="text-lg md:text-2xl font-bold text-gradient">إضافة معلن جديد</h1>
               <Link href="/admin/dashboard?tab=advertisers">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors"
+                  className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-primary-600 transition-colors text-sm md:text-base"
                 >
                   <FaArrowLeft />
-                  <span>العودة للمعلنين</span>
+                  <span className="hidden sm:inline">العودة للمعلنين</span>
+                  <span className="sm:hidden">رجوع</span>
                 </motion.button>
               </Link>
             </div>
@@ -428,17 +429,17 @@ export default function NewAdvertiser() {
         </header>
 
         {/* Form */}
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6 md:p-8 max-w-3xl mx-auto"
+            className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg p-4 md:p-8 max-w-3xl mx-auto"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
               {/* Company Name */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  <FaBuilding className="inline ml-2" /> اسم الشركة
+                <label className="block text-gray-700 font-semibold mb-1 md:mb-2 text-sm md:text-base">
+                  <FaBuilding className="inline ml-1 md:ml-2" /> اسم الشركة
                 </label>
                 <input
                   type="text"
@@ -446,16 +447,16 @@ export default function NewAdvertiser() {
                   value={formData.company_name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm md:text-base"
                   placeholder="اسم شركة نقل العفش"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {/* Phone */}
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaPhone className="inline ml-2" /> رقم الهاتف
+                  <label className="block text-gray-700 font-semibold mb-1 md:mb-2 text-sm md:text-base">
+                    <FaPhone className="inline ml-1 md:ml-2" /> رقم الهاتف
                   </label>
                   <input
                     type="tel"
@@ -463,22 +464,22 @@ export default function NewAdvertiser() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all english-numbers"
+                    className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all english-numbers text-sm md:text-base"
                     placeholder="05XXXXXXXX"
                     dir="ltr"
                   />
                 </div>
                 {/* WhatsApp */}
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
-                    <FaWhatsapp className="inline ml-2" /> رقم الواتساب (اختياري)
+                  <label className="block text-gray-700 font-semibold mb-1 md:mb-2 text-sm md:text-base">
+                    <FaWhatsapp className="inline ml-1 md:ml-2" /> الواتساب (اختياري)
                   </label>
                   <input
                     type="tel"
                     name="whatsapp"
                     value={formData.whatsapp}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all english-numbers"
+                    className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all english-numbers text-sm md:text-base"
                     placeholder="05XXXXXXXX"
                     dir="ltr"
                   />
@@ -487,110 +488,110 @@ export default function NewAdvertiser() {
 
               {/* 🆕 Customer Type - تصنيف العميل */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  <FaUserTie className="inline ml-2" /> تصنيف العميل
+                <label className="block text-gray-700 font-semibold mb-1 md:mb-2 text-sm md:text-base">
+                  <FaUserTie className="inline ml-1 md:ml-2" /> تصنيف العميل
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-2 md:gap-4">
                   <div 
                     onClick={() => setFormData({ ...formData, customer_type: 'new', payment_terms_days: 0 })}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    className={`border-2 rounded-lg p-2 md:p-4 cursor-pointer transition-all ${
                       formData.customer_type === 'new' 
                         ? 'border-blue-500 bg-blue-50' 
                         : 'border-gray-300 hover:border-blue-300'
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={`w-4 h-4 rounded-full border-2 ${
+                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
+                      <div className={`w-3 h-3 md:w-4 md:h-4 rounded-full border-2 ${
                         formData.customer_type === 'new' 
                           ? 'border-blue-500 bg-blue-500' 
                           : 'border-gray-400'
                       }`}>
                         {formData.customer_type === 'new' && (
-                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full m-0.5"></div>
                         )}
                       </div>
-                      <span className="font-semibold text-blue-700">عميل جديد</span>
+                      <span className="font-semibold text-blue-700 text-xs md:text-sm">جديد</span>
                     </div>
-                    <p className="text-xs text-gray-600">يجب الدفع لتفعيل الاشتراك</p>
+                    <p className="text-[10px] md:text-xs text-gray-600 hidden sm:block">يجب الدفع للتفعيل</p>
                   </div>
 
                   <div 
                     onClick={() => setFormData({ ...formData, customer_type: 'trusted', payment_terms_days: 7 })}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    className={`border-2 rounded-lg p-2 md:p-4 cursor-pointer transition-all ${
                       formData.customer_type === 'trusted' 
                         ? 'border-green-500 bg-green-50' 
                         : 'border-gray-300 hover:border-green-300'
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={`w-4 h-4 rounded-full border-2 ${
+                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
+                      <div className={`w-3 h-3 md:w-4 md:h-4 rounded-full border-2 ${
                         formData.customer_type === 'trusted' 
                           ? 'border-green-500 bg-green-500' 
                           : 'border-gray-400'
                       }`}>
                         {formData.customer_type === 'trusted' && (
-                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full m-0.5"></div>
                         )}
                       </div>
-                      <span className="font-semibold text-green-700">عميل موثوق</span>
+                      <span className="font-semibold text-green-700 text-xs md:text-sm">موثوق</span>
                     </div>
-                    <p className="text-xs text-gray-600">مهلة دفع 7 أيام - تفعيل فوري</p>
+                    <p className="text-[10px] md:text-xs text-gray-600 hidden sm:block">مهلة 7 أيام</p>
                   </div>
 
                   <div 
                     onClick={() => setFormData({ ...formData, customer_type: 'vip', payment_terms_days: 14 })}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    className={`border-2 rounded-lg p-2 md:p-4 cursor-pointer transition-all ${
                       formData.customer_type === 'vip' 
                         ? 'border-amber-500 bg-amber-50' 
                         : 'border-gray-300 hover:border-amber-300'
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={`w-4 h-4 rounded-full border-2 ${
+                    <div className="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
+                      <div className={`w-3 h-3 md:w-4 md:h-4 rounded-full border-2 ${
                         formData.customer_type === 'vip' 
                           ? 'border-amber-500 bg-amber-500' 
                           : 'border-gray-400'
                       }`}>
                         {formData.customer_type === 'vip' && (
-                          <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full m-0.5"></div>
                         )}
                       </div>
-                      <span className="font-semibold text-amber-700">⭐ عميل VIP</span>
+                      <span className="font-semibold text-amber-700 text-xs md:text-sm">⭐ VIP</span>
                     </div>
-                    <p className="text-xs text-gray-600">مهلة دفع 14 يوم - تفعيل فوري</p>
+                    <p className="text-[10px] md:text-xs text-gray-600 hidden sm:block">مهلة 14 يوم</p>
                   </div>
                 </div>
                 
                 {/* معلومات إضافية حسب نوع العميل */}
                 {formData.customer_type === 'new' && (
-                  <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                    ℹ️ العميل الجديد: يتطلب دفع ريال واحد على الأقل لتفعيل الاشتراك فوراً
+                  <div className="mt-2 md:mt-3 p-2 md:p-3 bg-blue-50 rounded-lg text-xs md:text-sm text-blue-800">
+                    ℹ️ يتطلب دفع للتفعيل
                   </div>
                 )}
                 {formData.customer_type === 'trusted' && (
-                  <div className="mt-3 p-3 bg-green-50 rounded-lg text-sm text-green-800">
-                    ✅ العميل الموثوق: يتم تفعيل الاشتراك فوراً مع مهلة دفع 7 أيام
+                  <div className="mt-2 md:mt-3 p-2 md:p-3 bg-green-50 rounded-lg text-xs md:text-sm text-green-800">
+                    ✅ تفعيل فوري + مهلة 7 أيام
                   </div>
                 )}
                 {formData.customer_type === 'vip' && (
-                  <div className="mt-3 p-3 bg-amber-50 rounded-lg text-sm text-amber-800">
-                    ⭐ العميل VIP: يتم تفعيل الاشتراك فوراً مع مهلة دفع 14 يوم وامتيازات خاصة
+                  <div className="mt-2 md:mt-3 p-2 md:p-3 bg-amber-50 rounded-lg text-xs md:text-sm text-amber-800">
+                    ⭐ تفعيل فوري + مهلة 14 يوم
                   </div>
                 )}
               </div>
 
               {/* Services */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  <FaListAlt className="inline ml-2" /> الخدمات المقدمة
+                <label className="block text-gray-700 font-semibold mb-1 md:mb-2 text-sm md:text-base">
+                  <FaListAlt className="inline ml-1 md:ml-2" /> الخدمات المقدمة
                 </label>
                 <textarea
                   name="services"
                   value={formData.services}
                   onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
-                  placeholder="مثال: نقل عفش، فك وتركيب، تغليف احترافي..."
+                  rows={2}
+                  className="w-full px-3 md:px-4 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none text-sm md:text-base"
+                  placeholder="نقل عفش، فك وتركيب، تغليف..."
                 />
               </div>
 
@@ -662,7 +663,7 @@ export default function NewAdvertiser() {
                   </div>
 
                   {availableIcons.length > 0 ? (
-                <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
+                <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2 md:gap-3">
                   {availableIcons.map((iconItem) => {
                     const IconComponent = iconItem.icon;
                     return (
@@ -672,13 +673,13 @@ export default function NewAdvertiser() {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setFormData({ ...formData, selected_icon: iconItem.name })}
-                            className={`p-4 rounded-xl border-2 transition-all ${
+                            className={`p-2 md:p-4 rounded-lg md:rounded-xl border-2 transition-all ${
                           formData.selected_icon === iconItem.name
                                 ? 'border-primary-500 bg-primary-50 shadow-lg ring-2 ring-primary-200'
                                 : 'border-gray-200 hover:border-primary-300 bg-white hover:shadow-md'
                         }`}
                       >
-                        <IconComponent className={`text-2xl ${iconItem.color}`} />
+                        <IconComponent className={`text-lg md:text-2xl ${iconItem.color}`} />
                       </motion.button>
                     );
                   })}

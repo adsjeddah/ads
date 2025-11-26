@@ -80,23 +80,23 @@ export default function AdRequests() {
     switch (status) {
       case 'pending':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-            <FaClock className="text-xs" />
-            قيد الانتظار
+          <span className="inline-flex items-center gap-0.5 md:gap-1 px-1.5 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-sm font-medium bg-yellow-100 text-yellow-800">
+            <FaClock className="text-[8px] md:text-xs" />
+            <span className="hidden sm:inline">انتظار</span>
           </span>
         );
       case 'approved':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-            <FaCheck className="text-xs" />
-            موافق عليه
+          <span className="inline-flex items-center gap-0.5 md:gap-1 px-1.5 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-sm font-medium bg-green-100 text-green-800">
+            <FaCheck className="text-[8px] md:text-xs" />
+            <span className="hidden sm:inline">موافق</span>
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-            <FaTimes className="text-xs" />
-            مرفوض
+          <span className="inline-flex items-center gap-0.5 md:gap-1 px-1.5 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-sm font-medium bg-red-100 text-red-800">
+            <FaTimes className="text-[8px] md:text-xs" />
+            <span className="hidden sm:inline">مرفوض</span>
           </span>
         );
       default:
@@ -116,33 +116,35 @@ export default function AdRequests() {
       </Head>
 
       <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
+          <div className="mb-4 md:mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">طلبات المعلنين</h1>
-                <p className="text-gray-600 mt-2">إدارة طلبات الإعلان الواردة من العملاء</p>
+                <h1 className="text-xl md:text-3xl font-bold text-gray-800">طلبات المعلنين</h1>
+                <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">إدارة طلبات الإعلان الواردة</p>
               </div>
-              <div className="flex gap-3">
-                <Link href="/admin/ad-requests/rejected">
+              <div className="flex gap-2 md:gap-3 w-full sm:w-auto">
+                <Link href="/admin/ad-requests/rejected" className="flex-1 sm:flex-initial">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="w-full flex items-center justify-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs md:text-sm"
                   >
                     <FaTimes />
-                    الطلبات المرفوضة
+                    <span className="hidden sm:inline">الطلبات المرفوضة</span>
+                    <span className="sm:hidden">مرفوض</span>
                   </motion.button>
                 </Link>
-                <Link href="/admin/dashboard">
+                <Link href="/admin/dashboard" className="flex-1 sm:flex-initial">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    className="w-full flex items-center justify-center gap-1 md:gap-2 px-3 md:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs md:text-sm"
                   >
                     <FaArrowRight className="rotate-180" />
-                    العودة للوحة التحكم
+                    <span className="hidden sm:inline">لوحة التحكم</span>
+                    <span className="sm:hidden">رجوع</span>
                   </motion.button>
                 </Link>
               </div>
@@ -150,10 +152,10 @@ export default function AdRequests() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="mb-6 flex gap-2">
+          <div className="mb-4 md:mb-6 flex gap-1 md:gap-2 overflow-x-auto scrollbar-hide pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-xs md:text-sm ${
                 filter === 'all' 
                   ? 'bg-primary-600 text-white' 
                   : 'bg-white text-gray-700 hover:bg-gray-100'
@@ -163,27 +165,27 @@ export default function AdRequests() {
             </button>
             <button
               onClick={() => setFilter('pending')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-xs md:text-sm ${
                 filter === 'pending' 
                   ? 'bg-yellow-600 text-white' 
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
             >
-              قيد الانتظار ({requests.filter(r => r.status === 'pending').length})
+              انتظار ({requests.filter(r => r.status === 'pending').length})
             </button>
             <button
               onClick={() => setFilter('approved')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-xs md:text-sm ${
                 filter === 'approved' 
                   ? 'bg-green-600 text-white' 
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
             >
-              موافق عليه ({requests.filter(r => r.status === 'approved').length})
+              موافق ({requests.filter(r => r.status === 'approved').length})
             </button>
             <button
               onClick={() => setFilter('rejected')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-xs md:text-sm ${
                 filter === 'rejected' 
                   ? 'bg-red-600 text-white' 
                   : 'bg-white text-gray-700 hover:bg-gray-100'
@@ -204,29 +206,29 @@ export default function AdRequests() {
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto -mx-2 md:mx-0">
+                <table className="w-full min-w-[600px]">
                   <thead className="bg-gray-50 border-b">
                     <tr>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">
                         الشركة
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">
                         المسؤول
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">
                         التواصل
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase hidden md:table-cell">
                         الخطة
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">
                         التاريخ
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">
                         الحالة
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">
                         الإجراءات
                       </th>
                     </tr>
@@ -239,61 +241,61 @@ export default function AdRequests() {
                         animate={{ opacity: 1 }}
                         className="hover:bg-gray-50 transition-colors"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <FaBuilding className="text-gray-400 ml-2" />
-                            <div className="text-sm font-medium text-gray-900">
+                            <FaBuilding className="text-gray-400 ml-1 md:ml-2 text-xs md:text-sm" />
+                            <div className="text-xs md:text-sm font-medium text-gray-900 truncate max-w-[100px] md:max-w-none">
                               {request.company_name}
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{request.contact_name}</div>
+                        <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap hidden sm:table-cell">
+                          <div className="text-xs md:text-sm text-gray-900">{request.contact_name}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
+                        <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1 md:gap-2">
                             <a
                               href={`tel:${request.phone}`}
-                              className="text-primary-600 hover:text-primary-800"
+                              className="text-primary-600 hover:text-primary-800 p-1"
                               title="اتصال"
                             >
-                              <FaPhone />
+                              <FaPhone className="text-xs md:text-sm" />
                             </a>
                             {request.whatsapp && (
                               <a
                                 href={`https://wa.me/${request.whatsapp}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-green-600 hover:text-green-800"
+                                className="text-green-600 hover:text-green-800 p-1"
                                 title="واتساب"
                               >
-                                <FaWhatsapp />
+                                <FaWhatsapp className="text-xs md:text-sm" />
                               </a>
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{request.plan_name || `خطة ${request.plan_id}`}</div>
+                        <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap hidden md:table-cell">
+                          <div className="text-xs md:text-sm text-gray-900">{request.plan_name || `خطة ${request.plan_id}`}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center text-sm text-gray-500">
-                            <FaCalendarAlt className="ml-1" />
+                        <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap hidden lg:table-cell">
+                          <div className="flex items-center text-xs md:text-sm text-gray-500">
+                            <FaCalendarAlt className="ml-1 text-xs" />
                             {formatDate(request.created_at)}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">
                           {getStatusBadge(request.status)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center gap-2">
+                        <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm font-medium">
+                          <div className="flex items-center gap-1 md:gap-2">
                             <Link href={`/admin/ad-requests/${request.id}`}>
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="text-primary-600 hover:text-primary-900"
+                                className="text-primary-600 hover:text-primary-900 p-1"
                                 title="عرض التفاصيل"
                               >
-                                <FaEye />
+                                <FaEye className="text-sm md:text-base" />
                               </motion.button>
                             </Link>
                             {request.status === 'pending' && (
@@ -302,19 +304,19 @@ export default function AdRequests() {
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleStatusChange(request.id, 'approved')}
-                                  className="text-green-600 hover:text-green-900"
-                                  title="الموافقة وإضافة كمعلن"
+                                  className="text-green-600 hover:text-green-900 p-1"
+                                  title="الموافقة"
                                 >
-                                  <FaCheck />
+                                  <FaCheck className="text-sm md:text-base" />
                                 </motion.button>
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleStatusChange(request.id, 'rejected')}
-                                  className="text-red-600 hover:text-red-900"
+                                  className="text-red-600 hover:text-red-900 p-1"
                                   title="رفض"
                                 >
-                                  <FaTimes />
+                                  <FaTimes className="text-sm md:text-base" />
                                 </motion.button>
                               </>
                             )}

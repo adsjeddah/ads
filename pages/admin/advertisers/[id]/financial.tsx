@@ -270,19 +270,20 @@ export default function AdvertiserFinancial() {
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
             <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gradient">النظام المالي المتكامل</h1>
-                <p className="text-gray-600 mt-1">{advertiser.company_name}</p>
+              <div className="min-w-0">
+                <h1 className="text-lg md:text-2xl font-bold text-gradient">النظام المالي</h1>
+                <p className="text-gray-600 mt-0.5 md:mt-1 text-xs md:text-base truncate">{advertiser.company_name}</p>
               </div>
               <Link href={`/admin/advertisers/${id}`}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors"
+                  className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-primary-600 transition-colors text-sm md:text-base"
                 >
                   <FaArrowLeft />
-                  <span>العودة للمعلن</span>
+                  <span className="hidden sm:inline">العودة للمعلن</span>
+                  <span className="sm:hidden">رجوع</span>
                 </motion.button>
               </Link>
             </div>
@@ -290,35 +291,35 @@ export default function AdvertiserFinancial() {
         </header>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
           {/* Advertiser Quick Info */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg p-6 mb-8"
+            className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg p-4 md:p-6 mb-4 md:mb-8"
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
-                  <FaBuilding className="text-3xl text-white" />
+              <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                <div className="w-10 h-10 md:w-16 md:h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <FaBuilding className="text-lg md:text-3xl text-white" />
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800">{advertiser.company_name}</h2>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                <div className="min-w-0">
+                  <h2 className="text-base md:text-xl font-bold text-gray-800 truncate">{advertiser.company_name}</h2>
+                  <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-4 mt-0.5 md:mt-1 text-xs md:text-sm text-gray-600">
                     <span className="flex items-center gap-1">
-                      <FaPhone /> {advertiser.phone}
+                      <FaPhone className="text-xs" /> <span dir="ltr">{advertiser.phone}</span>
                     </span>
                     {advertiser.email && (
-                      <span className="flex items-center gap-1">
-                        <FaEnvelope /> {advertiser.email}
+                      <span className="flex items-center gap-1 hidden md:flex">
+                        <FaEnvelope className="text-xs" /> {advertiser.email}
                       </span>
                     )}
                   </div>
                 </div>
               </div>
-              <div>
+              <div className="flex-shrink-0">
                 <span
-                  className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  className={`px-2 md:px-4 py-1 md:py-2 rounded-full text-xs md:text-sm font-semibold ${
                     advertiser.status === 'active'
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
@@ -332,7 +333,7 @@ export default function AdvertiserFinancial() {
 
           {/* Financial Summary Cards */}
           {summary && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-4 md:mb-8">
               <StatCard
                 title="إجمالي الاشتراكات"
                 value={summary.total_subscriptions || 0}
@@ -365,15 +366,16 @@ export default function AdvertiserFinancial() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-4 mb-8">
+          <div className="flex gap-2 md:gap-4 mb-4 md:mb-8">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowCreateSubscription(true)}
-              className="flex items-center gap-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              className="flex items-center gap-1 md:gap-2 bg-gradient-to-r from-primary-600 to-secondary-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all text-xs md:text-base flex-1 md:flex-initial justify-center"
             >
-              <FaPlus />
-              إنشاء اشتراك جديد
+              <FaPlus className="text-sm md:text-base" />
+              <span className="hidden sm:inline">إنشاء اشتراك</span>
+              <span className="sm:hidden">اشتراك</span>
             </motion.button>
 
             <motion.button
@@ -400,10 +402,11 @@ export default function AdvertiserFinancial() {
                 }
               }}
               disabled={!subscriptions || subscriptions.length === 0}
-              className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 md:gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-base flex-1 md:flex-initial justify-center"
             >
-              <FaMoneyBillWave />
-              تسجيل دفعة
+              <FaMoneyBillWave className="text-sm md:text-base" />
+              <span className="hidden sm:inline">تسجيل دفعة</span>
+              <span className="sm:hidden">دفعة</span>
             </motion.button>
           </div>
 
@@ -412,7 +415,7 @@ export default function AdvertiserFinancial() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mb-8"
+            className="mb-4 md:mb-8"
           >
             <SubscriptionsList
               subscriptions={subscriptions}
@@ -431,7 +434,7 @@ export default function AdvertiserFinancial() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-8"
+            className="mb-4 md:mb-8"
           >
             <InvoicesTable
               invoices={invoices}
@@ -444,7 +447,7 @@ export default function AdvertiserFinancial() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mb-8"
+            className="mb-4 md:mb-8"
           >
             <PaymentHistoryTable
               payments={payments}

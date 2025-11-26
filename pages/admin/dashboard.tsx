@@ -610,17 +610,18 @@ export default function AdminDashboard() {
     }
   };
 
-  const StatCard = ({ icon: Icon, title, value, color }: any) => (
+  const StatCard = ({ icon: Icon, title, value, color, subtitle }: any) => (
     <motion.div
-      whileHover={{ y: -5 }}
-      className="bg-white rounded-xl shadow-lg p-6"
+      whileHover={{ y: -3 }}
+      className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6"
     >
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-600 text-sm">{title}</p>
-          <p className="text-3xl font-bold mt-2">{value}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-gray-600 text-xs md:text-sm truncate">{title}</p>
+          <p className="text-lg md:text-3xl font-bold mt-1 md:mt-2 truncate">{value}</p>
+          {subtitle && <p className="text-xs text-gray-500 mt-1 truncate">{subtitle}</p>}
         </div>
-        <div className={`w-16 h-16 ${color} rounded-full flex items-center justify-center text-white text-2xl`}>
+        <div className={`w-10 h-10 md:w-16 md:h-16 ${color} rounded-full flex items-center justify-center text-white text-lg md:text-2xl flex-shrink-0 mr-2`}>
           <Icon />
         </div>
       </div>
@@ -644,27 +645,27 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
+          <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gradient">لوحة التحكم</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-gradient">لوحة التحكم</h1>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 text-red-600 hover:text-red-700 transition-colors"
+                className="flex items-center gap-1 md:gap-2 text-red-600 hover:text-red-700 transition-colors text-sm md:text-base"
               >
                 <FaSignOutAlt />
-                <span>تسجيل الخروج</span>
+                <span className="hidden sm:inline">تسجيل الخروج</span>
               </button>
             </div>
           </div>
         </header>
 
-        {/* Navigation Tabs */}
+        {/* Navigation Tabs - Scrollable on mobile */}
         <div className="bg-white border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex gap-8">
+          <div className="container mx-auto px-2 md:px-4">
+            <div className="flex gap-4 md:gap-8 overflow-x-auto scrollbar-hide pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               <button
                 onClick={() => changeTab('overview')}
-                className={`py-4 px-2 border-b-2 transition-colors ${
+                className={`py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors whitespace-nowrap text-sm md:text-base ${
                   activeTab === 'overview' 
                     ? 'border-primary-500 text-primary-600' 
                     : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -674,7 +675,7 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => changeTab('advertisers')}
-                className={`py-4 px-2 border-b-2 transition-colors ${
+                className={`py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors whitespace-nowrap text-sm md:text-base ${
                   activeTab === 'advertisers' 
                     ? 'border-primary-500 text-primary-600' 
                     : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -684,7 +685,7 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => changeTab('invoices')}
-                className={`py-4 px-2 border-b-2 transition-colors ${
+                className={`py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors whitespace-nowrap text-sm md:text-base ${
                   activeTab === 'invoices'
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -694,22 +695,22 @@ export default function AdminDashboard() {
               </button>
               <button
                 onClick={() => changeTab('requests')}
-                className={`py-4 px-2 border-b-2 transition-colors relative ${
+                className={`py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors relative whitespace-nowrap text-sm md:text-base ${
                   activeTab === 'requests'
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-600 hover:text-gray-800'
                 }`}
               >
-                طلبات الإعلان
+                الطلبات
                 {adRequests.length > 0 && (
-                  <span className="absolute -top-1 -left-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -left-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs">
                     {adRequests.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => changeTab('reminders')}
-                className={`py-4 px-2 border-b-2 transition-colors relative ${
+                className={`py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors relative whitespace-nowrap text-sm md:text-base ${
                   activeTab === 'reminders'
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -717,14 +718,14 @@ export default function AdminDashboard() {
               >
                 التذكيرات
                 {reminders.length > 0 && (
-                  <span className="absolute -top-1 -left-2 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -left-1 bg-yellow-500 text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs">
                     {reminders.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => changeTab('refunds')}
-                className={`py-4 px-2 border-b-2 transition-colors relative ${
+                className={`py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors relative whitespace-nowrap text-sm md:text-base ${
                   activeTab === 'refunds'
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -732,30 +733,30 @@ export default function AdminDashboard() {
               >
                 الاستردادات
                 {statistics?.pendingRefunds && statistics.pendingRefunds.count > 0 && (
-                  <span className="absolute -top-1 -left-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -left-1 bg-orange-500 text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-[10px] md:text-xs">
                     {statistics.pendingRefunds.count}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => changeTab('audit')}
-                className={`py-4 px-2 border-b-2 transition-colors ${
+                className={`py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors whitespace-nowrap text-sm md:text-base ${
                   activeTab === 'audit'
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-600 hover:text-gray-800'
                 }`}
               >
-                سجل التدقيق
+                التدقيق
               </button>
               <Link href="/admin/plans">
                 <button
-                  className={`py-4 px-2 border-b-2 transition-colors ${
+                  className={`py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors whitespace-nowrap text-sm md:text-base ${
                     false
                       ? 'border-primary-500 text-primary-600'
                       : 'border-transparent text-gray-600 hover:text-gray-800'
                   }`}
                 >
-                  خطط الأسعار
+                  الأسعار
                 </button>
               </Link>
             </div>
@@ -763,14 +764,14 @@ export default function AdminDashboard() {
         </div>
 
         {/* Content */}
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
           {activeTab === 'overview' && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               {/* Statistics Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-4 md:mb-8">
                 <StatCard
                   icon={FaUsers}
                   title="إجمالي المعلنين"
@@ -798,7 +799,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Subscription Status Statistics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-4 md:mb-8">
                 <StatCard
                   icon={FaPause}
                   title="اشتراكات متوقفة مؤقتاً"
@@ -845,83 +846,83 @@ export default function AdminDashboard() {
               </div>
 
               {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6 mb-4 md:mb-8">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6 text-white cursor-pointer"
                   onClick={() => changeTab('invoices')}
                 >
-                  <FaFileInvoice className="text-3xl mb-2" />
-                  <h3 className="text-lg font-bold mb-1">إدارة الفواتير</h3>
-                  <p className="text-sm opacity-90">عرض وإدارة جميع الفواتير مع VAT</p>
+                  <FaFileInvoice className="text-xl md:text-3xl mb-1 md:mb-2" />
+                  <h3 className="text-sm md:text-lg font-bold mb-0.5 md:mb-1">الفواتير</h3>
+                  <p className="text-xs opacity-90 hidden md:block">عرض وإدارة جميع الفواتير</p>
                 </motion.div>
                 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
+                  className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6 text-white cursor-pointer"
                   onClick={() => changeTab('refunds')}
                 >
-                  <FaUndo className="text-3xl mb-2" />
-                  <h3 className="text-lg font-bold mb-1">إدارة الاستردادات</h3>
-                  <p className="text-sm opacity-90">
+                  <FaUndo className="text-xl md:text-3xl mb-1 md:mb-2" />
+                  <h3 className="text-sm md:text-lg font-bold mb-0.5 md:mb-1">الاستردادات</h3>
+                  <p className="text-xs opacity-90 hidden md:block">
                     {statistics?.pendingRefunds ? `${statistics.pendingRefunds.count} معلق` : 'عرض وإدارة الاستردادات'}
                   </p>
                 </motion.div>
                 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
+                  className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6 text-white cursor-pointer"
                   onClick={() => changeTab('reminders')}
                 >
-                  <FaBell className="text-3xl mb-2" />
-                  <h3 className="text-lg font-bold mb-1">التذكيرات التلقائية</h3>
-                  <p className="text-sm opacity-90">إدارة تذكيرات الدفع والاشتراكات</p>
+                  <FaBell className="text-xl md:text-3xl mb-1 md:mb-2" />
+                  <h3 className="text-sm md:text-lg font-bold mb-0.5 md:mb-1">التذكيرات</h3>
+                  <p className="text-xs opacity-90 hidden md:block">إدارة تذكيرات الدفع</p>
                 </motion.div>
                 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white cursor-pointer"
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6 text-white cursor-pointer"
                   onClick={() => changeTab('audit')}
                 >
-                  <FaHistory className="text-3xl mb-2" />
-                  <h3 className="text-lg font-bold mb-1">سجل التدقيق</h3>
-                  <p className="text-sm opacity-90">تتبع جميع التغييرات والعمليات</p>
+                  <FaHistory className="text-xl md:text-3xl mb-1 md:mb-2" />
+                  <h3 className="text-sm md:text-lg font-bold mb-0.5 md:mb-1">التدقيق</h3>
+                  <p className="text-xs opacity-90 hidden md:block">تتبع التغييرات</p>
                 </motion.div>
               </div>
 
               {/* Recent Advertisers */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold">أحدث المعلنين</h2>
+              <div className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6">
+                  <h2 className="text-lg md:text-xl font-bold">أحدث المعلنين</h2>
                   <Link href="/admin/advertisers/new">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
-                      className="btn-primary flex items-center gap-2"
+                      className="btn-primary flex items-center gap-1 md:gap-2 text-sm md:text-base px-3 py-2"
                     >
                       <FaPlus />
-                      <span>إضافة معلن</span>
+                      <span>إضافة</span>
                     </motion.button>
                   </Link>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="overflow-x-auto -mx-3 md:mx-0">
+                  <table className="w-full min-w-[500px]">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-right py-3 px-4">الشركة</th>
-                        <th className="text-right py-3 px-4">الهاتف</th>
-                        <th className="text-right py-3 px-4">الحالة</th>
-                        <th className="text-right py-3 px-4">الاشتراكات</th>
-                        <th className="text-right py-3 px-4">الإجراءات</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الشركة</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الهاتف</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الحالة</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden sm:table-cell">الاشتراكات</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الإجراءات</th>
                       </tr>
                     </thead>
                     <tbody>
                       {advertisers.slice(0, 5).map((advertiser) => (
                         <tr key={advertiser.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4">{advertiser.company_name}</td>
-                          <td className="py-3 px-4">{advertiser.phone}</td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
+                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">{advertiser.company_name}</td>
+                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm" dir="ltr">{advertiser.phone}</td>
+                          <td className="py-2 md:py-3 px-2 md:px-4">
+                            <span className={`px-1.5 md:px-2 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs ${
                               advertiser.status === 'active' 
                                 ? 'bg-green-100 text-green-800' 
                                 : 'bg-red-100 text-red-800'
@@ -929,43 +930,43 @@ export default function AdminDashboard() {
                               {advertiser.status === 'active' ? 'نشط' : 'غير نشط'}
                             </span>
                           </td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <span className="flex items-center gap-1">
-                                <FaCheckCircle className="text-green-500" />
+                          <td className="py-2 md:py-3 px-2 md:px-4 hidden sm:table-cell">
+                            <div className="flex items-center gap-1 md:gap-2 text-xs">
+                              <span className="flex items-center gap-0.5">
+                                <FaCheckCircle className="text-green-500 text-xs" />
                                 {advertiser.active_subscriptions || 0}
                               </span>
                               {advertiser.paused_subscriptions ? (
-                                <span className="flex items-center gap-1 text-yellow-600">
-                                  <FaPause className="text-xs" />
+                                <span className="flex items-center gap-0.5 text-yellow-600">
+                                  <FaPause className="text-[10px]" />
                                   {advertiser.paused_subscriptions}
                                 </span>
                               ) : null}
                               {advertiser.stopped_subscriptions ? (
-                                <span className="flex items-center gap-1 text-red-600">
-                                  <FaStop className="text-xs" />
+                                <span className="flex items-center gap-0.5 text-red-600">
+                                  <FaStop className="text-[10px]" />
                                   {advertiser.stopped_subscriptions}
                                 </span>
                               ) : null}
                             </div>
                           </td>
-                          <td className="py-3 px-4">
-                            <div className="flex gap-2">
+                          <td className="py-2 md:py-3 px-2 md:px-4">
+                            <div className="flex gap-1 md:gap-2">
                               <Link href={`/admin/advertisers/${advertiser.id}`}>
-                                <button className="text-blue-600 hover:text-blue-800">
-                                  <FaEye />
+                                <button className="text-blue-600 hover:text-blue-800 p-1">
+                                  <FaEye className="text-sm md:text-base" />
                                 </button>
                               </Link>
                               <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
-                                <button className="text-green-600 hover:text-green-800">
-                                  <FaEdit />
+                                <button className="text-green-600 hover:text-green-800 p-1">
+                                  <FaEdit className="text-sm md:text-base" />
                                 </button>
                               </Link>
                               <button
                                 onClick={() => handleDeleteAdvertiser(advertiser.id)}
-                                className="text-red-600 hover:text-red-800"
+                                className="text-red-600 hover:text-red-800 p-1"
                               >
-                                <FaTrash />
+                                <FaTrash className="text-sm md:text-base" />
                               </button>
                             </div>
                           </td>
@@ -983,41 +984,41 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold">جميع المعلنين</h2>
+              <div className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6">
+                  <h2 className="text-lg md:text-xl font-bold">جميع المعلنين</h2>
                   <Link href="/admin/advertisers/new">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
-                      className="btn-primary flex items-center gap-2"
+                      className="btn-primary flex items-center gap-1 md:gap-2 text-sm md:text-base px-3 py-2"
                     >
                       <FaPlus />
-                      <span>إضافة معلن</span>
+                      <span>إضافة</span>
                     </motion.button>
                   </Link>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="overflow-x-auto -mx-3 md:mx-0">
+                  <table className="w-full min-w-[600px]">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-right py-3 px-4">الشركة</th>
-                        <th className="text-right py-3 px-4">الهاتف</th>
-                        <th className="text-right py-3 px-4">البريد</th>
-                        <th className="text-right py-3 px-4">الحالة</th>
-                        <th className="text-right py-3 px-4">الاشتراكات</th>
-                        <th className="text-right py-3 px-4">تاريخ التسجيل</th>
-                        <th className="text-right py-3 px-4">الإجراءات</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الشركة</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الهاتف</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden lg:table-cell">البريد</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الحالة</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden sm:table-cell">الاشتراكات</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden md:table-cell">التسجيل</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الإجراءات</th>
                       </tr>
                     </thead>
                     <tbody>
                       {advertisers.map((advertiser) => (
                         <tr key={advertiser.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-4">{advertiser.company_name}</td>
-                          <td className="py-3 px-4">{advertiser.phone}</td>
-                          <td className="py-3 px-4">{advertiser.email || '-'}</td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
+                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">{advertiser.company_name}</td>
+                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm" dir="ltr">{advertiser.phone}</td>
+                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden lg:table-cell">{advertiser.email || '-'}</td>
+                          <td className="py-2 md:py-3 px-2 md:px-4">
+                            <span className={`px-1.5 md:px-2 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs ${
                               advertiser.status === 'active' 
                                 ? 'bg-green-100 text-green-800' 
                                 : 'bg-red-100 text-red-800'
@@ -1025,46 +1026,46 @@ export default function AdminDashboard() {
                               {advertiser.status === 'active' ? 'نشط' : 'غير نشط'}
                             </span>
                           </td>
-                          <td className="py-3 px-4">
-                            <div className="flex flex-wrap items-center gap-2 text-sm">
-                              <span className="flex items-center gap-1 text-green-600">
-                                <FaCheckCircle className="text-xs" />
+                          <td className="py-2 md:py-3 px-2 md:px-4 hidden sm:table-cell">
+                            <div className="flex flex-wrap items-center gap-1 text-xs">
+                              <span className="flex items-center gap-0.5 text-green-600">
+                                <FaCheckCircle className="text-[10px]" />
                                 {advertiser.active_subscriptions || 0}
                               </span>
                               {advertiser.paused_subscriptions ? (
-                                <span className="flex items-center gap-1 text-yellow-600">
-                                  <FaPause className="text-xs" />
+                                <span className="flex items-center gap-0.5 text-yellow-600">
+                                  <FaPause className="text-[10px]" />
                                   {advertiser.paused_subscriptions}
                                 </span>
                               ) : null}
                               {advertiser.stopped_subscriptions ? (
-                                <span className="flex items-center gap-1 text-red-600">
-                                  <FaStop className="text-xs" />
+                                <span className="flex items-center gap-0.5 text-red-600">
+                                  <FaStop className="text-[10px]" />
                                   {advertiser.stopped_subscriptions}
                                 </span>
                               ) : null}
                             </div>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs hidden md:table-cell">
                             {formatDate(advertiser.created_at, 'dd/MM/yyyy')}
                           </td>
-                          <td className="py-3 px-4">
-                            <div className="flex gap-2">
+                          <td className="py-2 md:py-3 px-2 md:px-4">
+                            <div className="flex gap-1 md:gap-2">
                               <Link href={`/admin/advertisers/${advertiser.id}`}>
-                                <button className="text-blue-600 hover:text-blue-800">
-                                  <FaEye />
+                                <button className="text-blue-600 hover:text-blue-800 p-1">
+                                  <FaEye className="text-sm md:text-base" />
                                 </button>
                               </Link>
                               <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
-                                <button className="text-green-600 hover:text-green-800">
-                                  <FaEdit />
+                                <button className="text-green-600 hover:text-green-800 p-1">
+                                  <FaEdit className="text-sm md:text-base" />
                                 </button>
                               </Link>
                               <button
                                 onClick={() => handleDeleteAdvertiser(advertiser.id)}
-                                className="text-red-600 hover:text-red-800"
+                                className="text-red-600 hover:text-red-800 p-1"
                               >
-                                <FaTrash />
+                                <FaTrash className="text-sm md:text-base" />
                               </button>
                             </div>
                           </td>
@@ -1083,20 +1084,20 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
             >
               {/* Statistics Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="grid grid-cols-3 gap-2 md:gap-6 mb-4 md:mb-6">
                 {/* عدد الفواتير */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-blue-50 rounded-xl shadow-lg p-6"
+                  className="bg-blue-50 rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6"
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-blue-600 text-sm font-medium mb-1">عدد الفواتير</p>
-                      <p className="text-3xl font-bold text-blue-900">{invoices.length}</p>
+                    <div className="min-w-0">
+                      <p className="text-blue-600 text-xs md:text-sm font-medium mb-0.5 md:mb-1">الفواتير</p>
+                      <p className="text-xl md:text-3xl font-bold text-blue-900">{invoices.length}</p>
                     </div>
-                    <div className="bg-blue-100 p-4 rounded-lg">
-                      <FaFileInvoice className="text-blue-600 text-2xl" />
+                    <div className="bg-blue-100 p-2 md:p-4 rounded-lg flex-shrink-0">
+                      <FaFileInvoice className="text-blue-600 text-lg md:text-2xl" />
                     </div>
                   </div>
                 </motion.div>
@@ -1106,17 +1107,17 @@ export default function AdminDashboard() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-yellow-50 rounded-xl shadow-lg p-6"
+                  className="bg-yellow-50 rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6"
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-yellow-600 text-sm font-medium mb-1">المبالغ المعلقة</p>
-                      <p className="text-3xl font-bold text-yellow-900">
+                    <div className="min-w-0">
+                      <p className="text-yellow-600 text-xs md:text-sm font-medium mb-0.5 md:mb-1">معلق</p>
+                      <p className="text-base md:text-3xl font-bold text-yellow-900 truncate">
                         {formatPrice(invoices.reduce((sum, inv) => sum + (inv.subscription_remaining || 0), 0))}
                       </p>
                     </div>
-                    <div className="bg-yellow-100 p-4 rounded-lg">
-                      <FaClock className="text-yellow-600 text-2xl" />
+                    <div className="bg-yellow-100 p-2 md:p-4 rounded-lg flex-shrink-0">
+                      <FaClock className="text-yellow-600 text-lg md:text-2xl" />
                     </div>
                   </div>
                 </motion.div>
@@ -1126,17 +1127,17 @@ export default function AdminDashboard() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-green-50 rounded-xl shadow-lg p-6"
+                  className="bg-green-50 rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6"
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-green-600 text-sm font-medium mb-1">إجمالي المدفوعات</p>
-                      <p className="text-3xl font-bold text-green-900">
+                    <div className="min-w-0">
+                      <p className="text-green-600 text-xs md:text-sm font-medium mb-0.5 md:mb-1">مدفوع</p>
+                      <p className="text-base md:text-3xl font-bold text-green-900 truncate">
                         {formatPrice(invoices.reduce((sum, inv) => sum + (inv.subscription_paid || 0), 0))}
                       </p>
                     </div>
-                    <div className="bg-green-100 p-4 rounded-lg">
-                      <FaMoneyBillWave className="text-green-600 text-2xl" />
+                    <div className="bg-green-100 p-2 md:p-4 rounded-lg flex-shrink-0">
+                      <FaMoneyBillWave className="text-green-600 text-lg md:text-2xl" />
                     </div>
                   </div>
                 </motion.div>
@@ -1156,41 +1157,42 @@ export default function AdminDashboard() {
               </div>
 
               {/* 🆕 Advanced Filters - فلاتر متقدمة شاملة */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold text-gray-800">الفلاتر والبحث</h3>
-                  <div className="flex gap-2">
+              <div className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6 mb-4 md:mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                  <h3 className="text-base md:text-lg font-bold text-gray-800">الفلاتر والبحث</h3>
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                      className="flex-1 sm:flex-initial px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-1 text-xs md:text-sm"
                     >
                       <FaFilter />
-                      <span>{showAdvancedFilters ? 'إخفاء الفلاتر المتقدمة' : 'إظهار الفلاتر المتقدمة'}</span>
+                      <span className="hidden sm:inline">{showAdvancedFilters ? 'إخفاء المتقدمة' : 'فلاتر متقدمة'}</span>
+                      <span className="sm:hidden">متقدم</span>
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={resetAdvancedFilters}
-                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-xs md:text-sm"
                     >
-                      إعادة تعيين
+                      تعيين
                     </motion.button>
                   </div>
                 </div>
 
                 {/* Basic Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-4 mb-4">
                   {/* Search */}
-                  <div className="relative">
-                    <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <div className="relative sm:col-span-2 md:col-span-1">
+                    <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
                     <input
                       type="text"
-                      placeholder="البحث بالاسم أو الهاتف أو رقم الفاتورة..."
+                      placeholder="البحث..."
                       value={invoicesSearchTerm}
                       onChange={(e) => setInvoicesSearchTerm(e.target.value)}
-                      className="w-full pr-10 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full pr-9 pl-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base"
                     />
                   </div>
 
@@ -1198,11 +1200,11 @@ export default function AdminDashboard() {
                   <select
                     value={invoicesFilterStatus}
                     onChange={(e) => setInvoicesFilterStatus(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base"
                   >
-                    <option value="all">جميع الحالات</option>
+                    <option value="all">الكل</option>
                     <option value="paid">مدفوعة</option>
-                    <option value="partial">مدفوعة جزئياً</option>
+                    <option value="partial">جزئي</option>
                     <option value="unpaid">غير مدفوعة</option>
                   </select>
 
@@ -1210,14 +1212,14 @@ export default function AdminDashboard() {
                   <select
                     value={invoicesDateRange}
                     onChange={(e) => setInvoicesDateRange(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm md:text-base"
                   >
                     <option value="all">كل الفترات</option>
                     <option value="today">اليوم</option>
-                    <option value="last7days">آخر 7 أيام</option>
-                    <option value="thisMonth">الشهر الحالي</option>
+                    <option value="last7days">7 أيام</option>
+                    <option value="thisMonth">هذا الشهر</option>
                     <option value="lastMonth">الشهر السابق</option>
-                    <option value="custom">مدة مخصصة</option>
+                    <option value="custom">مخصص</option>
                   </select>
                 </div>
 
@@ -1333,20 +1335,20 @@ export default function AdminDashboard() {
                   <p className="text-gray-500">لا توجد فواتير تطابق البحث أو الفلتر.</p>
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
+                <div className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg overflow-hidden">
+                  <div className="overflow-x-auto -mx-2 md:mx-0">
+                    <table className="w-full min-w-[700px]">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الفاتورة</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">العميل</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الخطة</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ الإصدار</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المبلغ الإجمالي</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المدفوع</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المتبقي</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">الفاتورة</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">العميل</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase hidden md:table-cell">الخطة</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">التاريخ</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">الإجمالي</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">المدفوع</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">المتبقي</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">الحالة</th>
+                          <th className="px-2 md:px-4 py-2 md:py-3 text-right text-[10px] md:text-xs font-medium text-gray-500 uppercase">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
@@ -1357,28 +1359,27 @@ export default function AdminDashboard() {
                             animate={{ opacity: 1 }}
                             className="hover:bg-gray-50"
                           >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{invoice.invoice_number}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                              <div>{invoice.company_name}</div>
-                              <div className="text-xs text-gray-500">{invoice.phone}</div>
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm font-medium text-gray-900">{invoice.invoice_number}</td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-800">
+                              <div className="truncate max-w-[100px] md:max-w-none">{invoice.company_name}</div>
+                              <div className="text-[10px] md:text-xs text-gray-500 hidden sm:block" dir="ltr">{invoice.phone}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.plan_name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDateUtil(invoice.issued_date)}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-800">{formatPrice(invoice.amount)}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">{formatPrice(invoice.subscription_paid)}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">{formatPrice(invoice.subscription_remaining)}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{getInvoiceStatusBadge(invoice)}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <div className="flex items-center gap-2">
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-600 hidden md:table-cell">{invoice.plan_name}</td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-600 hidden lg:table-cell">{formatDateUtil(invoice.issued_date)}</td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm font-semibold text-gray-800">{formatPrice(invoice.amount)}</td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm font-semibold text-green-600 hidden sm:table-cell">{formatPrice(invoice.subscription_paid)}</td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm font-semibold text-red-600">{formatPrice(invoice.subscription_remaining)}</td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap">{getInvoiceStatusBadge(invoice)}</td>
+                            <td className="px-2 md:px-4 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm">
+                              <div className="flex items-center gap-1">
                                 <Link href={`/admin/invoices/${invoice.id}`}>
                                   <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 px-3 py-1 rounded"
+                                    className="text-primary-600 hover:text-primary-700 p-1.5 rounded"
                                     title="عرض الفاتورة"
                                   >
-                                    <FaEye />
-                                    <span>عرض</span>
+                                    <FaEye className="text-sm md:text-base" />
                                   </motion.button>
                                 </Link>
                                 
@@ -1387,11 +1388,10 @@ export default function AdminDashboard() {
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleDeleteInvoice(invoice.id)}
-                                  className="text-red-600 hover:text-red-700 font-medium flex items-center gap-1 px-3 py-1 rounded hover:bg-red-50"
+                                  className="text-red-600 hover:text-red-700 p-1.5 rounded hover:bg-red-50"
                                   title="حذف الفاتورة نهائياً"
                                 >
-                                  <FaTrash />
-                                  <span>حذف</span>
+                                  <FaTrash className="text-sm md:text-base" />
                                 </motion.button>
                               </div>
                             </td>

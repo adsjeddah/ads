@@ -142,10 +142,10 @@ export default function AdminPlans() {
 
       <div className="min-h-screen bg-gray-50">
         <div className="bg-white shadow">
-          <div className="container mx-auto px-4 py-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-800">إدارة خطط الأسعار</h1>
-              <div className="flex gap-3">
+          <div className="container mx-auto px-3 md:px-4 py-4 md:py-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <h1 className="text-lg md:text-2xl font-bold text-gray-800">إدارة خطط الأسعار</h1>
+              <div className="flex gap-2 md:gap-3 w-full sm:w-auto">
                 <button
                   onClick={() => {
                     setEditingPlan(null);
@@ -159,13 +159,14 @@ export default function AdminPlans() {
                     });
                     setShowForm(!showForm);
                   }}
-                  className="btn-primary flex items-center gap-2"
+                  className="btn-primary flex items-center gap-1 md:gap-2 flex-1 sm:flex-initial justify-center text-sm md:text-base px-3 py-2"
                 >
                   <FaPlus />
-                  <span>إضافة خطة جديدة</span>
+                  <span className="hidden sm:inline">إضافة خطة</span>
+                  <span className="sm:hidden">إضافة</span>
                 </button>
-                <Link href="/admin/dashboard">
-                  <button className="btn-secondary flex items-center gap-2">
+                <Link href="/admin/dashboard" className="flex-1 sm:flex-initial">
+                  <button className="btn-secondary flex items-center gap-1 md:gap-2 w-full justify-center text-sm md:text-base px-3 py-2">
                     <FaArrowLeft />
                     <span>رجوع</span>
                   </button>
@@ -175,39 +176,39 @@ export default function AdminPlans() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
           {showForm && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-lg shadow-lg p-6 mb-8"
+              className="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-4 md:mb-8"
             >
-              <h2 className="text-xl font-bold mb-4">
+              <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4">
                 {editingPlan ? 'تعديل الخطة' : 'إضافة خطة جديدة'}
               </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
                       اسم الخطة
                     </label>
                     <input
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      السعر (ريال سعودي)
+                    <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+                      السعر (ريال)
                     </label>
                     <input
                       type="number"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
                       required
                       min="0"
                     />
@@ -215,40 +216,40 @@ export default function AdminPlans() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
                     الوصف
                   </label>
                   <input
                     type="text"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
                     required
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      المدة (بالأيام)
+                    <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+                      المدة (يوم)
                     </label>
                     <input
                       type="number"
                       value={formData.duration_days}
                       onChange={(e) => setFormData({ ...formData, duration_days: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
                       required
                       min="1"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
                       الحالة
                     </label>
                     <select
                       value={formData.is_active.toString()}
                       onChange={(e) => setFormData({ ...formData, is_active: e.target.value === 'true' })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
                     >
                       <option value="true">نشط</option>
                       <option value="false">غير نشط</option>
@@ -257,20 +258,20 @@ export default function AdminPlans() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    المميزات (سطر واحد لكل ميزة)
+                  <label className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+                    المميزات (سطر لكل ميزة)
                   </label>
                   <textarea
                     value={formData.features}
                     onChange={(e) => setFormData({ ...formData, features: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    rows={5}
-                    placeholder="ظهور في قائمة الشركات&#10;معلومات الاتصال الأساسية&#10;دعم عبر البريد الإلكتروني"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
+                    rows={4}
+                    placeholder="ظهور في قائمة الشركات&#10;معلومات الاتصال&#10;دعم البريد"
                     required
                   />
                 </div>
 
-                <div className="flex justify-end gap-3">
+                <div className="flex justify-end gap-2 md:gap-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -291,37 +292,37 @@ export default function AdminPlans() {
 
           {loading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 md:h-16 md:w-16 border-t-4 border-b-4 border-primary-500"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {plans.map((plan) => (
                 <motion.div
                   key={plan.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-lg shadow-lg overflow-hidden"
+                  className="bg-white rounded-lg shadow-md md:shadow-lg overflow-hidden"
                 >
-                  <div className={`p-6 ${plan.is_active ? 'bg-gradient-to-r from-primary-500 to-secondary-500' : 'bg-gray-500'} text-white`}>
-                    <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-                    <p className="text-sm opacity-90">{plan.description}</p>
-                    <div className="mt-4 flex items-end gap-1">
-                      <span className="text-3xl font-bold">{plan.price}</span>
-                      <span className="text-sm mb-1">ريال سعودي</span>
+                  <div className={`p-4 md:p-6 ${plan.is_active ? 'bg-gradient-to-r from-primary-500 to-secondary-500' : 'bg-gray-500'} text-white`}>
+                    <h3 className="text-lg md:text-xl font-bold mb-1 md:mb-2">{plan.name}</h3>
+                    <p className="text-xs md:text-sm opacity-90">{plan.description}</p>
+                    <div className="mt-2 md:mt-4 flex items-end gap-1">
+                      <span className="text-2xl md:text-3xl font-bold">{plan.price}</span>
+                      <span className="text-xs md:text-sm mb-1">ريال</span>
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 text-gray-600 mb-4">
-                      <FaClock />
+                  <div className="p-4 md:p-6">
+                    <div className="flex items-center gap-1 md:gap-2 text-gray-600 mb-3 md:mb-4 text-sm md:text-base">
+                      <FaClock className="text-sm" />
                       <span>{plan.duration_days} يوم</span>
                     </div>
 
-                    <div className="space-y-2 mb-6">
+                    <div className="space-y-1.5 md:space-y-2 mb-4 md:mb-6 max-h-32 md:max-h-none overflow-y-auto">
                       {plan.features.map((feature, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <span className="text-green-500 mt-1">✓</span>
-                          <span className="text-gray-600 text-sm">{feature}</span>
+                        <div key={index} className="flex items-start gap-1.5 md:gap-2">
+                          <span className="text-green-500 mt-0.5 text-sm">✓</span>
+                          <span className="text-gray-600 text-xs md:text-sm">{feature}</span>
                         </div>
                       ))}
                     </div>
@@ -329,22 +330,22 @@ export default function AdminPlans() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(plan)}
-                        className="flex-1 btn-secondary text-sm flex items-center justify-center gap-1"
+                        className="flex-1 btn-secondary text-xs md:text-sm flex items-center justify-center gap-1 py-2"
                       >
-                        <FaEdit />
+                        <FaEdit className="text-xs md:text-sm" />
                         تعديل
                       </button>
                       <button
                         onClick={() => handleDelete(plan.id)}
-                        className="flex-1 btn-danger text-sm flex items-center justify-center gap-1"
+                        className="flex-1 btn-danger text-xs md:text-sm flex items-center justify-center gap-1 py-2"
                       >
-                        <FaTrash />
+                        <FaTrash className="text-xs md:text-sm" />
                         حذف
                       </button>
                     </div>
 
                     {!plan.is_active && (
-                      <div className="mt-3 text-center text-sm text-gray-500">
+                      <div className="mt-2 md:mt-3 text-center text-xs md:text-sm text-gray-500">
                         غير نشط
                       </div>
                     )}
