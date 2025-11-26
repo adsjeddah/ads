@@ -746,7 +746,7 @@ export default function CleaningRiyadh() {
                                 )}
                               </div>
 
-                              <h3 className="text-lg md:text-3xl font-bold text-center mb-1.5 md:mb-2 text-gray-800 leading-tight">
+                              <h3 className="text-2xl md:text-3xl font-bold text-center mb-1.5 md:mb-2 text-gray-800 leading-tight">
                                 {advertiser.company_name}
                               </h3>
 
