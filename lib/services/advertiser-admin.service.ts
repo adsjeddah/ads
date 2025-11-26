@@ -90,6 +90,39 @@ export class AdvertiserAdminService {
 
   // حذف معلن
   static async delete(id: string): Promise<void> {
+    // حذف جميع الفواتير المرتبطة بالمعلن
+    const invoicesSnapshot = await adminDb.collection('invoices')
+      .where('advertiser_id', '==', id)
+      .get();
+    
+    const invoiceDeletions = invoicesSnapshot.docs.map(doc => doc.ref.delete());
+    await Promise.all(invoiceDeletions);
+    
+    console.log(`✅ تم حذف ${invoicesSnapshot.docs.length} فاتورة مرتبطة بالمعلن`);
+    
+    // حذف جميع الاشتراكات المرتبطة بالمعلن
+    const subscriptionsSnapshot = await adminDb.collection('subscriptions')
+      .where('advertiser_id', '==', id)
+      .get();
+    
+    const subscriptionDeletions = subscriptionsSnapshot.docs.map(doc => doc.ref.delete());
+    await Promise.all(subscriptionDeletions);
+    
+    console.log(`✅ تم حذف ${subscriptionsSnapshot.docs.length} اشتراك مرتبط بالمعلن`);
+    
+    // حذف جميع الدفعات المرتبطة بالمعلن
+    const paymentsSnapshot = await adminDb.collection('payments')
+      .where('advertiser_id', '==', id)
+      .get();
+    
+    const paymentDeletions = paymentsSnapshot.docs.map(doc => doc.ref.delete());
+    await Promise.all(paymentDeletions);
+    
+    console.log(`✅ تم حذف ${paymentsSnapshot.docs.length} دفعة مرتبطة بالمعلن`);
+    
+    // حذف المعلن نفسه
     await adminDb.collection('advertisers').doc(id).delete();
+    
+    console.log(`✅ تم حذف المعلن ${id} وجميع بياناته المرتبطة بنجاح`);
   }
 }
