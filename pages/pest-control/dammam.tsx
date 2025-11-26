@@ -766,11 +766,11 @@ export default function PestControlDammam() {
                                   className="w-full flex items-center justify-center gap-1 md:gap-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white py-1.5 md:py-2.5 px-2 md:px-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all duration-200 relative overflow-hidden text-[13px] md:text-lg"
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
-                                  <FaPhone className="relative animate-bounce text-[12px] md:text-lg" />
-                                  <span className="relative font-bold tracking-wider text-xl md:text-xl" dir="ltr">
+                                  <FaPhone className="relative animate-bounce text-base md:text-lg" />
+                                  <span className="relative font-bold tracking-wider text-2xl md:text-xl" dir="ltr">
                                     {advertiser.phone}
                                   </span>
-                                  <FaBolt className="relative text-yellow-300 animate-pulse text-[12px] md:text-lg" />
+                                  <FaBolt className="relative text-yellow-300 animate-pulse text-base md:text-lg" />
                                 </motion.button>
                               </div>
                             </div>
