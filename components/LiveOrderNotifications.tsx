@@ -122,28 +122,28 @@ const LiveOrderNotifications: React.FC<LiveOrderNotificationsProps> = ({
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -100, scale: 0.8 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="bg-white rounded-lg shadow-lg px-2.5 py-1.5 max-w-[220px] border-r-4 border-blue-500"
+            className="bg-white rounded-lg shadow-lg px-3 py-2 max-w-[240px] border-r-4 border-blue-500"
           >
-            <div className="flex items-start gap-1.5">
-              <div className="bg-green-100 rounded-full p-1 flex-shrink-0 mt-0.5">
-                <FaCheckCircle className="text-green-600 text-[10px]" />
+            <div className="flex items-start gap-2">
+              <div className="bg-green-100 rounded-full p-1.5 flex-shrink-0 mt-0.5">
+                <FaCheckCircle className="text-green-600 text-xs" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1 mb-0.5">
-                  <span className="text-[10px] font-bold text-gray-800 truncate">
+                <div className="flex items-center gap-1 mb-1">
+                  <span className="text-xs font-bold text-gray-800 truncate">
                     {currentNotification.name}
                   </span>
                 </div>
-                <p className="text-[9px] text-gray-600 leading-tight mb-0.5">
+                <p className="text-[10px] text-gray-600 leading-tight mb-1">
                   {currentNotification.action}
                 </p>
-                <div className="flex items-center justify-between text-[8px] text-gray-500">
-                  <div className="flex items-center gap-0.5">
-                    <FaMapMarkerAlt className="text-blue-500 text-[8px]" />
-                    <span className="truncate max-w-[80px]">{currentNotification.neighborhood}</span>
+                <div className="flex items-center justify-between text-[9px] text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <FaMapMarkerAlt className="text-blue-500 text-[9px]" />
+                    <span className="truncate max-w-[90px]">{currentNotification.neighborhood}</span>
                   </div>
-                  <div className="flex items-center gap-0.5">
-                    <FaClock className="text-gray-400 text-[7px]" />
+                  <div className="flex items-center gap-1">
+                    <FaClock className="text-gray-400 text-[8px]" />
                     <span className="whitespace-nowrap">{currentNotification.timeAgo}</span>
                   </div>
                 </div>

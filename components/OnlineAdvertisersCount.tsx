@@ -32,19 +32,19 @@ const OnlineAdvertisersCount: React.FC<OnlineAdvertisersCountProps> = ({
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 100, scale: 0.8 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="bg-white rounded-lg shadow-lg px-2.5 py-1.5 flex items-center gap-1.5 border-r-4 border-green-500 max-w-[160px]"
+            className="bg-white rounded-lg shadow-lg px-3 py-2 flex items-center gap-2 border-r-4 border-green-500 max-w-[180px]"
           >
-            <div className="bg-green-100 rounded-full p-1 flex-shrink-0">
-              <FaTruck className="text-green-600 text-xs" />
+            <div className="bg-green-100 rounded-full p-1.5 flex-shrink-0">
+              <FaTruck className="text-green-600 text-sm" />
             </div>
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-1">
-                <span className="text-lg font-bold text-gray-800">{totalAdvertisers}</span>
-                <span className="text-[10px] text-gray-600">شركة</span>
+                <span className="text-xl font-bold text-gray-800">{totalAdvertisers}</span>
+                <span className="text-xs text-gray-600">شركة</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-[9px] text-green-600 font-semibold">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-[10px] text-green-600 font-semibold">
                   {onlineAdvertisers} متاحة الآن
                 </span>
               </div>
