@@ -8,6 +8,8 @@ import { MdVerified, MdLocalOffer, MdSecurity } from 'react-icons/md';
 import { AiFillSafetyCertificate } from 'react-icons/ai';
 import axios from 'axios';
 import Link from 'next/link';
+import OnlineAdvertisersCount from '../../components/OnlineAdvertisersCount';
+import LiveOrderNotifications from '../../components/LiveOrderNotifications';
 
 
 // Component for animated counter
@@ -1231,6 +1233,18 @@ export default function WaterLeaksIndex() {
             </div>
           </div>
         </footer>
+
+        {/* عدد المعلنين المتاحين - يمين */}
+        <OnlineAdvertisersCount
+          totalAdvertisers={20}
+          onlineAdvertisers={14}
+        />
+
+        {/* إشعارات الطلبات المباشرة - يسار */}
+        <LiveOrderNotifications
+          city="riyadh"
+          service="water-leaks"
+        />
       </div>
     </>
   );

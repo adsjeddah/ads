@@ -6,6 +6,8 @@ import { motion, AnimatePresence, useInView } from 'framer-motion';
 import axios from 'axios';
 import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaBolt, FaBell, FaInfoCircle, FaUsers, FaPercent, FaBars, FaTimes } from 'react-icons/fa';
 import { MdVerified } from 'react-icons/md';
+import OnlineAdvertisersCount from '../../components/OnlineAdvertisersCount';
+import LiveOrderNotifications from '../../components/LiveOrderNotifications';
 
 interface Advertiser {
   id: string;
@@ -1072,6 +1074,18 @@ export default function PestControlDammam() {
             </div>
           </div>
         </footer>
+
+        {/* عدد المعلنين المتاحين - يمين */}
+        <OnlineAdvertisersCount
+          totalAdvertisers={shuffledAdvertisers.length}
+          onlineAdvertisers={Math.floor(shuffledAdvertisers.length * 0.7)}
+        />
+
+        {/* إشعارات الطلبات المباشرة - يسار */}
+        <LiveOrderNotifications
+          city="dammam"
+          service="pest-control"
+        />
       </div>
     </>
   );
