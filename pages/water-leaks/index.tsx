@@ -840,7 +840,7 @@ export default function WaterLeaksIndex() {
                           <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-secondary-500/20 to-accent-500/20 rounded-lg md:rounded-2xl blur-xl"></div>
                           <div className="relative bg-white rounded-lg md:rounded-2xl shadow-xl overflow-hidden">
                             {/* Header with gradient */}
-                            <div className="h-1.5 md:h-2 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500"></div>
+                            <div className="h-1.5 md:h-2 bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 animate-gradient-x bg-[length:200%_100%]"></div>
                             
                             <div className="p-2 md:p-4">
                               {/* Company Icon/Logo & Name */}
@@ -881,7 +881,7 @@ export default function WaterLeaksIndex() {
                                 >
                                   <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 animate-pulse opacity-30"></div>
                                   <FaPhone className="relative animate-bounce text-[12px] md:text-lg" />
-                                  <span className="relative font-bold tracking-wider text-lg md:text-xl" dir="ltr">
+                                  <span className="relative font-bold tracking-wider text-xl md:text-xl" dir="ltr">
                                     {advertiser.phone}
                                   </span>
                                   <FaBolt className="relative text-yellow-300 animate-pulse text-[12px] md:text-lg" />
