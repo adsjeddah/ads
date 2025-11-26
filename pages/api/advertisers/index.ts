@@ -4,6 +4,7 @@ import { AdvertiserAdminService } from '../../../lib/services/advertiser-admin.s
 import { FinancialService } from '../../../lib/services/financial.service';
 import { GoogleSheetsService } from '../../../lib/services/google-sheets.service';
 import { PlansAdminService } from '../../../lib/services/plans-admin.service';
+import { SubscriptionAdminService } from '../../../lib/services/subscription-admin.service';
 import { Advertiser } from '../../../types/models';
 import { verifyAdminToken } from '../../../lib/firebase-admin'; // Assuming admin-only access for POST
 
@@ -13,7 +14,7 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      const { status, sector, city } = req.query;
+      const { status, sector, city, include_subscriptions } = req.query;
       
       // Use Admin service for GET to avoid permissions issues
       let advertisers = await AdvertiserAdminService.getAll(status as string | undefined);
@@ -33,6 +34,56 @@ export default async function handler(
           // المعلنون الذين يغطون هذه المدينة فقط
           if (adv.coverage_type === 'city' && adv.coverage_cities?.includes(city as string)) return true;
           return false;
+        });
+      }
+      
+      // 🆕 إضافة بيانات الاشتراكات للمعلنين
+      if (include_subscriptions === 'true') {
+        const allSubscriptions = await SubscriptionAdminService.getAll();
+        const allPlans = await PlansAdminService.getAll();
+        
+        // Create a map of plans for quick lookup
+        const plansMap = new Map(allPlans.map(plan => [plan.id, plan]));
+        
+        // Enrich advertisers with subscription data
+        advertisers = advertisers.map(adv => {
+          const advSubscriptions = allSubscriptions.filter(sub => sub.advertiser_id === adv.id);
+          
+          // Get the most recent active subscription
+          const activeSubscription = advSubscriptions.find(sub => 
+            sub.status === 'active' || sub.status === 'paused'
+          ) || advSubscriptions[0];
+          
+          if (activeSubscription) {
+            const plan = plansMap.get(activeSubscription.plan_id);
+            
+            // Calculate total paid amount from all subscriptions
+            const totalPaidAmount = advSubscriptions.reduce((sum, sub) => sum + (sub.paid_amount || 0), 0);
+            
+            return {
+              ...adv,
+              subscription_start_date: activeSubscription.start_date,
+              subscription_end_date: activeSubscription.end_date,
+              subscription_status: activeSubscription.status,
+              plan_name: plan?.name || 'غير محدد',
+              plan_type: plan?.plan_type || activeSubscription.coverage_area || 'kingdom',
+              subscription_city: activeSubscription.city || plan?.city,
+              total_paid_amount: totalPaidAmount,
+              has_payments: totalPaidAmount > 0
+            };
+          }
+          
+          return {
+            ...adv,
+            subscription_start_date: null,
+            subscription_end_date: null,
+            subscription_status: null,
+            plan_name: null,
+            plan_type: null,
+            subscription_city: null,
+            total_paid_amount: 0,
+            has_payments: false
+          };
         });
       }
       

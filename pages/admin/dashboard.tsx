@@ -46,6 +46,17 @@ interface Advertiser {
   total_amount?: number;
   paid_amount?: number;
   remaining_amount?: number;
+  // 🆕 حقول الاشتراك الجديدة
+  sector?: 'movers' | 'cleaning' | 'water-leaks' | 'pest-control';
+  coverage_cities?: string[];
+  subscription_start_date?: any;
+  subscription_end_date?: any;
+  subscription_status?: string;
+  plan_name?: string;
+  plan_type?: string;
+  subscription_city?: string;
+  total_paid_amount?: number;
+  has_payments?: boolean;
 }
 
 interface AdRequest {
@@ -263,7 +274,7 @@ export default function AdminDashboard() {
 
       const [statsRes, advertisersRes, requestsRes, remindersRes, refundsRes, auditRes, gracePeriodStatsRes] = await Promise.all([
         axios.get(`${apiUrl}/statistics/dashboard`, { headers }),
-        axios.get(`${apiUrl}/advertisers`, { headers }),
+        axios.get(`${apiUrl}/advertisers?include_subscriptions=true`, { headers }),
         axios.get(`${apiUrl}/ad-requests`, { headers }),
         axios.get(`${apiUrl}/reminders?status=pending`, { headers }).catch(() => ({ data: { reminders: [] } })),
         axios.get(`${apiUrl}/refunds?status=pending`, { headers }).catch(() => ({ data: [] })),
@@ -984,9 +995,25 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
+              {/* 🆕 دليل الألوان */}
+              <div className="bg-white rounded-lg md:rounded-xl shadow-md p-3 md:p-4 mb-4 flex flex-wrap gap-3 md:gap-6 text-xs md:text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-orange-100 border border-orange-300"></div>
+                  <span>ينتهي خلال 7 أيام</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-red-100 border border-red-300"></div>
+                  <span>لم يسجل أي دفعات</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-purple-100 border border-purple-300"></div>
+                  <span>ينتهي قريباً + بدون دفعات</span>
+                </div>
+              </div>
+
               <div className="bg-white rounded-lg md:rounded-xl shadow-md md:shadow-lg p-3 md:p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6">
-                  <h2 className="text-lg md:text-xl font-bold">جميع المعلنين</h2>
+                  <h2 className="text-lg md:text-xl font-bold">جميع المعلنين ({advertisers.length})</h2>
                   <Link href="/admin/advertisers/new">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -999,78 +1026,139 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="overflow-x-auto -mx-3 md:mx-0">
-                  <table className="w-full min-w-[600px]">
+                  <table className="w-full min-w-[900px]">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الشركة</th>
-                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الهاتف</th>
-                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden lg:table-cell">البريد</th>
-                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الحالة</th>
-                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden sm:table-cell">الاشتراكات</th>
-                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden md:table-cell">التسجيل</th>
-                        <th className="text-right py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">الإجراءات</th>
+                      <tr className="border-b bg-gray-50">
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">الشركة</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">الهاتف</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">القطاع</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">المدينة</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">الباقة</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">تاريخ البداية</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">تاريخ النهاية</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">الحالة</th>
+                        <th className="text-right py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-semibold">الإجراءات</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {advertisers.map((advertiser) => (
-                        <tr key={advertiser.id} className="border-b hover:bg-gray-50">
-                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm">{advertiser.company_name}</td>
-                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm" dir="ltr">{advertiser.phone}</td>
-                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm hidden lg:table-cell">{advertiser.email || '-'}</td>
-                          <td className="py-2 md:py-3 px-2 md:px-4">
-                            <span className={`px-1.5 md:px-2 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs ${
-                              advertiser.status === 'active' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {advertiser.status === 'active' ? 'نشط' : 'غير نشط'}
-                            </span>
-                          </td>
-                          <td className="py-2 md:py-3 px-2 md:px-4 hidden sm:table-cell">
-                            <div className="flex flex-wrap items-center gap-1 text-xs">
-                              <span className="flex items-center gap-0.5 text-green-600">
-                                <FaCheckCircle className="text-[10px]" />
-                                {advertiser.active_subscriptions || 0}
-                              </span>
-                              {advertiser.paused_subscriptions ? (
-                                <span className="flex items-center gap-0.5 text-yellow-600">
-                                  <FaPause className="text-[10px]" />
-                                  {advertiser.paused_subscriptions}
+                      {advertisers.map((advertiser) => {
+                        // حساب الأيام المتبقية
+                        const endDate = advertiser.subscription_end_date ? toDate(advertiser.subscription_end_date) : null;
+                        const now = new Date();
+                        const daysRemaining = endDate ? Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : null;
+                        const isExpiringSoon = daysRemaining !== null && daysRemaining <= 7 && daysRemaining > 0;
+                        const isExpired = daysRemaining !== null && daysRemaining <= 0;
+                        const hasNoPayments = !advertiser.has_payments && advertiser.subscription_start_date;
+                        
+                        // تحديد لون الخلفية
+                        let rowBgClass = 'hover:bg-gray-50';
+                        if (isExpiringSoon && hasNoPayments) {
+                          rowBgClass = 'bg-purple-50 hover:bg-purple-100';
+                        } else if (hasNoPayments) {
+                          rowBgClass = 'bg-red-50 hover:bg-red-100';
+                        } else if (isExpiringSoon) {
+                          rowBgClass = 'bg-orange-50 hover:bg-orange-100';
+                        }
+                        
+                        // ترجمة القطاع
+                        const sectorLabels: Record<string, string> = {
+                          'movers': 'نقل عفش',
+                          'cleaning': 'نظافة',
+                          'water-leaks': 'كشف تسربات',
+                          'pest-control': 'مكافحة حشرات'
+                        };
+                        
+                        // ترجمة المدينة
+                        const cityLabels: Record<string, string> = {
+                          'jeddah': 'جدة',
+                          'riyadh': 'الرياض',
+                          'dammam': 'الدمام',
+                          'makkah': 'مكة',
+                          'madinah': 'المدينة'
+                        };
+                        
+                        return (
+                          <tr key={advertiser.id} className={`border-b ${rowBgClass} transition-colors`}>
+                            <td className="py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm font-medium">{advertiser.company_name}</td>
+                            <td className="py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm" dir="ltr">{advertiser.phone}</td>
+                            <td className="py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm">
+                              {advertiser.sector ? (
+                                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] md:text-xs">
+                                  {sectorLabels[advertiser.sector] || advertiser.sector}
                                 </span>
-                              ) : null}
-                              {advertiser.stopped_subscriptions ? (
-                                <span className="flex items-center gap-0.5 text-red-600">
-                                  <FaStop className="text-[10px]" />
-                                  {advertiser.stopped_subscriptions}
+                              ) : '-'}
+                            </td>
+                            <td className="py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm">
+                              {advertiser.subscription_city ? (
+                                <span className="text-gray-700">{cityLabels[advertiser.subscription_city] || advertiser.subscription_city}</span>
+                              ) : advertiser.coverage_cities?.length ? (
+                                <span className="text-gray-700">
+                                  {advertiser.coverage_cities.map(c => cityLabels[c] || c).join('، ')}
                                 </span>
-                              ) : null}
-                            </div>
-                          </td>
-                          <td className="py-2 md:py-3 px-2 md:px-4 text-xs hidden md:table-cell">
-                            {formatDate(advertiser.created_at, 'dd/MM/yyyy')}
-                          </td>
-                          <td className="py-2 md:py-3 px-2 md:px-4">
-                            <div className="flex gap-1 md:gap-2">
-                              <Link href={`/admin/advertisers/${advertiser.id}`}>
-                                <button className="text-blue-600 hover:text-blue-800 p-1">
-                                  <FaEye className="text-sm md:text-base" />
+                              ) : (
+                                <span className="text-green-600 text-[10px] md:text-xs">المملكة</span>
+                              )}
+                            </td>
+                            <td className="py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm">
+                              {advertiser.plan_name || '-'}
+                            </td>
+                            <td className="py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm">
+                              {advertiser.subscription_start_date ? formatDate(advertiser.subscription_start_date, 'dd/MM/yyyy') : '-'}
+                            </td>
+                            <td className="py-2 md:py-3 px-2 md:px-3 text-xs md:text-sm">
+                              <div className="flex flex-col">
+                                <span className={isExpired ? 'text-red-600 font-bold' : isExpiringSoon ? 'text-orange-600 font-bold' : ''}>
+                                  {advertiser.subscription_end_date ? formatDate(advertiser.subscription_end_date, 'dd/MM/yyyy') : '-'}
+                                </span>
+                                {daysRemaining !== null && daysRemaining > 0 && daysRemaining <= 7 && (
+                                  <span className="text-[10px] text-orange-600">({daysRemaining} يوم)</span>
+                                )}
+                                {isExpired && (
+                                  <span className="text-[10px] text-red-600">(منتهي)</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-2 md:py-3 px-2 md:px-3">
+                              <div className="flex flex-col gap-1">
+                                <span className={`px-1.5 md:px-2 py-0.5 rounded-full text-[10px] md:text-xs w-fit ${
+                                  advertiser.status === 'active' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {advertiser.status === 'active' ? 'نشط' : 'غير نشط'}
+                                </span>
+                                {hasNoPayments && (
+                                  <span className="text-[10px] text-red-600 flex items-center gap-0.5">
+                                    <FaExclamationTriangle className="text-[8px]" />
+                                    بدون دفعات
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-2 md:py-3 px-2 md:px-3">
+                              <div className="flex gap-1 md:gap-2">
+                                <Link href={`/admin/advertisers/${advertiser.id}`}>
+                                  <button className="text-blue-600 hover:text-blue-800 p-1" title="عرض">
+                                    <FaEye className="text-sm md:text-base" />
+                                  </button>
+                                </Link>
+                                <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
+                                  <button className="text-green-600 hover:text-green-800 p-1" title="تعديل">
+                                    <FaEdit className="text-sm md:text-base" />
+                                  </button>
+                                </Link>
+                                <button
+                                  onClick={() => handleDeleteAdvertiser(advertiser.id)}
+                                  className="text-red-600 hover:text-red-800 p-1"
+                                  title="حذف"
+                                >
+                                  <FaTrash className="text-sm md:text-base" />
                                 </button>
-                              </Link>
-                              <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
-                                <button className="text-green-600 hover:text-green-800 p-1">
-                                  <FaEdit className="text-sm md:text-base" />
-                                </button>
-                              </Link>
-                              <button
-                                onClick={() => handleDeleteAdvertiser(advertiser.id)}
-                                className="text-red-600 hover:text-red-800 p-1"
-                              >
-                                <FaTrash className="text-sm md:text-base" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
