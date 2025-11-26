@@ -3,12 +3,13 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaGift, FaTimes } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaGift, FaTimes, FaCheckCircle } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import SubscriptionStatusManager from '../../../components/admin/SubscriptionStatusManager';
+import RecordPaymentForm from '../../../components/admin/RecordPaymentForm';
 
 interface Advertiser {
   id: number;
@@ -86,6 +87,8 @@ export default function AdvertiserDetails() {
   const [gracePeriodDays, setGracePeriodDays] = useState(3);
   const [gracePeriodReason, setGracePeriodReason] = useState('');
   const [gracePeriodLoading, setGracePeriodLoading] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   // تعريف الأيقونات المتاحة (نفس النظام من index.tsx)
   const iconComponents: { [key: string]: any } = {
@@ -570,16 +573,47 @@ export default function AdvertiserDetails() {
                           <th className="text-right py-2 px-3">الحالة</th>
                           <th className="text-right py-2 px-3">تاريخ الإصدار</th>
                           <th className="text-right py-2 px-3">تاريخ الاستحقاق</th>
+                          <th className="text-center py-2 px-3">الإجراءات</th>
                         </tr>
                       </thead>
                       <tbody>
                         {invoices.map(inv => (
                           <tr key={inv.id} className="border-b hover:bg-gray-50">
                             <td className="py-2 px-3">{inv.invoice_number}</td>
-                            <td className="py-2 px-3">{inv.amount} ريال</td>
+                            <td className="py-2 px-3 font-semibold">{inv.amount.toLocaleString('ar-SA')} ريال</td>
                             <td className="py-2 px-3"><span className={`px-2 py-1 rounded-full text-xs ${inv.status === 'paid' ? 'bg-green-100 text-green-800' : (inv.status === 'unpaid' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')}`}>{inv.status === 'paid' ? 'مدفوعة' : (inv.status === 'unpaid' ? 'غير مدفوعة' : 'معلقة')}</span></td>
                             <td className="py-2 px-3">{formatDate(inv.issued_date, 'dd/MM/yyyy')}</td>
                             <td className="py-2 px-3">{formatDate(inv.due_date, 'dd/MM/yyyy')}</td>
+                            <td className="py-2 px-3 text-center">
+                              {inv.status !== 'paid' && (
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => {
+                                    // العثور على الاشتراك المرتبط بالفاتورة
+                                    const relatedSub = subscriptions.find(sub => sub.id === inv.subscription_id);
+                                    if (relatedSub) {
+                                      setSelectedSubscription(relatedSub);
+                                      setSelectedInvoice(inv);
+                                      setShowPaymentModal(true);
+                                    } else {
+                                      toast.error('لم يتم العثور على الاشتراك المرتبط');
+                                    }
+                                  }}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-sm"
+                                  title="تسجيل دفعة"
+                                >
+                                  <FaMoneyBillWave />
+                                  <span>تسجيل دفعة</span>
+                                </motion.button>
+                              )}
+                              {inv.status === 'paid' && (
+                                <span className="text-green-600 text-xs flex items-center justify-center gap-1">
+                                  <FaCheckCircle />
+                                  <span>مكتمل</span>
+                                </span>
+                              )}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -715,6 +749,79 @@ export default function AdvertiserDetails() {
                 </button>
               </Link>
             </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Modal لتسجيل دفعة */}
+      {showPaymentModal && selectedSubscription && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold flex items-center gap-2">
+                <FaMoneyBillWave className="text-green-600" />
+                تسجيل دفعة
+              </h3>
+              <button
+                onClick={() => {
+                  setShowPaymentModal(false);
+                  setSelectedSubscription(null);
+                  setSelectedInvoice(null);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <FaTimes className="text-xl text-gray-600" />
+              </button>
+            </div>
+
+            {/* معلومات الاشتراك والفاتورة */}
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-gray-800 mb-3">معلومات الاشتراك</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-gray-600">إجمالي الاشتراك:</span>
+                  <span className="font-bold text-gray-900 mr-2">{selectedSubscription.total_amount.toLocaleString('ar-SA')} ريال</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">المدفوع:</span>
+                  <span className="font-bold text-green-600 mr-2">{selectedSubscription.paid_amount.toLocaleString('ar-SA')} ريال</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-600">المتبقي:</span>
+                  <span className="font-bold text-red-600 mr-2 text-lg">{selectedSubscription.remaining_amount.toLocaleString('ar-SA')} ريال</span>
+                </div>
+              </div>
+              {selectedInvoice && (
+                <div className="mt-3 pt-3 border-t border-blue-200">
+                  <span className="text-gray-600 text-sm">الفاتورة:</span>
+                  <span className="font-semibold text-gray-900 mr-2">{selectedInvoice.invoice_number}</span>
+                  <span className="text-gray-600 text-sm mr-2">المبلغ:</span>
+                  <span className="font-semibold text-gray-900">{selectedInvoice.amount.toLocaleString('ar-SA')} ريال</span>
+                </div>
+              )}
+            </div>
+
+            {/* نموذج تسجيل الدفعة */}
+            <RecordPaymentForm
+              subscription={selectedSubscription as any}
+              invoices={invoices.map(inv => ({ ...inv, id: String(inv.id), invoice_number: inv.invoice_number, amount: inv.amount, status: inv.status }))}
+              onSuccess={() => {
+                setShowPaymentModal(false);
+                setSelectedSubscription(null);
+                setSelectedInvoice(null);
+                fetchAdvertiserDetails();
+                toast.success('تم تسجيل الدفعة بنجاح!');
+              }}
+              onCancel={() => {
+                setShowPaymentModal(false);
+                setSelectedSubscription(null);
+                setSelectedInvoice(null);
+              }}
+            />
           </motion.div>
         </div>
       )}
