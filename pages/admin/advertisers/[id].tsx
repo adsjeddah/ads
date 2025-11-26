@@ -477,11 +477,16 @@ export default function AdvertiserDetails() {
                 
                 <p className="text-sm text-gray-500 mt-4">تاريخ الإنشاء: {formatDate(advertiser.created_at, 'dd/MM/yyyy HH:mm')}</p>
                 <p className="text-sm text-gray-500">آخر تحديث: {formatDate(advertiser.updated_at, 'dd/MM/yyyy HH:mm')}</p>
-                <div className="mt-6 flex gap-3">
-                  <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
-                    <motion.button whileHover={{scale: 1.05}} className="btn-primary flex-1 flex items-center justify-center gap-2"><FaEdit /> تعديل البيانات</motion.button>
+                <div className="mt-6 flex flex-col gap-3">
+                  <div className="flex gap-3">
+                    <Link href={`/admin/advertisers/${advertiser.id}/edit-simple`}>
+                      <motion.button whileHover={{scale: 1.05}} className="btn-primary flex-1 flex items-center justify-center gap-2"><FaEdit /> تعديل البيانات</motion.button>
+                    </Link>
+                    <motion.button onClick={handleDeleteAdvertiser} whileHover={{scale: 1.05}} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center gap-2"><FaTrash /> حذف</motion.button>
+                  </div>
+                  <Link href={`/admin/advertisers/${advertiser.id}/statistics`}>
+                    <motion.button whileHover={{scale: 1.05}} className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg w-full flex items-center justify-center gap-2"><FaChartLine /> إحصائيات تفصيلية متقدمة</motion.button>
                   </Link>
-                  <motion.button onClick={handleDeleteAdvertiser} whileHover={{scale: 1.05}} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex-1 flex items-center justify-center gap-2"><FaTrash /> حذف</motion.button>
                 </div>
               </InfoCard>
 

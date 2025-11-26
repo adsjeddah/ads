@@ -105,8 +105,8 @@ export class StatisticsAdminService {
     }
   }
 
-  // Record a view (server-side)
-  static async recordView(advertiserId: string) {
+  // Record a view (server-side) with optional tracking
+  static async recordView(advertiserId: string, trackingData?: any) {
     const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
@@ -116,25 +116,52 @@ export class StatisticsAdminService {
       .where('date', '==', todayTimestamp)
       .get();
 
+    // إعداد تفاصيل المشاهدة (اختياري - يمكن حفظه أو تجاهله لتقليل حجم البيانات)
+    const viewDetail = trackingData ? {
+      timestamp: Timestamp.now(),
+      ...trackingData
+    } : null;
+
     if (snapshot.empty) {
-      await statsRef.add({
+      const docData: any = {
         advertiser_id: advertiserId,
         date: todayTimestamp,
         views: 1,
         clicks: 0,
         calls: 0,
+        click_details: [],
         call_details: []
-      });
+      };
+      
+      // حفظ تفاصيل المشاهدات فقط إذا كانت مطلوبة (اختياري)
+      if (viewDetail) {
+        docData.view_details = [viewDetail];
+      }
+      
+      await statsRef.add(docData);
     } else {
       const docRef = snapshot.docs[0].ref;
-      await docRef.update({
+      const docData = snapshot.docs[0].data();
+      
+      const updateData: any = {
         views: FieldValue.increment(1)
-      });
+      };
+
+      // إضافة تفاصيل المشاهدة إلى المصفوفة (اختياري)
+      if (viewDetail) {
+        const existingViewDetails = docData.view_details || [];
+        updateData.view_details = [
+          ...existingViewDetails,
+          viewDetail
+        ];
+      }
+
+      await docRef.update(updateData);
     }
   }
 
-  // Record a click (server-side)
-  static async recordClick(advertiserId: string) {
+  // Record a click (server-side) with advanced tracking
+  static async recordClick(advertiserId: string, trackingData?: any) {
     const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
@@ -143,6 +170,12 @@ export class StatisticsAdminService {
       .where('advertiser_id', '==', advertiserId)
       .where('date', '==', todayTimestamp)
       .get();
+
+    // إعداد تفاصيل النقرة
+    const clickDetail = trackingData ? {
+      timestamp: Timestamp.now(),
+      ...trackingData
+    } : { timestamp: Timestamp.now() };
 
     if (snapshot.empty) {
       await statsRef.add({
@@ -151,18 +184,30 @@ export class StatisticsAdminService {
         views: 0,
         clicks: 1,
         calls: 0,
+        click_details: [clickDetail],
         call_details: []
       });
     } else {
       const docRef = snapshot.docs[0].ref;
-      await docRef.update({
+      const docData = snapshot.docs[0].data();
+      
+      const updateData: any = {
         clicks: FieldValue.increment(1)
-      });
+      };
+
+      // إضافة تفاصيل النقرة إلى المصفوفة
+      const existingClickDetails = docData.click_details || [];
+      updateData.click_details = [
+        ...existingClickDetails,
+        clickDetail
+      ];
+
+      await docRef.update(updateData);
     }
   }
 
-  // Record a call (server-side)
-  static async recordCall(advertiserId: string, phone?: string) {
+  // Record a call (server-side) with advanced tracking
+  static async recordCall(advertiserId: string, phone?: string, trackingData?: any) {
     const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
@@ -172,6 +217,13 @@ export class StatisticsAdminService {
       .where('date', '==', todayTimestamp)
       .get();
 
+    // إعداد تفاصيل المكالمة
+    const callDetail = {
+      timestamp: Timestamp.now(),
+      phone: phone || null,
+      ...(trackingData || {})
+    };
+
     if (snapshot.empty) {
       await statsRef.add({
         advertiser_id: advertiserId,
@@ -179,7 +231,8 @@ export class StatisticsAdminService {
         views: 0,
         clicks: 0,
         calls: 1,
-        call_details: phone ? [{ phone, timestamp: Timestamp.now() }] : []
+        click_details: [],
+        call_details: [callDetail]
       });
     } else {
       const docRef = snapshot.docs[0].ref;
@@ -189,13 +242,12 @@ export class StatisticsAdminService {
         calls: FieldValue.increment(1)
       };
 
-      if (phone) {
-        const existingCallDetails = docData.call_details || [];
-        updateData.call_details = [
-          ...existingCallDetails,
-          { phone, timestamp: Timestamp.now() }
-        ];
-      }
+      // إضافة تفاصيل المكالمة إلى المصفوفة
+      const existingCallDetails = docData.call_details || [];
+      updateData.call_details = [
+        ...existingCallDetails,
+        callDetail
+      ];
 
       await docRef.update(updateData);
     }

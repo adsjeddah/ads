@@ -204,12 +204,121 @@ export interface Payment {
   created_at: Date;
 }
 
+// إحصائيات الإعلانات - نظام تتبع متقدم
 export interface Statistics {
   id?: string;
   advertiser_id: string;
   date: Date;
   views: number;
   clicks: number;
+  calls: number;
+  
+  // تفاصيل النقرات (Clicks Details)
+  click_details?: ClickDetail[];
+  
+  // تفاصيل المكالمات (Call Details)
+  call_details?: CallDetail[];
+  
+  // تفاصيل المشاهدات (Views Details) - اختياري
+  view_details?: ViewDetail[];
+}
+
+// تفاصيل النقرة الواحدة
+export interface ClickDetail {
+  timestamp: Date;              // التاريخ والوقت الدقيق
+  
+  // معلومات الموقع الجغرافي
+  ip_address?: string;          // عنوان IP
+  country?: string;             // الدولة
+  city?: string;                // المدينة
+  region?: string;              // المنطقة/الإمارة
+  isp?: string;                 // مزود الخدمة (STC, Mobily, Zain...)
+  
+  // معلومات الجهاز والمتصفح
+  device_type?: string;         // Mobile, Desktop, Tablet
+  device_vendor?: string;       // Apple, Samsung, Huawei...
+  device_model?: string;        // iPhone 14, Galaxy S23...
+  os?: string;                  // iOS 17, Android 14, Windows 11...
+  browser?: string;             // Chrome, Safari, Firefox...
+  browser_version?: string;     // 120.0.6099.109
+  
+  // معلومات التصفح
+  page_url?: string;            // الصفحة التي تمت النقرة منها
+  referrer?: string;            // من أين جاء الزائر
+  screen_resolution?: string;   // 1920x1080
+  
+  // معلومات تسويقية (Google Ads)
+  utm_source?: string;          // google, facebook, twitter...
+  utm_medium?: string;          // cpc, banner, email...
+  utm_campaign?: string;        // summer_2025, ramadan_offer...
+  utm_term?: string;            // الكلمات المفتاحية
+  utm_content?: string;         // ad_variant_A
+  
+  // معلومات سلوكية
+  session_id?: string;          // معرف الجلسة
+  time_on_page?: number;        // الوقت المستغرق في الصفحة (بالثواني)
+  is_returning_visitor?: boolean; // زائر عائد أم جديد
+  previous_visits?: number;     // عدد الزيارات السابقة
+}
+
+// تفاصيل المكالمة الواحدة
+export interface CallDetail {
+  timestamp: Date;              // التاريخ والوقت الدقيق
+  phone?: string;               // رقم الهاتف الذي تم الاتصال به
+  
+  // معلومات الموقع الجغرافي
+  ip_address?: string;
+  country?: string;
+  city?: string;
+  region?: string;
+  isp?: string;
+  
+  // معلومات الجهاز والمتصفح
+  device_type?: string;
+  device_vendor?: string;
+  device_model?: string;
+  os?: string;
+  browser?: string;
+  browser_version?: string;
+  
+  // معلومات التصفح
+  page_url?: string;
+  referrer?: string;
+  screen_resolution?: string;
+  
+  // معلومات تسويقية (Google Ads)
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  
+  // معلومات سلوكية
+  session_id?: string;
+  time_on_page?: number;
+  is_returning_visitor?: boolean;
+  previous_visits?: number;
+  
+  // معلومات إضافية للمكالمات
+  call_duration?: number;       // مدة المكالمة (إذا أمكن تتبعها)
+  call_status?: 'answered' | 'missed' | 'busy' | 'unknown'; // حالة المكالمة
+}
+
+// تفاصيل المشاهدة الواحدة (اختياري - للتحليل المتقدم)
+export interface ViewDetail {
+  timestamp: Date;
+  ip_address?: string;
+  country?: string;
+  city?: string;
+  device_type?: string;
+  os?: string;
+  browser?: string;
+  page_url?: string;
+  referrer?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  session_id?: string;
 }
 
 export interface Admin {

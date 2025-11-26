@@ -6,6 +6,7 @@ import { motion, AnimatePresence, useInView } from 'framer-motion';
 import axios from 'axios';
 import { FaPhone, FaWhatsapp, FaTruck, FaBoxes, FaShieldAlt, FaClock, FaStar, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaAward, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaCheckCircle, FaBolt, FaBell, FaInfoCircle, FaUsers, FaPercent, FaBars, FaTimes } from 'react-icons/fa';
 import { MdVerified } from 'react-icons/md';
+import { initializeTracking, collectEventData } from '../../lib/utils/client-tracking';
 
 interface Advertiser {
   id: string;
@@ -499,6 +500,9 @@ export default function WaterLeaksRiyadh() {
   };
 
   useEffect(() => {
+    // تهيئة نظام التتبع المتقدم
+    initializeTracking();
+    
     fetchAdvertisers();
     
     const handleScroll = () => {
@@ -553,10 +557,14 @@ export default function WaterLeaksRiyadh() {
 
   const handleCall = async (phone: string, advertiserId: string) => {
     try {
+      // جمع بيانات التتبع المتقدمة
+      const trackingData = collectEventData();
+      
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/statistics/record`, {
         advertiserId,
         type: 'call',
-        phone
+        phone,
+        ...trackingData
       });
     } catch (error) {
       console.error('Error recording call:', error);
