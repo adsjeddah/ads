@@ -379,21 +379,26 @@ export default function AdvertiserFinancial() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                // إذا كان هناك اشتراك نشط واحد فقط، نختاره تلقائياً
+                // فلترة الاشتراكات التي لها مبالغ متبقية
                 const activeSubscriptions = subscriptions.filter(
-                  s => s.status === 'active' && s.remaining_amount > 0
+                  s => s.remaining_amount > 0
                 );
+                
+                if (activeSubscriptions.length === 0) {
+                  toast.error('لا توجد اشتراكات بمبالغ متبقية');
+                  return;
+                }
+                
                 if (activeSubscriptions.length === 1) {
+                  // اشتراك واحد فقط، نختاره تلقائياً
                   setSelectedSubscription(activeSubscriptions[0]);
                   setShowRecordPayment(true);
-                } else if (activeSubscriptions.length > 1) {
-                  // إذا كان هناك أكثر من اشتراك، نعرض Modal لاختيار الاشتراك
-                  setShowSubscriptionSelector(true);
                 } else {
-                  toast.error('لا توجد اشتراكات نشطة بمبالغ متبقية');
+                  // أكثر من اشتراك، نعرض Modal لاختيار الاشتراك
+                  setShowSubscriptionSelector(true);
                 }
               }}
-              disabled={subscriptions.filter(s => s.status === 'active' && s.remaining_amount > 0).length === 0}
+              disabled={!subscriptions || subscriptions.length === 0}
               className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FaMoneyBillWave />
@@ -620,7 +625,7 @@ export default function AdvertiserFinancial() {
             <div className="p-6">
               <div className="space-y-4">
                 {subscriptions
-                  .filter(s => s.status === 'active' && s.remaining_amount > 0)
+                  .filter(s => s.remaining_amount > 0)
                   .map(subscription => {
                     const plan = plans.find(p => p.id === subscription.plan_id);
                     return (
