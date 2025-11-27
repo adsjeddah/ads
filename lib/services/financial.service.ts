@@ -341,25 +341,46 @@ export class FinancialService {
       const totalInvoicePayments = invoicePayments.reduce((sum, p) => sum + p.amount, 0);
       const totalAfterThisPayment = totalInvoicePayments + data.amount;
 
+      console.log(`📄 تحديث الفاتورة ${data.invoice_id}:`);
+      console.log(`   - مبلغ الفاتورة: ${invoice.amount} ريال`);
+      console.log(`   - المدفوع السابق: ${totalInvoicePayments} ريال`);
+      console.log(`   - الدفعة الجديدة: ${data.amount} ريال`);
+      console.log(`   - المدفوع الإجمالي: ${totalAfterThisPayment} ريال`);
+
       // تحديث حالة الفاتورة
       if (totalAfterThisPayment >= invoice.amount) {
-        await InvoiceAdminService.updatePaymentStatus(data.invoice_id, 'paid', getSaudiNow());
+        await InvoiceAdminService.updatePaymentStatus(data.invoice_id, 'paid', getSaudiNow(), totalAfterThisPayment);
+        console.log(`   - الحالة الجديدة: مدفوعة ✅`);
+      } else if (totalAfterThisPayment > 0) {
+        // 🆕 تحديث الحالة إلى "مدفوعة جزئياً" مع المبلغ المدفوع
+        await InvoiceAdminService.updatePaymentStatus(data.invoice_id, 'partial', undefined, totalAfterThisPayment);
+        console.log(`   - الحالة الجديدة: مدفوعة جزئياً (${totalAfterThisPayment} من ${invoice.amount}) 📝`);
       }
     } else {
       // إذا لم يتم تحديد فاتورة، نبحث عن الفاتورة المرتبطة بالاشتراك
       const invoices = await InvoiceAdminService.getBySubscriptionId(data.subscription_id);
       if (invoices.length > 0) {
-        const unpaidInvoice = invoices.find(inv => inv.status === 'unpaid');
-        if (unpaidInvoice && unpaidInvoice.id) {
-          data.invoice_id = unpaidInvoice.id;
+        // البحث عن فاتورة غير مدفوعة أو مدفوعة جزئياً
+        const targetInvoice = invoices.find(inv => inv.status === 'unpaid' || inv.status === 'partial');
+        if (targetInvoice && targetInvoice.id) {
+          data.invoice_id = targetInvoice.id;
           
           // حساب المدفوعات السابقة
-          const invoicePayments = await PaymentAdminService.getByInvoiceId(unpaidInvoice.id);
+          const invoicePayments = await PaymentAdminService.getByInvoiceId(targetInvoice.id);
           const totalInvoicePayments = invoicePayments.reduce((sum, p) => sum + p.amount, 0);
           const totalAfterThisPayment = totalInvoicePayments + data.amount;
 
-          if (totalAfterThisPayment >= unpaidInvoice.amount) {
-            await InvoiceAdminService.updatePaymentStatus(unpaidInvoice.id, 'paid', getSaudiNow());
+          console.log(`📄 تحديث الفاتورة المرتبطة ${targetInvoice.id}:`);
+          console.log(`   - مبلغ الفاتورة: ${targetInvoice.amount} ريال`);
+          console.log(`   - المدفوع الإجمالي: ${totalAfterThisPayment} ريال`);
+
+          if (totalAfterThisPayment >= targetInvoice.amount) {
+            await InvoiceAdminService.updatePaymentStatus(targetInvoice.id, 'paid', getSaudiNow(), totalAfterThisPayment);
+            console.log(`   - الحالة الجديدة: مدفوعة ✅`);
+          } else if (totalAfterThisPayment > 0) {
+            // 🆕 تحديث الحالة إلى "مدفوعة جزئياً"
+            await InvoiceAdminService.updatePaymentStatus(targetInvoice.id, 'partial', undefined, totalAfterThisPayment);
+            console.log(`   - الحالة الجديدة: مدفوعة جزئياً 📝`);
           }
         }
       }

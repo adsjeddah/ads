@@ -251,11 +251,24 @@ export class InvoiceAdminService {
   }
 
   // تحديث حالة الدفع
-  static async updatePaymentStatus(id: string, status: 'paid' | 'unpaid' | 'pending', paidDate?: Date): Promise<void> {
-    const updateData: any = { status };
+  static async updatePaymentStatus(
+    id: string, 
+    status: 'paid' | 'unpaid' | 'pending' | 'partial', 
+    paidDate?: Date,
+    paidAmount?: number
+  ): Promise<void> {
+    const updateData: any = { 
+      status,
+      updated_at: FieldValue.serverTimestamp()
+    };
     
     if (status === 'paid' && paidDate) {
       updateData.paid_date = Timestamp.fromDate(paidDate);
+    }
+    
+    // 🆕 تسجيل المبلغ المدفوع للفاتورة
+    if (paidAmount !== undefined) {
+      updateData.paid_amount = paidAmount;
     }
     
     await adminDb.collection('invoices').doc(id).update(updateData);
