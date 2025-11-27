@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '../../../lib/firebase-admin';
-import { verifyToken } from '../../../lib/auth';
+import { verifyToken } from '../../../lib/utils/auth';
 import { Timestamp } from 'firebase-admin/firestore';
 
 /**
