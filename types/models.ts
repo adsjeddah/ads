@@ -160,7 +160,7 @@ export interface Invoice {
   vat_amount: number;            // مبلغ الضريبة
   amount: number;                // الإجمالي (subtotal + vat_amount)
   
-  status: 'paid' | 'unpaid' | 'cancelled';
+  status: 'paid' | 'unpaid' | 'partial' | 'cancelled';
   issued_date: Date;
   due_date?: Date;
   paid_date?: Date;
