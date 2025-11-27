@@ -438,6 +438,7 @@ export default function AdvertiserFinancial() {
           >
             <InvoicesTable
               invoices={invoices}
+              subscriptions={subscriptions}
               loading={loading}
             />
           </motion.div>

@@ -18,19 +18,28 @@ interface Invoice {
   subscription_id: string;
   invoice_number: string;
   amount: number;
-  status: 'paid' | 'unpaid' | 'cancelled';
+  status: 'paid' | 'unpaid' | 'partial' | 'cancelled';
   issued_date: any;
   due_date?: any;
   paid_date?: any;
+  paid_amount?: number; // 🆕 المبلغ المدفوع الفعلي
   created_at: any;
+}
+
+interface Subscription {
+  id: string;
+  paid_amount: number;
+  remaining_amount: number;
+  total_amount: number;
 }
 
 interface InvoicesTableProps {
   invoices: Invoice[];
+  subscriptions?: Subscription[]; // 🆕 لربط الفواتير بالاشتراكات
   loading?: boolean;
 }
 
-export default function InvoicesTable({ invoices, loading }: InvoicesTableProps) {
+export default function InvoicesTable({ invoices, subscriptions = [], loading }: InvoicesTableProps) {
   if (loading || !invoices) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
@@ -54,36 +63,69 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
     );
   }
 
-  const getStatusBadge = (status: string) => {
-    const styles = {
+  // 🆕 دالة للحصول على المبلغ المدفوع للفاتورة من الاشتراك المرتبط
+  const getInvoicePaidAmount = (invoice: Invoice): number => {
+    // أولاً: استخدام paid_amount من الفاتورة مباشرة إذا كان موجوداً
+    if (invoice.paid_amount !== undefined && invoice.paid_amount > 0) {
+      return invoice.paid_amount;
+    }
+    // ثانياً: البحث في الاشتراك المرتبط
+    const subscription = subscriptions.find(s => s.id === invoice.subscription_id);
+    if (subscription) {
+      return subscription.paid_amount || 0;
+    }
+    // ثالثاً: إذا كانت الحالة مدفوعة، افترض أن المبلغ كاملاً مدفوع
+    if (invoice.status === 'paid') {
+      return invoice.amount;
+    }
+    return 0;
+  };
+
+  const getStatusBadge = (status: string, paidAmt: number, totalAmt: number) => {
+    // تحديد الحالة الفعلية بناءً على المبالغ
+    let actualStatus = status;
+    if (paidAmt >= totalAmt) {
+      actualStatus = 'paid';
+    } else if (paidAmt > 0) {
+      actualStatus = 'partial';
+    } else if (status !== 'cancelled') {
+      actualStatus = 'unpaid';
+    }
+
+    const styles: Record<string, string> = {
       paid: 'bg-green-100 text-green-700',
+      partial: 'bg-yellow-100 text-yellow-700',
       unpaid: 'bg-red-100 text-red-700',
       cancelled: 'bg-gray-100 text-gray-700'
     };
     
-    const labels = {
+    const labels: Record<string, string> = {
       paid: 'مدفوعة',
+      partial: 'مدفوعة جزئياً',
       unpaid: 'غير مدفوعة',
       cancelled: 'ملغاة'
     };
 
-    const icons = {
+    const icons: Record<string, React.ReactNode> = {
       paid: <FaCheckCircle className="inline mr-1" />,
+      partial: <FaExclamationCircle className="inline mr-1" />,
       unpaid: <FaExclamationCircle className="inline mr-1 animate-pulse" />,
       cancelled: null
     };
 
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center ${styles[status as keyof typeof styles]}`}>
-        {icons[status as keyof typeof icons]}
-        {labels[status as keyof typeof labels]}
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center ${styles[actualStatus] || styles.unpaid}`}>
+        {icons[actualStatus]}
+        {labels[actualStatus] || labels.unpaid}
       </span>
     );
   };
 
   const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
-  const paidAmount = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0);
-  const unpaidAmount = invoices.filter(inv => inv.status === 'unpaid').reduce((sum, inv) => sum + inv.amount, 0);
+  
+  // 🆕 حساب المبلغ المدفوع الفعلي من كل فاتورة
+  const paidAmount = invoices.reduce((sum, inv) => sum + getInvoicePaidAmount(inv), 0);
+  const unpaidAmount = Math.max(0, totalAmount - paidAmount);
 
   return (
     <motion.div
@@ -172,7 +214,7 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge(invoice.status)}
+                  {getStatusBadge(invoice.status, getInvoicePaidAmount(invoice), invoice.amount)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
@@ -223,13 +265,13 @@ export default function InvoicesTable({ invoices, loading }: InvoicesTableProps)
             <div>
               <p className="text-xs text-gray-500">المدفوع</p>
               <p className="text-lg font-bold text-green-600">
-                {invoices.filter(inv => inv.status === 'paid').length}
+                {invoices.filter(inv => getInvoicePaidAmount(inv) >= inv.amount).length}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500">غير المدفوع</p>
               <p className="text-lg font-bold text-red-600">
-                {invoices.filter(inv => inv.status === 'unpaid').length}
+                {invoices.filter(inv => getInvoicePaidAmount(inv) < inv.amount).length}
               </p>
             </div>
           </div>
