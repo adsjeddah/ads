@@ -23,7 +23,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             __html: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'AW-933899057');`,
+gtag('config', 'AW-933899057');
+
+// Google Ads Conversion Tracking - Phone Click
+function gtag_report_conversion(url) {
+  var callback = function () {
+    if (typeof(url) != 'undefined') {
+      window.location = url;
+    }
+  };
+  gtag('event', 'conversion', {
+    'send_to': 'AW-933899057/dd0DCO6e4ccbELHWqL0D',
+    'value': 1.0,
+    'currency': 'USD',
+    'event_callback': callback
+  });
+  return false;
+}`,
           }}
         />
         {/* End Google Ads */}
