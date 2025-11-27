@@ -10,7 +10,7 @@ import {
   FaHistory, FaUndo, FaExclamationTriangle, FaPercent,
   FaChartBar, FaCalendarAlt, FaArrowUp, FaArrowDown,
   FaPause, FaPlay, FaStop, FaBan, FaRedo, FaSearch, FaFilter,
-  FaStickyNote, FaGift
+  FaStickyNote, FaGift, FaPhone
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -768,6 +768,14 @@ export default function AdminDashboard() {
                   }`}
                 >
                   الأسعار
+                </button>
+              </Link>
+              <Link href="/admin/call-reports">
+                <button
+                  className="py-3 md:py-4 px-3 md:px-2 border-b-2 transition-colors whitespace-nowrap text-sm md:text-base border-transparent text-gray-600 hover:text-gray-800 flex items-center gap-1"
+                >
+                  <FaPhone className="text-blue-500" />
+                  تقارير المكالمات
                 </button>
               </Link>
             </div>
