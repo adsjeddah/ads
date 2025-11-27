@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { adminDb } from '../../../lib/firebase-admin';
-import { verifyToken } from '../../../lib/utils/auth';
+import { adminDb, verifyAdminToken } from '../../../lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 
 /**
@@ -23,7 +22,7 @@ export default async function handler(
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const decoded = verifyToken(token);
+    const decoded = await verifyAdminToken(token);
     if (!decoded) {
       return res.status(401).json({ error: 'Invalid token' });
     }
