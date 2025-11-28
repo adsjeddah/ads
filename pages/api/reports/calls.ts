@@ -19,12 +19,19 @@ export default async function handler(
     // التحقق من التوكن
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: 'Unauthorized - No token provided' });
     }
 
-    const decoded = await verifyAdminToken(token);
+    let decoded;
+    try {
+      decoded = await verifyAdminToken(token);
+    } catch (authError: any) {
+      console.error('Token verification failed:', authError.message);
+      return res.status(401).json({ error: 'Invalid token: ' + authError.message });
+    }
+
     if (!decoded) {
-      return res.status(401).json({ error: 'Invalid token' });
+      return res.status(401).json({ error: 'Invalid token - decoded is null' });
     }
 
     const { period = 'week', start_date, end_date, city, sector } = req.query;
@@ -62,16 +69,68 @@ export default async function handler(
     }
 
     // جلب الإحصائيات من Firestore
-    const statsRef = adminDb.collection('statistics');
-    let statsQuery = statsRef
-      .where('date', '>=', Timestamp.fromDate(startDate))
-      .where('date', '<=', Timestamp.fromDate(endDate));
+    console.log('Fetching statistics from:', startDate.toISOString(), 'to', endDate.toISOString());
+    
+    let statsSnapshot;
+    let useManualDateFilter = false;
+    
+    try {
+      const statsRef = adminDb.collection('statistics');
+      // استعلام بسيط بدون orderBy لتجنب مشاكل الفهرس
+      const statsQuery = statsRef
+        .where('date', '>=', Timestamp.fromDate(startDate))
+        .where('date', '<=', Timestamp.fromDate(endDate));
 
-    const statsSnapshot = await statsQuery.get();
+      statsSnapshot = await statsQuery.get();
+      console.log('Statistics fetched:', statsSnapshot.size, 'documents');
+    } catch (queryError: any) {
+      console.error('Statistics query error:', queryError.message);
+      // إذا فشل الاستعلام، نحاول جلب كل الإحصائيات وفلترتها يدوياً
+      console.log('Trying alternative query without date filter...');
+      useManualDateFilter = true;
+      try {
+        const statsRef = adminDb.collection('statistics');
+        statsSnapshot = await statsRef.get();
+        console.log('All statistics fetched:', statsSnapshot.size, 'documents');
+      } catch (fallbackError: any) {
+        console.error('Fallback query also failed:', fallbackError.message);
+        // إرجاع بيانات فارغة بدلاً من خطأ
+        return res.status(200).json({
+          success: true,
+          data: {
+            summary: {
+              total_calls: 0,
+              total_views: 0,
+              total_clicks: 0,
+              avg_daily_calls: 0,
+              total_advertisers: 0,
+              period_days: 7,
+              top_advertiser: null,
+              least_advertiser: null
+            },
+            chart_data: [],
+            advertisers: [],
+            breakdown: {
+              cities: [],
+              sectors: [],
+              devices: [],
+              sources: []
+            }
+          }
+        });
+      }
+    }
 
     // جلب جميع المعلنين
-    const advertisersRef = adminDb.collection('advertisers');
-    const advertisersSnapshot = await advertisersRef.get();
+    let advertisersSnapshot;
+    try {
+      const advertisersRef = adminDb.collection('advertisers');
+      advertisersSnapshot = await advertisersRef.get();
+      console.log('Advertisers fetched:', advertisersSnapshot.size, 'documents');
+    } catch (advError: any) {
+      console.error('Advertisers query error:', advError.message);
+      return res.status(500).json({ error: 'Failed to fetch advertisers: ' + advError.message });
+    }
     
     const advertisersMap: Record<string, any> = {};
     advertisersSnapshot.docs.forEach(doc => {
@@ -100,6 +159,15 @@ export default async function handler(
 
     for (const doc of statsSnapshot.docs) {
       const data = doc.data();
+      
+      // إذا كنا نستخدم الفلترة اليدوية، تحقق من التاريخ
+      if (useManualDateFilter && data.date) {
+        const docDate = data.date.toDate ? data.date.toDate() : new Date(data.date);
+        if (docDate < startDate || docDate > endDate) {
+          continue;
+        }
+      }
+      
       const advertiserId = data.advertiser_id;
       const advertiser = advertisersMap[advertiserId];
 
