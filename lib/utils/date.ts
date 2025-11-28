@@ -27,13 +27,11 @@ export function toSaudiTime(date: Date | string | number): Date {
 }
 
 /**
- * الحصول على التاريخ والوقت الحالي بتوقيت السعودية
- * يُرجع Date object يمثل الوقت الحالي مع إزاحة السعودية
+ * الحصول على التاريخ والوقت الحالي
+ * ملاحظة: تحويل التوقيت يتم في startOfDay و endOfDay
  */
 export function getSaudiNow(): Date {
-  const now = new Date();
-  // إضافة 3 ساعات للحصول على التوقيت السعودي
-  return new Date(now.getTime() + (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
+  return new Date();
 }
 
 /**
