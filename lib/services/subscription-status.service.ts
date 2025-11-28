@@ -275,8 +275,8 @@ export class SubscriptionStatusService {
         return { success: false, message: 'الاشتراك غير موجود' };
       }
       
-      // يمكن إيقاف اشتراك نشط أو متوقف مؤقتاً
-      if (!['active', 'paused'].includes(subscription.status)) {
+      // يمكن إيقاف اشتراك نشط أو متوقف مؤقتاً أو في انتظار الدفع
+      if (!['active', 'paused', 'pending_payment'].includes(subscription.status)) {
         return { 
           success: false, 
           message: `لا يمكن إيقاف اشتراك بحالة: ${subscription.status}` 
@@ -298,6 +298,10 @@ export class SubscriptionStatusService {
         // إذا كان متوقفاً مؤقتاً
         daysUsed = subscription.active_days || 0;
         daysWasted = subscription.remaining_active_days || 0;
+      } else if (subscription.status === 'pending_payment') {
+        // إذا كان في انتظار الدفع
+        daysUsed = 0;
+        daysWasted = daysBetween(startDate, currentEndDate);
       }
       
       // تحديث الاشتراك
@@ -379,11 +383,12 @@ export class SubscriptionStatusService {
         return { success: false, message: 'الاشتراك غير موجود' };
       }
       
-      // يمكن إعادة تشغيل اشتراك متوقف فقط
-      if (subscription.status !== 'stopped') {
+      // يمكن إعادة تشغيل اشتراك متوقف أو منتهي أو ملغي أو في انتظار الدفع
+      const allowedStatuses = ['stopped', 'expired', 'cancelled', 'pending_payment'];
+      if (!allowedStatuses.includes(subscription.status)) {
         return { 
           success: false, 
-          message: `لا يمكن إعادة تشغيل اشتراك بحالة: ${subscription.status}. يجب أن يكون متوقفاً.` 
+          message: `لا يمكن إعادة تشغيل اشتراك بحالة: ${subscription.status}. يجب أن يكون متوقفاً أو منتهياً.` 
         };
       }
       
@@ -420,7 +425,7 @@ export class SubscriptionStatusService {
       await this.recordStatusChange({
         subscription_id: data.subscription_id,
         advertiser_id: subscription.advertiser_id,
-        from_status: 'stopped',
+        from_status: subscription.status as any,
         to_status: 'active',
         action_type: 'reactivate',
         changed_at: now,
@@ -429,7 +434,7 @@ export class SubscriptionStatusService {
         days_after_change: plannedDays,
         changed_by: data.reactivated_by,
         changed_by_type: 'admin',
-        reason: 'إعادة تشغيل بعد إيقاف كامل',
+        reason: `إعادة تنشيط من حالة: ${subscription.status}`,
         notes: data.notes,
         ip_address: data.ip_address,
         financial_impact: {
