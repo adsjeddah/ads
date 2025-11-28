@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaGift, FaTimes, FaCheckCircle } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaBuilding, FaPhone, FaEnvelope, FaListAlt, FaWhatsapp, FaCalendarAlt, FaMoneyBillWave, FaChartLine, FaPlus, FaFileInvoice, FaPause, FaPlay, FaRedo, FaClock, FaBox, FaStop, FaTruck, FaBoxes, FaHome, FaDolly, FaShippingFast, FaWarehouse, FaHandshake, FaTools, FaPeopleCarry, FaRoute, FaShieldAlt, FaAward, FaStar, FaMapMarkedAlt, FaHeadset, FaUserTie, FaClipboardCheck, FaTruckLoading, FaBoxOpen, FaGift, FaTimes, FaCheckCircle, FaSync } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -478,6 +478,34 @@ export default function AdvertiserDetails() {
     }
   };
 
+  // مزامنة حالة المعلن مع حالة الاشتراك
+  const handleSyncStatus = async () => {
+    if (!advertiser) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      
+      const response = await axios.post(
+        `${apiUrl}/admin/sync-advertiser-status`,
+        { advertiser_id: advertiser.id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (response.data.success) {
+        if (response.data.results.updated > 0) {
+          toast.success('تم مزامنة حالة المعلن بنجاح');
+        } else {
+          toast.success('حالة المعلن متزامنة بالفعل');
+        }
+        fetchAdvertiserDetails();
+      }
+    } catch (error: any) {
+      console.error('Error syncing status:', error);
+      toast.error(error.response?.data?.error || 'خطأ في مزامنة الحالة');
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-500"></div></div>;
   }
@@ -515,6 +543,15 @@ export default function AdvertiserDetails() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
+                {/* زر مزامنة الحالة */}
+                <button
+                  onClick={handleSyncStatus}
+                  className="flex items-center justify-center p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 active:bg-blue-300 transition-all"
+                  title="مزامنة حالة المعلن مع الاشتراك"
+                >
+                  <FaSync className="text-sm" />
+                </button>
+                
                 {/* أزرار سريعة لتغيير الحالة - للموبايل */}
                 <button
                   onClick={handleToggleStatus}
