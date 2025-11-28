@@ -89,6 +89,12 @@ export default function AdvertiserDetails() {
   const [gracePeriodLoading, setGracePeriodLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  
+  // حالات الإجراءات السريعة للموبايل
+  const [showQuickActionModal, setShowQuickActionModal] = useState(false);
+  const [quickActionType, setQuickActionType] = useState<'pause' | 'stop' | 'resume' | 'reactivate' | null>(null);
+  const [quickActionReason, setQuickActionReason] = useState('');
+  const [quickActionLoading, setQuickActionLoading] = useState(false);
 
   // تعريف الأيقونات المتاحة (نفس النظام من index.tsx)
   const iconComponents: { [key: string]: any } = {
@@ -369,6 +375,109 @@ export default function AdvertiserDetails() {
     }
   };
 
+  // دوال الإجراءات السريعة للموبايل
+  const openQuickAction = (subscription: Subscription, action: 'pause' | 'stop' | 'resume' | 'reactivate') => {
+    setSelectedSubscription(subscription);
+    setQuickActionType(action);
+    setQuickActionReason('');
+    setShowQuickActionModal(true);
+  };
+
+  const executeQuickAction = async () => {
+    if (!selectedSubscription || !quickActionType) return;
+    
+    // التحقق من السبب للإيقاف الكامل
+    if (quickActionType === 'stop' && !quickActionReason.trim()) {
+      toast.error('الرجاء إدخال سبب الإيقاف');
+      return;
+    }
+
+    setQuickActionLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      
+      let endpoint = '';
+      let successMessage = '';
+      
+      switch (quickActionType) {
+        case 'pause':
+          endpoint = `${apiUrl}/subscriptions/${selectedSubscription.id}/pause`;
+          successMessage = 'تم إيقاف الاشتراك مؤقتاً';
+          break;
+        case 'stop':
+          endpoint = `${apiUrl}/subscriptions/${selectedSubscription.id}/stop`;
+          successMessage = 'تم إيقاف الاشتراك';
+          break;
+        case 'resume':
+          endpoint = `${apiUrl}/subscriptions/${selectedSubscription.id}/resume`;
+          successMessage = 'تم إعادة تشغيل الاشتراك';
+          break;
+        case 'reactivate':
+          endpoint = `${apiUrl}/subscriptions/${selectedSubscription.id}/reactivate`;
+          successMessage = 'تم إعادة تنشيط الاشتراك';
+          break;
+      }
+
+      const response = await axios.post(
+        endpoint,
+        { reason: quickActionReason || undefined },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success(response.data.message || successMessage);
+      setShowQuickActionModal(false);
+      setQuickActionType(null);
+      setQuickActionReason('');
+      setSelectedSubscription(null);
+      fetchAdvertiserDetails();
+    } catch (error: any) {
+      console.error('Error executing quick action:', error);
+      toast.error(error.response?.data?.error || 'حدث خطأ في تنفيذ الإجراء');
+    } finally {
+      setQuickActionLoading(false);
+    }
+  };
+
+  const getQuickActionInfo = () => {
+    switch (quickActionType) {
+      case 'pause':
+        return {
+          title: 'إيقاف مؤقت',
+          description: 'سيتم إيقاف الاشتراك مؤقتاً. الأيام لن تُحتسب أثناء التوقف.',
+          color: 'bg-yellow-500',
+          icon: FaPause,
+          requireReason: false
+        };
+      case 'stop':
+        return {
+          title: 'إيقاف كامل',
+          description: 'سيتم إيقاف الاشتراك بشكل كامل. يمكن إعادة تنشيطه لاحقاً.',
+          color: 'bg-red-500',
+          icon: FaStop,
+          requireReason: true
+        };
+      case 'resume':
+        return {
+          title: 'إعادة تشغيل',
+          description: 'سيتم إعادة تشغيل الاشتراك وتمديد تاريخ النهاية بعدد أيام التوقف.',
+          color: 'bg-green-500',
+          icon: FaPlay,
+          requireReason: false
+        };
+      case 'reactivate':
+        return {
+          title: 'إعادة تنشيط',
+          description: 'سيبدأ الاشتراك من جديد بنفس الباقة والمدة.',
+          color: 'bg-blue-500',
+          icon: FaRedo,
+          requireReason: false
+        };
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-500"></div></div>;
   }
@@ -398,20 +507,100 @@ export default function AdvertiserDetails() {
         <header className="bg-white shadow-sm sticky top-0 z-50">
           <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-lg md:text-2xl font-bold text-gradient truncate max-w-[200px] md:max-w-none">{advertiser.company_name}</h1>
-              <Link href="/admin/dashboard?tab=advertisers">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-primary-600 transition-colors text-sm md:text-base"
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg md:text-2xl font-bold text-gradient truncate max-w-[150px] md:max-w-none">{advertiser.company_name}</h1>
+                {/* حالة المعلن */}
+                <span className={`px-2 py-0.5 rounded-full text-[10px] md:text-xs font-semibold ${advertiser.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {advertiser.status === 'active' ? '● نشط' : '○ موقف'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* أزرار سريعة لتغيير الحالة - للموبايل */}
+                <button
+                  onClick={handleToggleStatus}
+                  className={`md:hidden flex items-center justify-center p-2 rounded-lg transition-all ${
+                    advertiser.status === 'active' 
+                      ? 'bg-red-100 text-red-600 hover:bg-red-200 active:bg-red-300' 
+                      : 'bg-green-100 text-green-600 hover:bg-green-200 active:bg-green-300'
+                  }`}
+                  title={advertiser.status === 'active' ? 'إيقاف المعلن' : 'تفعيل المعلن'}
                 >
-                  <FaArrowLeft />
-                  <span className="hidden sm:inline">العودة للمعلنين</span>
-                  <span className="sm:hidden">رجوع</span>
-                </motion.button>
-              </Link>
+                  {advertiser.status === 'active' ? <FaStop className="text-sm" /> : <FaPlay className="text-sm" />}
+                </button>
+                
+                <Link href="/admin/dashboard?tab=advertisers">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-primary-600 transition-colors text-sm md:text-base"
+                  >
+                    <FaArrowLeft />
+                    <span className="hidden sm:inline">العودة للمعلنين</span>
+                    <span className="sm:hidden">رجوع</span>
+                  </motion.button>
+                </Link>
+              </div>
             </div>
           </div>
         </header>
+        
+        {/* شريط إجراءات سريعة للموبايل - يظهر تحت الهيدر */}
+        {subscriptions.length > 0 && (
+          <div className="md:hidden bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-3 py-2 overflow-x-auto">
+            <div className="flex items-center gap-2 min-w-max">
+              <span className="text-xs text-gray-500 font-medium whitespace-nowrap">إجراءات سريعة:</span>
+              {subscriptions.filter(sub => sub.status === 'active' || sub.status === 'paused' || sub.status === 'stopped').slice(0, 1).map(sub => (
+                <div key={sub.id} className="flex items-center gap-1.5">
+                  {sub.status === 'active' && (
+                    <>
+                      <button
+                        onClick={() => openQuickAction(sub, 'pause')}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-yellow-500 text-white text-xs font-medium rounded-lg active:bg-yellow-600 shadow-sm"
+                      >
+                        <FaPause className="text-[10px]" />
+                        <span>إيقاف مؤقت</span>
+                      </button>
+                      <button
+                        onClick={() => openQuickAction(sub, 'stop')}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg active:bg-red-600 shadow-sm"
+                      >
+                        <FaStop className="text-[10px]" />
+                        <span>إيقاف</span>
+                      </button>
+                    </>
+                  )}
+                  {sub.status === 'paused' && (
+                    <>
+                      <button
+                        onClick={() => openQuickAction(sub, 'resume')}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg active:bg-green-600 shadow-sm"
+                      >
+                        <FaPlay className="text-[10px]" />
+                        <span>تشغيل</span>
+                      </button>
+                      <button
+                        onClick={() => openQuickAction(sub, 'stop')}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg active:bg-red-600 shadow-sm"
+                      >
+                        <FaStop className="text-[10px]" />
+                        <span>إيقاف</span>
+                      </button>
+                    </>
+                  )}
+                  {sub.status === 'stopped' && (
+                    <button
+                      onClick={() => openQuickAction(sub, 'reactivate')}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg active:bg-blue-600 shadow-sm"
+                    >
+                      <FaRedo className="text-[10px]" />
+                      <span>إعادة تنشيط</span>
+                    </button>
+                  )}
+                  <span className="text-[10px] text-gray-400 mr-1">({sub.plan_name})</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="container mx-auto px-2 md:px-4 py-4 md:py-8">
@@ -947,6 +1136,79 @@ export default function AdvertiserDetails() {
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 font-semibold disabled:opacity-50 transition-all shadow-lg"
               >
                 {gracePeriodLoading ? 'جاري التفعيل...' : '🎁 تفعيل فترة السماح'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Modal للإجراءات السريعة - محسّن للموبايل */}
+      {showQuickActionModal && selectedSubscription && getQuickActionInfo() && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            className="bg-white rounded-t-2xl sm:rounded-xl p-4 sm:p-6 w-full sm:max-w-md shadow-2xl"
+          >
+            {/* مؤشر السحب للموبايل */}
+            <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4 sm:hidden" />
+            
+            <div className="flex items-center gap-3 mb-4">
+              {React.createElement(getQuickActionInfo()!.icon, {
+                className: `text-2xl text-white p-2 rounded-full ${getQuickActionInfo()!.color}`
+              })}
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">{getQuickActionInfo()!.title}</h3>
+                <p className="text-sm text-gray-500">{selectedSubscription.plan_name}</p>
+              </div>
+            </div>
+            
+            <p className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg">
+              {getQuickActionInfo()!.description}
+            </p>
+            
+            {/* حقل السبب */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                السبب {getQuickActionInfo()!.requireReason && <span className="text-red-500">*</span>}
+              </label>
+              <textarea
+                value={quickActionReason}
+                onChange={(e) => setQuickActionReason(e.target.value)}
+                placeholder={getQuickActionInfo()!.requireReason ? 'السبب مطلوب...' : 'السبب (اختياري)...'}
+                rows={2}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+              />
+            </div>
+            
+            {/* أزرار الإجراءات */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowQuickActionModal(false);
+                  setQuickActionType(null);
+                  setQuickActionReason('');
+                  setSelectedSubscription(null);
+                }}
+                disabled={quickActionLoading}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 active:bg-gray-300 transition-colors font-medium text-sm"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={executeQuickAction}
+                disabled={quickActionLoading || (getQuickActionInfo()!.requireReason && !quickActionReason.trim())}
+                className={`flex-1 px-4 py-2.5 text-white rounded-lg font-medium text-sm disabled:opacity-50 transition-all shadow-sm ${getQuickActionInfo()!.color} hover:opacity-90 active:opacity-80`}
+              >
+                {quickActionLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    جاري التنفيذ...
+                  </span>
+                ) : (
+                  'تأكيد'
+                )}
               </button>
             </div>
           </motion.div>

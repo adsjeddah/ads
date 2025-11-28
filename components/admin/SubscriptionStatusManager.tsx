@@ -242,73 +242,73 @@ export default function SubscriptionStatusManager({
   };
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold text-gray-800">إدارة حالة الاشتراك</h3>
-        <div className={`px-4 py-2 rounded-full ${statusInfo.color} flex items-center gap-2`}>
-          <statusInfo.icon className={statusInfo.iconColor} />
-          <span className="font-semibold">{statusInfo.label}</span>
+    <div className="bg-white rounded-lg shadow-md p-3 md:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 md:mb-6">
+        <h3 className="text-base md:text-lg font-bold text-gray-800">إدارة حالة الاشتراك</h3>
+        <div className={`px-3 py-1.5 md:px-4 md:py-2 rounded-full ${statusInfo.color} flex items-center gap-2 w-fit`}>
+          <statusInfo.icon className={`${statusInfo.iconColor} text-sm md:text-base`} />
+          <span className="font-semibold text-sm md:text-base">{statusInfo.label}</span>
         </div>
       </div>
       
       {/* معلومات الحالة */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4 mb-4 md:mb-6">
         {subscription.paused_at && (
-          <div className="bg-yellow-50 p-3 rounded-lg">
-            <p className="text-xs text-yellow-600 mb-1">متوقف منذ</p>
-            <p className="text-sm font-semibold text-yellow-800">
+          <div className="bg-yellow-50 p-2 md:p-3 rounded-lg">
+            <p className="text-[10px] md:text-xs text-yellow-600 mb-0.5 md:mb-1">متوقف منذ</p>
+            <p className="text-xs md:text-sm font-semibold text-yellow-800">
               {formatDate(subscription.paused_at, 'dd/MM/yyyy')}
             </p>
           </div>
         )}
         
         {subscription.total_paused_days && subscription.total_paused_days > 0 && (
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <p className="text-xs text-blue-600 mb-1">إجمالي أيام التوقف</p>
-            <p className="text-sm font-semibold text-blue-800">
+          <div className="bg-blue-50 p-2 md:p-3 rounded-lg">
+            <p className="text-[10px] md:text-xs text-blue-600 mb-0.5 md:mb-1">إجمالي أيام التوقف</p>
+            <p className="text-xs md:text-sm font-semibold text-blue-800">
               {subscription.total_paused_days} يوم
             </p>
           </div>
         )}
         
         {subscription.remaining_active_days && (
-          <div className="bg-green-50 p-3 rounded-lg">
-            <p className="text-xs text-green-600 mb-1">الأيام المتبقية</p>
-            <p className="text-sm font-semibold text-green-800">
+          <div className="bg-green-50 p-2 md:p-3 rounded-lg">
+            <p className="text-[10px] md:text-xs text-green-600 mb-0.5 md:mb-1">الأيام المتبقية</p>
+            <p className="text-xs md:text-sm font-semibold text-green-800">
               {subscription.remaining_active_days} يوم
             </p>
           </div>
         )}
         
         {subscription.active_days && (
-          <div className="bg-purple-50 p-3 rounded-lg">
-            <p className="text-xs text-purple-600 mb-1">الأيام المستخدمة</p>
-            <p className="text-sm font-semibold text-purple-800">
+          <div className="bg-purple-50 p-2 md:p-3 rounded-lg">
+            <p className="text-[10px] md:text-xs text-purple-600 mb-0.5 md:mb-1">الأيام المستخدمة</p>
+            <p className="text-xs md:text-sm font-semibold text-purple-800">
               {subscription.active_days} يوم
             </p>
           </div>
         )}
       </div>
       
-      {/* أزرار الإجراءات */}
-      <div className="flex flex-wrap gap-3">
+      {/* أزرار الإجراءات - محسّنة للموبايل */}
+      <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:gap-3">
         {subscription.status === 'active' && (
           <>
             <button
               onClick={handlePause}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 active:bg-yellow-700 transition-colors disabled:opacity-50 text-sm md:text-base font-medium shadow-sm"
             >
-              <FaPause />
+              <FaPause className="text-sm" />
               <span>إيقاف مؤقت</span>
             </button>
             
             <button
               onClick={handleStop}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 active:bg-red-700 transition-colors disabled:opacity-50 text-sm md:text-base font-medium shadow-sm"
             >
-              <FaStop />
+              <FaStop className="text-sm" />
               <span>إيقاف كامل</span>
             </button>
           </>
@@ -319,18 +319,18 @@ export default function SubscriptionStatusManager({
             <button
               onClick={handleResume}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors disabled:opacity-50 text-sm md:text-base font-medium shadow-sm"
             >
-              <FaPlay />
-              <span>إعادة تشغيل</span>
+              <FaPlay className="text-sm" />
+              <span>تشغيل</span>
             </button>
             
             <button
               onClick={handleStop}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 active:bg-red-700 transition-colors disabled:opacity-50 text-sm md:text-base font-medium shadow-sm"
             >
-              <FaStop />
+              <FaStop className="text-sm" />
               <span>إيقاف كامل</span>
             </button>
           </>
@@ -340,30 +340,33 @@ export default function SubscriptionStatusManager({
           <button
             onClick={handleReactivate}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+            className="col-span-2 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors disabled:opacity-50 text-sm md:text-base font-medium shadow-sm"
           >
-            <FaRedo />
+            <FaRedo className="text-sm" />
             <span>إعادة تنشيط</span>
           </button>
         )}
       </div>
       
-      {/* Modal للسبب */}
+      {/* Modal للسبب - محسّن للموبايل */}
       {showReasonModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-t-2xl sm:rounded-xl p-4 sm:p-6 w-full sm:max-w-md"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <FaExclamationTriangle className="text-yellow-500 text-2xl" />
-              <h3 className="text-lg font-bold">
+            {/* مؤشر السحب للموبايل */}
+            <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4 sm:hidden" />
+            
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <FaExclamationTriangle className="text-yellow-500 text-xl sm:text-2xl" />
+              <h3 className="text-base sm:text-lg font-bold">
                 {actionType === 'pause' ? 'إيقاف مؤقت' : 'إيقاف كامل'}
               </h3>
             </div>
             
-            <p className="text-gray-600 mb-4">
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
               {actionType === 'pause' 
                 ? 'سيتم إيقاف الاشتراك مؤقتاً. الأيام لن تُحتسب أثناء التوقف.' 
                 : 'سيتم إيقاف الاشتراك بشكل كامل. يمكن إعادة تنشيطه لاحقاً.'}
@@ -373,16 +376,16 @@ export default function SubscriptionStatusManager({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder={actionType === 'stop' ? 'السبب (مطلوب)' : 'السبب (اختياري)'}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm sm:text-base"
               rows={3}
               required={actionType === 'stop'}
             />
             
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-2 sm:gap-3 mt-4">
               <button
                 onClick={executeAction}
                 disabled={loading || (actionType === 'stop' && !reason.trim())}
-                className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                className="flex-1 bg-blue-500 text-white px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors disabled:opacity-50 text-sm sm:text-base font-medium"
               >
                 {loading ? 'جاري التنفيذ...' : 'تأكيد'}
               </button>
@@ -394,7 +397,7 @@ export default function SubscriptionStatusManager({
                   setActionType(null);
                 }}
                 disabled={loading}
-                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                className="flex-1 bg-gray-200 text-gray-700 px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg hover:bg-gray-300 active:bg-gray-400 transition-colors text-sm sm:text-base font-medium"
               >
                 إلغاء
               </button>
