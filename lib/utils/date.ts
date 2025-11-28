@@ -9,9 +9,11 @@ import { toEnglishNumerals } from './numbers';
 
 // التوقيت السعودي
 export const SAUDI_TIMEZONE = 'Asia/Riyadh';
+export const SAUDI_OFFSET_HOURS = 3; // UTC+3
 
 /**
- * تحويل التاريخ إلى التوقيت السعودي
+ * تحويل التاريخ إلى التوقيت السعودي (للعرض فقط)
+ * تحذير: هذه الدالة للعرض فقط، لا تستخدمها لحسابات التواريخ!
  */
 export function toSaudiTime(date: Date | string | number): Date {
   const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
@@ -26,9 +28,12 @@ export function toSaudiTime(date: Date | string | number): Date {
 
 /**
  * الحصول على التاريخ والوقت الحالي بتوقيت السعودية
+ * يُرجع Date object يمثل الوقت الحالي مع إزاحة السعودية
  */
 export function getSaudiNow(): Date {
-  return toSaudiTime(new Date());
+  const now = new Date();
+  // إضافة 3 ساعات للحصول على التوقيت السعودي
+  return new Date(now.getTime() + (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
 }
 
 /**
@@ -181,21 +186,46 @@ export function formatRelativeDate(date: Date | string | number): string {
 }
 
 /**
- * الحصول على بداية اليوم (00:00:00)
+ * الحصول على بداية اليوم بتوقيت السعودية (00:00:00 سعودي)
+ * يُرجع Date بـ UTC يمثل بداية اليوم السعودي
  */
 export function startOfDay(date: Date | string | number): Date {
-  const dateObj = toSaudiTime(date);
-  dateObj.setHours(0, 0, 0, 0);
-  return dateObj;
+  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  
+  // تحويل إلى توقيت السعودية لمعرفة اليوم السعودي
+  const saudiTime = new Date(dateObj.getTime() + (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
+  
+  // الحصول على مكونات التاريخ السعودي
+  const saudiYear = saudiTime.getUTCFullYear();
+  const saudiMonth = saudiTime.getUTCMonth();
+  const saudiDay = saudiTime.getUTCDate();
+  
+  // بداية اليوم السعودي (00:00 سعودي = 21:00 UTC اليوم السابق)
+  // نحسب: منتصف الليل السعودي بـ UTC
+  const startUtc = new Date(Date.UTC(saudiYear, saudiMonth, saudiDay, 0, 0, 0, 0));
+  // نطرح 3 ساعات للتحويل من السعودي إلى UTC
+  return new Date(startUtc.getTime() - (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
 }
 
 /**
- * الحصول على نهاية اليوم (23:59:59)
+ * الحصول على نهاية اليوم بتوقيت السعودية (23:59:59 سعودي)
+ * يُرجع Date بـ UTC يمثل نهاية اليوم السعودي
  */
 export function endOfDay(date: Date | string | number): Date {
-  const dateObj = toSaudiTime(date);
-  dateObj.setHours(23, 59, 59, 999);
-  return dateObj;
+  const dateObj = typeof date === 'string' ? parseISO(date) : new Date(date);
+  
+  // تحويل إلى توقيت السعودية لمعرفة اليوم السعودي
+  const saudiTime = new Date(dateObj.getTime() + (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
+  
+  // الحصول على مكونات التاريخ السعودي
+  const saudiYear = saudiTime.getUTCFullYear();
+  const saudiMonth = saudiTime.getUTCMonth();
+  const saudiDay = saudiTime.getUTCDate();
+  
+  // نهاية اليوم السعودي (23:59:59 سعودي)
+  const endUtc = new Date(Date.UTC(saudiYear, saudiMonth, saudiDay, 23, 59, 59, 999));
+  // نطرح 3 ساعات للتحويل من السعودي إلى UTC
+  return new Date(endUtc.getTime() - (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
 }
 
 /**
