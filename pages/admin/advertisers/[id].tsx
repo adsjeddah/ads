@@ -548,8 +548,9 @@ export default function AdvertiserDetails() {
           <div className="md:hidden bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-3 py-2 overflow-x-auto">
             <div className="flex items-center gap-2 min-w-max">
               <span className="text-xs text-gray-500 font-medium whitespace-nowrap">إجراءات سريعة:</span>
-              {subscriptions.filter(sub => sub.status === 'active' || sub.status === 'paused' || sub.status === 'stopped').slice(0, 1).map(sub => (
+              {subscriptions.slice(0, 1).map(sub => (
                 <div key={sub.id} className="flex items-center gap-1.5">
+                  {/* الاشتراك النشط */}
                   {sub.status === 'active' && (
                     <>
                       <button
@@ -568,6 +569,7 @@ export default function AdvertiserDetails() {
                       </button>
                     </>
                   )}
+                  {/* الاشتراك المتوقف مؤقتاً */}
                   {sub.status === 'paused' && (
                     <>
                       <button
@@ -586,6 +588,7 @@ export default function AdvertiserDetails() {
                       </button>
                     </>
                   )}
+                  {/* الاشتراك المتوقف */}
                   {sub.status === 'stopped' && (
                     <button
                       onClick={() => openQuickAction(sub, 'reactivate')}
@@ -595,7 +598,52 @@ export default function AdvertiserDetails() {
                       <span>إعادة تنشيط</span>
                     </button>
                   )}
-                  <span className="text-[10px] text-gray-400 mr-1">({sub.plan_name})</span>
+                  {/* الاشتراك المنتهي أو الملغي */}
+                  {(sub.status === 'expired' || sub.status === 'cancelled') && (
+                    <button
+                      onClick={() => openQuickAction(sub, 'reactivate')}
+                      className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-500 text-white text-xs font-medium rounded-lg active:bg-blue-600 shadow-sm"
+                    >
+                      <FaRedo className="text-[10px]" />
+                      <span>إعادة تنشيط</span>
+                    </button>
+                  )}
+                  {/* في انتظار الدفع */}
+                  {sub.status === 'pending_payment' && (
+                    <>
+                      <button
+                        onClick={() => openQuickAction(sub, 'reactivate')}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg active:bg-green-600 shadow-sm"
+                      >
+                        <FaPlay className="text-[10px]" />
+                        <span>تفعيل</span>
+                      </button>
+                      <button
+                        onClick={() => openQuickAction(sub, 'stop')}
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg active:bg-red-600 shadow-sm"
+                      >
+                        <FaStop className="text-[10px]" />
+                        <span>إلغاء</span>
+                      </button>
+                    </>
+                  )}
+                  {/* حالة الاشتراك واسم الباقة */}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                    sub.status === 'active' ? 'bg-green-100 text-green-700' :
+                    sub.status === 'paused' ? 'bg-yellow-100 text-yellow-700' :
+                    sub.status === 'stopped' ? 'bg-red-100 text-red-700' :
+                    sub.status === 'expired' ? 'bg-gray-100 text-gray-700' :
+                    sub.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                    'bg-orange-100 text-orange-700'
+                  }`}>
+                    {sub.status === 'active' ? 'نشط' :
+                     sub.status === 'paused' ? 'متوقف مؤقتاً' :
+                     sub.status === 'stopped' ? 'متوقف' :
+                     sub.status === 'expired' ? 'منتهي' :
+                     sub.status === 'cancelled' ? 'ملغي' :
+                     'انتظار الدفع'}
+                  </span>
+                  <span className="text-[10px] text-gray-400">({sub.plan_name})</span>
                 </div>
               ))}
             </div>
@@ -706,17 +754,23 @@ export default function AdvertiserDetails() {
                             <h4 className="font-semibold text-lg">{sub.plan_name}</h4>
                             <p className="text-sm text-gray-600">{sub.price} ريال / {sub.duration_days} يوم</p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                               sub.status === 'active' ? 'bg-green-100 text-green-800' :
                               sub.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
                               sub.status === 'stopped' ? 'bg-red-100 text-red-800' :
+                              sub.status === 'expired' ? 'bg-gray-100 text-gray-800' :
+                              sub.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                              sub.status === 'pending_payment' ? 'bg-orange-100 text-orange-800' :
                               'bg-gray-100 text-gray-800'
                             }`}>
                               {sub.status === 'active' ? '🟢 نشط' :
                                sub.status === 'paused' ? '🟡 متوقف مؤقتاً' :
                                sub.status === 'stopped' ? '🔴 متوقف' :
-                               '⚫ منتهي'}
+                               sub.status === 'expired' ? '⚫ منتهي' :
+                               sub.status === 'cancelled' ? '❌ ملغي' :
+                               sub.status === 'pending_payment' ? '🟠 انتظار الدفع' :
+                               '⚫ ' + sub.status}
                             </span>
                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                               sub.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
@@ -745,12 +799,11 @@ export default function AdvertiserDetails() {
                         </div>
                         
                         {/* Status Manager Component */}
-                        {(sub.status === 'active' || sub.status === 'paused' || sub.status === 'stopped') && (
-                          <SubscriptionStatusManager 
-                            subscription={sub as any}
-                            onStatusChanged={fetchAdvertiserDetails}
-                          />
-                        )}
+                        {/* إدارة حالة الاشتراك - متاحة لجميع الحالات */}
+                        <SubscriptionStatusManager 
+                          subscription={sub as any}
+                          onStatusChanged={fetchAdvertiserDetails}
+                        />
                       </div>
                     ))}
                   </div>

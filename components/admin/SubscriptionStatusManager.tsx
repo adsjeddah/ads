@@ -69,9 +69,23 @@ export default function SubscriptionStatusManager({
           icon: FaClock,
           iconColor: 'text-gray-600'
         };
+      case 'cancelled':
+        return {
+          label: 'ملغي',
+          color: 'bg-red-100 text-red-800',
+          icon: FaBan,
+          iconColor: 'text-red-600'
+        };
+      case 'pending_payment':
+        return {
+          label: 'في انتظار الدفع',
+          color: 'bg-orange-100 text-orange-800',
+          icon: FaClock,
+          iconColor: 'text-orange-600'
+        };
       default:
         return {
-          label: subscription.status,
+          label: subscription.status === 'pending' ? 'معلق' : subscription.status,
           color: 'bg-gray-100 text-gray-800',
           icon: FaClock,
           iconColor: 'text-gray-600'
@@ -345,6 +359,41 @@ export default function SubscriptionStatusManager({
             <FaRedo className="text-sm" />
             <span>إعادة تنشيط</span>
           </button>
+        )}
+        
+        {/* للاشتراكات المنتهية أو الملغية */}
+        {(subscription.status === 'expired' || subscription.status === 'cancelled') && (
+          <button
+            onClick={handleReactivate}
+            disabled={loading}
+            className="col-span-2 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors disabled:opacity-50 text-sm md:text-base font-medium shadow-sm"
+          >
+            <FaRedo className="text-sm" />
+            <span>إعادة تنشيط الاشتراك</span>
+          </button>
+        )}
+        
+        {/* للاشتراكات في انتظار الدفع */}
+        {subscription.status === 'pending_payment' && (
+          <>
+            <button
+              onClick={handleReactivate}
+              disabled={loading}
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors disabled:opacity-50 text-sm md:text-base font-medium shadow-sm"
+            >
+              <FaPlay className="text-sm" />
+              <span>تفعيل</span>
+            </button>
+            
+            <button
+              onClick={handleStop}
+              disabled={loading}
+              className="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 active:bg-red-700 transition-colors disabled:opacity-50 text-sm md:text-base font-medium shadow-sm"
+            >
+              <FaStop className="text-sm" />
+              <span>إلغاء</span>
+            </button>
+          </>
         )}
       </div>
       
