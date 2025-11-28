@@ -122,19 +122,11 @@ export default async function handler(
       end_date as string
     );
 
-    console.log('=== CALL REPORTS DEBUG ===');
-    console.log('Period:', period);
-    console.log('Query Date Range:');
-    console.log('  Start:', startDate.toISOString());
-    console.log('  End:', endDate.toISOString());
-
-    // جلب جميع الإحصائيات (بدون فلترة) ثم فلترة يدوياً
-    // هذا يضمن عدم تفويت أي بيانات بسبب مشاكل الفهرس أو التوقيت
+    // جلب جميع الإحصائيات ثم فلترة يدوياً
     let statsSnapshot;
     try {
       const statsRef = adminDb.collection('statistics');
       statsSnapshot = await statsRef.get();
-      console.log('Total statistics documents:', statsSnapshot.size);
     } catch (queryError: any) {
       console.error('Statistics query error:', queryError.message);
       return res.status(200).json({
@@ -152,8 +144,7 @@ export default async function handler(
           },
           chart_data: [],
           advertisers: [],
-          breakdown: { cities: [], sectors: [], devices: [], sources: [] },
-          debug: { error: queryError.message }
+          breakdown: { cities: [], sectors: [], devices: [], sources: [] }
         }
       });
     }
@@ -163,7 +154,6 @@ export default async function handler(
     try {
       const advertisersRef = adminDb.collection('advertisers');
       advertisersSnapshot = await advertisersRef.get();
-      console.log('Total advertisers:', advertisersSnapshot.size);
     } catch (advError: any) {
       console.error('Advertisers query error:', advError.message);
       return res.status(500).json({ error: 'Failed to fetch advertisers: ' + advError.message });
@@ -193,12 +183,6 @@ export default async function handler(
     let totalViews = 0;
     let totalClicks = 0;
     const dailyTotals: Record<string, { calls: number; views: number; clicks: number }> = {};
-    
-    // للتشخيص: تتبع التواريخ الموجودة
-    const foundDates: string[] = [];
-    let skippedDueToDate = 0;
-    let skippedDueToAdvertiser = 0;
-    let processedCount = 0;
 
     for (const doc of statsSnapshot.docs) {
       const data = doc.data();
@@ -215,15 +199,9 @@ export default async function handler(
         }
       }
       
-      // تسجيل التواريخ للتشخيص
-      if (docDate && !foundDates.includes(docDate.toISOString().split('T')[0])) {
-        foundDates.push(docDate.toISOString().split('T')[0]);
-      }
-      
       // فلترة حسب التاريخ
       if (docDate) {
         if (docDate < startDate || docDate > endDate) {
-          skippedDueToDate++;
           continue;
         }
       }
@@ -231,18 +209,13 @@ export default async function handler(
       const advertiserId = data.advertiser_id;
       const advertiser = advertisersMap[advertiserId];
 
-      if (!advertiser) {
-        skippedDueToAdvertiser++;
-        continue;
-      }
+      if (!advertiser) continue;
 
       // فلترة حسب المدينة
       if (city && city !== 'all' && advertiser.city !== city) continue;
 
       // فلترة حسب القطاع
       if (sector && sector !== 'all' && advertiser.sector !== sector) continue;
-
-      processedCount++;
 
       // إعداد بيانات المعلن
       if (!advertiserStats[advertiserId]) {
@@ -308,14 +281,6 @@ export default async function handler(
       dailyTotals[dateKey].views += views;
       dailyTotals[dateKey].clicks += clicks;
     }
-
-    console.log('Processing summary:');
-    console.log('  Found dates in DB:', foundDates.sort().join(', '));
-    console.log('  Skipped due to date filter:', skippedDueToDate);
-    console.log('  Skipped due to missing advertiser:', skippedDueToAdvertiser);
-    console.log('  Processed:', processedCount);
-    console.log('  Total calls found:', totalCalls);
-    console.log('  Total views found:', totalViews);
 
     // تحويل إلى مصفوفة وترتيب حسب المكالمات
     const advertisersArray = Object.values(advertiserStats)
@@ -392,18 +357,6 @@ export default async function handler(
           sectors: Object.entries(sectorsStats).map(([name, count]) => ({ name, count })),
           devices: Object.entries(devicesStats).map(([name, count]) => ({ name, count })),
           sources: Object.entries(sourcesStats).map(([name, count]) => ({ name, count }))
-        },
-        // معلومات التشخيص (للتطوير)
-        debug: {
-          query_range: {
-            start: startDate.toISOString(),
-            end: endDate.toISOString()
-          },
-          found_dates_in_db: foundDates.sort(),
-          total_stats_docs: statsSnapshot.size,
-          processed_docs: processedCount,
-          skipped_by_date: skippedDueToDate,
-          skipped_by_advertiser: skippedDueToAdvertiser
         }
       }
     });
