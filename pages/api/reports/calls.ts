@@ -2,31 +2,83 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb, verifyAdminToken } from '../../../lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 
-// تحويل التاريخ إلى التوقيت السعودي
-function toSaudiTime(date: Date): Date {
-  const saudiTime = new Date(date.toLocaleString('en-US', { 
-    timeZone: 'Asia/Riyadh' 
-  }));
-  return saudiTime;
+// Saudi Arabia is UTC+3
+const SAUDI_OFFSET_HOURS = 3;
+
+/**
+ * الحصول على تاريخ اليوم بتوقيت السعودية (بداية اليوم ونهايته) بـ UTC
+ * هذه الطريقة تضمن حساب صحيح للتواريخ بغض النظر عن توقيت السيرفر
+ */
+function getSaudiDayRange(referenceDate: Date = new Date()): { start: Date; end: Date } {
+  // الوقت الحالي بـ UTC
+  const utcTime = referenceDate.getTime();
+  
+  // تحويل إلى توقيت السعودية بإضافة 3 ساعات
+  const saudiTime = new Date(utcTime + (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
+  
+  // الحصول على التاريخ السعودي (السنة، الشهر، اليوم)
+  const saudiYear = saudiTime.getUTCFullYear();
+  const saudiMonth = saudiTime.getUTCMonth();
+  const saudiDay = saudiTime.getUTCDate();
+  
+  // بداية اليوم السعودي بـ UTC (00:00 سعودي = 21:00 UTC اليوم السابق)
+  const startUtc = new Date(Date.UTC(saudiYear, saudiMonth, saudiDay, 0, 0, 0, 0) - (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
+  
+  // نهاية اليوم السعودي بـ UTC (23:59:59 سعودي = 20:59:59 UTC)
+  const endUtc = new Date(Date.UTC(saudiYear, saudiMonth, saudiDay, 23, 59, 59, 999) - (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
+  
+  return { start: startUtc, end: endUtc };
 }
 
-// الحصول على التاريخ والوقت الحالي بتوقيت السعودية
-function getSaudiNow(): Date {
-  return toSaudiTime(new Date());
-}
-
-// بداية اليوم بتوقيت السعودية
-function startOfSaudiDay(date: Date): Date {
-  const saudiDate = toSaudiTime(date);
-  saudiDate.setHours(0, 0, 0, 0);
-  return saudiDate;
-}
-
-// نهاية اليوم بتوقيت السعودية
-function endOfSaudiDay(date: Date): Date {
-  const saudiDate = toSaudiTime(date);
-  saudiDate.setHours(23, 59, 59, 999);
-  return saudiDate;
+/**
+ * الحصول على نطاق التواريخ حسب الفترة المحددة
+ */
+function getDateRange(period: string, customStart?: string, customEnd?: string): { start: Date; end: Date } {
+  const now = new Date();
+  
+  if (period === 'custom' && customStart && customEnd) {
+    const startDate = new Date(customStart);
+    const endDate = new Date(customEnd);
+    // إضافة يوم كامل للتاريخ النهائي
+    endDate.setUTCHours(23, 59, 59, 999);
+    return { start: startDate, end: endDate };
+  }
+  
+  const todayRange = getSaudiDayRange(now);
+  
+  switch (period) {
+    case 'day':
+      return todayRange;
+    
+    case 'week': {
+      const weekAgo = new Date(now);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weekAgoRange = getSaudiDayRange(weekAgo);
+      return { start: weekAgoRange.start, end: todayRange.end };
+    }
+    
+    case 'month': {
+      const monthAgo = new Date(now);
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      const monthAgoRange = getSaudiDayRange(monthAgo);
+      return { start: monthAgoRange.start, end: todayRange.end };
+    }
+    
+    case 'year': {
+      const yearAgo = new Date(now);
+      yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+      const yearAgoRange = getSaudiDayRange(yearAgo);
+      return { start: yearAgoRange.start, end: todayRange.end };
+    }
+    
+    default: {
+      // افتراضي: آخر 7 أيام
+      const defaultWeekAgo = new Date(now);
+      defaultWeekAgo.setDate(defaultWeekAgo.getDate() - 7);
+      const defaultRange = getSaudiDayRange(defaultWeekAgo);
+      return { start: defaultRange.start, end: todayRange.end };
+    }
+  }
 }
 
 /**
@@ -63,92 +115,47 @@ export default async function handler(
 
     const { period = 'week', start_date, end_date, city, sector } = req.query;
 
-    // حساب نطاق التواريخ بتوقيت السعودية
-    const now = getSaudiNow();
-    let startDate: Date;
-    let endDate: Date = endOfSaudiDay(now);
+    // حساب نطاق التواريخ
+    const { start: startDate, end: endDate } = getDateRange(
+      period as string,
+      start_date as string,
+      end_date as string
+    );
 
-    if (period === 'custom' && start_date && end_date) {
-      startDate = startOfSaudiDay(new Date(start_date as string));
-      endDate = endOfSaudiDay(new Date(end_date as string));
-    } else {
-      switch (period) {
-        case 'day':
-          startDate = startOfSaudiDay(now);
-          break;
-        case 'week':
-          const weekAgo = new Date(now);
-          weekAgo.setDate(weekAgo.getDate() - 7);
-          startDate = startOfSaudiDay(weekAgo);
-          break;
-        case 'month':
-          const monthAgo = new Date(now);
-          monthAgo.setMonth(monthAgo.getMonth() - 1);
-          startDate = startOfSaudiDay(monthAgo);
-          break;
-        case 'year':
-          const yearAgo = new Date(now);
-          yearAgo.setFullYear(yearAgo.getFullYear() - 1);
-          startDate = startOfSaudiDay(yearAgo);
-          break;
-        default:
-          const defaultWeekAgo = new Date(now);
-          defaultWeekAgo.setDate(defaultWeekAgo.getDate() - 7);
-          startDate = startOfSaudiDay(defaultWeekAgo);
-      }
-    }
+    console.log('=== CALL REPORTS DEBUG ===');
+    console.log('Period:', period);
+    console.log('Query Date Range:');
+    console.log('  Start:', startDate.toISOString());
+    console.log('  End:', endDate.toISOString());
 
-    // جلب الإحصائيات من Firestore
-    console.log('Fetching statistics from:', startDate.toISOString(), 'to', endDate.toISOString());
-    
+    // جلب جميع الإحصائيات (بدون فلترة) ثم فلترة يدوياً
+    // هذا يضمن عدم تفويت أي بيانات بسبب مشاكل الفهرس أو التوقيت
     let statsSnapshot;
-    let useManualDateFilter = false;
-    
     try {
       const statsRef = adminDb.collection('statistics');
-      // استعلام بسيط بدون orderBy لتجنب مشاكل الفهرس
-      const statsQuery = statsRef
-        .where('date', '>=', Timestamp.fromDate(startDate))
-        .where('date', '<=', Timestamp.fromDate(endDate));
-
-      statsSnapshot = await statsQuery.get();
-      console.log('Statistics fetched:', statsSnapshot.size, 'documents');
+      statsSnapshot = await statsRef.get();
+      console.log('Total statistics documents:', statsSnapshot.size);
     } catch (queryError: any) {
       console.error('Statistics query error:', queryError.message);
-      // إذا فشل الاستعلام، نحاول جلب كل الإحصائيات وفلترتها يدوياً
-      console.log('Trying alternative query without date filter...');
-      useManualDateFilter = true;
-      try {
-        const statsRef = adminDb.collection('statistics');
-        statsSnapshot = await statsRef.get();
-        console.log('All statistics fetched:', statsSnapshot.size, 'documents');
-      } catch (fallbackError: any) {
-        console.error('Fallback query also failed:', fallbackError.message);
-        // إرجاع بيانات فارغة بدلاً من خطأ
-        return res.status(200).json({
-          success: true,
-          data: {
-            summary: {
-              total_calls: 0,
-              total_views: 0,
-              total_clicks: 0,
-              avg_daily_calls: 0,
-              total_advertisers: 0,
-              period_days: 7,
-              top_advertiser: null,
-              least_advertiser: null
-            },
-            chart_data: [],
-            advertisers: [],
-            breakdown: {
-              cities: [],
-              sectors: [],
-              devices: [],
-              sources: []
-            }
-          }
-        });
-      }
+      return res.status(200).json({
+        success: true,
+        data: {
+          summary: {
+            total_calls: 0,
+            total_views: 0,
+            total_clicks: 0,
+            avg_daily_calls: 0,
+            total_advertisers: 0,
+            period_days: 1,
+            top_advertiser: null,
+            least_advertiser: null
+          },
+          chart_data: [],
+          advertisers: [],
+          breakdown: { cities: [], sectors: [], devices: [], sources: [] },
+          debug: { error: queryError.message }
+        }
+      });
     }
 
     // جلب جميع المعلنين
@@ -156,7 +163,7 @@ export default async function handler(
     try {
       const advertisersRef = adminDb.collection('advertisers');
       advertisersSnapshot = await advertisersRef.get();
-      console.log('Advertisers fetched:', advertisersSnapshot.size, 'documents');
+      console.log('Total advertisers:', advertisersSnapshot.size);
     } catch (advError: any) {
       console.error('Advertisers query error:', advError.message);
       return res.status(500).json({ error: 'Failed to fetch advertisers: ' + advError.message });
@@ -186,14 +193,37 @@ export default async function handler(
     let totalViews = 0;
     let totalClicks = 0;
     const dailyTotals: Record<string, { calls: number; views: number; clicks: number }> = {};
+    
+    // للتشخيص: تتبع التواريخ الموجودة
+    const foundDates: string[] = [];
+    let skippedDueToDate = 0;
+    let skippedDueToAdvertiser = 0;
+    let processedCount = 0;
 
     for (const doc of statsSnapshot.docs) {
       const data = doc.data();
       
-      // إذا كنا نستخدم الفلترة اليدوية، تحقق من التاريخ
-      if (useManualDateFilter && data.date) {
-        const docDate = data.date.toDate ? data.date.toDate() : new Date(data.date);
+      // الحصول على تاريخ المستند
+      let docDate: Date | null = null;
+      if (data.date) {
+        if (data.date.toDate && typeof data.date.toDate === 'function') {
+          docDate = data.date.toDate();
+        } else if (data.date.seconds) {
+          docDate = new Date(data.date.seconds * 1000);
+        } else if (data.date._seconds) {
+          docDate = new Date(data.date._seconds * 1000);
+        }
+      }
+      
+      // تسجيل التواريخ للتشخيص
+      if (docDate && !foundDates.includes(docDate.toISOString().split('T')[0])) {
+        foundDates.push(docDate.toISOString().split('T')[0]);
+      }
+      
+      // فلترة حسب التاريخ
+      if (docDate) {
         if (docDate < startDate || docDate > endDate) {
+          skippedDueToDate++;
           continue;
         }
       }
@@ -201,13 +231,18 @@ export default async function handler(
       const advertiserId = data.advertiser_id;
       const advertiser = advertisersMap[advertiserId];
 
-      if (!advertiser) continue;
+      if (!advertiser) {
+        skippedDueToAdvertiser++;
+        continue;
+      }
 
       // فلترة حسب المدينة
       if (city && city !== 'all' && advertiser.city !== city) continue;
 
       // فلترة حسب القطاع
       if (sector && sector !== 'all' && advertiser.sector !== sector) continue;
+
+      processedCount++;
 
       // إعداد بيانات المعلن
       if (!advertiserStats[advertiserId]) {
@@ -253,8 +288,8 @@ export default async function handler(
       }
 
       // المكالمات اليومية
-      const dateKey = data.date?.toDate ? 
-        data.date.toDate().toISOString().split('T')[0] : 
+      const dateKey = docDate ? 
+        docDate.toISOString().split('T')[0] : 
         new Date().toISOString().split('T')[0];
       
       advertiserStats[advertiserId].daily_calls[dateKey] = 
@@ -273,6 +308,14 @@ export default async function handler(
       dailyTotals[dateKey].views += views;
       dailyTotals[dateKey].clicks += clicks;
     }
+
+    console.log('Processing summary:');
+    console.log('  Found dates in DB:', foundDates.sort().join(', '));
+    console.log('  Skipped due to date filter:', skippedDueToDate);
+    console.log('  Skipped due to missing advertiser:', skippedDueToAdvertiser);
+    console.log('  Processed:', processedCount);
+    console.log('  Total calls found:', totalCalls);
+    console.log('  Total views found:', totalViews);
 
     // تحويل إلى مصفوفة وترتيب حسب المكالمات
     const advertisersArray = Object.values(advertiserStats)
@@ -349,6 +392,18 @@ export default async function handler(
           sectors: Object.entries(sectorsStats).map(([name, count]) => ({ name, count })),
           devices: Object.entries(devicesStats).map(([name, count]) => ({ name, count })),
           sources: Object.entries(sourcesStats).map(([name, count]) => ({ name, count }))
+        },
+        // معلومات التشخيص (للتطوير)
+        debug: {
+          query_range: {
+            start: startDate.toISOString(),
+            end: endDate.toISOString()
+          },
+          found_dates_in_db: foundDates.sort(),
+          total_stats_docs: statsSnapshot.size,
+          processed_docs: processedCount,
+          skipped_by_date: skippedDueToDate,
+          skipped_by_advertiser: skippedDueToAdvertiser
         }
       }
     });
@@ -358,4 +413,3 @@ export default async function handler(
     res.status(500).json({ error: 'Failed to fetch call reports: ' + error.message });
   }
 }
-
