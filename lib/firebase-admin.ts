@@ -37,10 +37,19 @@ export const adminStorage = getStorage(adminApp);
 export async function verifyAdminToken(token: string) {
   try {
     const decodedToken = await adminAuth.verifyIdToken(token);
+    
     // Check if user has admin claim
     if (decodedToken.admin === true) {
       return decodedToken;
     }
+    
+    // If no admin claim, check Firestore admins collection
+    const adminDoc = await adminDb.collection('admins').doc(decodedToken.uid).get();
+    if (adminDoc.exists) {
+      // User is admin in Firestore, return the token
+      return decodedToken;
+    }
+    
     throw new Error('User is not an admin');
   } catch (error: any) {
     console.error('Token verification error:', error.message);
