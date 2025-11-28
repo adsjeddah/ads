@@ -18,6 +18,47 @@ import { SubscriptionAdminService } from './subscription-admin.service';
 export class SubscriptionStatusService {
   
   /**
+   * تحديث حالة المعلن بناءً على حالة الاشتراك
+   * هذه الدالة تضمن أن حالة المعلن تعكس حالة اشتراكه
+   */
+  private static async updateAdvertiserStatus(
+    advertiser_id: string, 
+    newStatus: 'active' | 'inactive'
+  ): Promise<void> {
+    try {
+      // أولاً: التحقق من وجود اشتراكات أخرى نشطة لهذا المعلن
+      if (newStatus === 'inactive') {
+        const allSubscriptions = await adminDb
+          .collection('subscriptions')
+          .where('advertiser_id', '==', advertiser_id)
+          .get();
+        
+        // إذا كان هناك اشتراك نشط آخر، لا نغير حالة المعلن
+        const hasActiveSubscription = allSubscriptions.docs.some(doc => {
+          const sub = doc.data();
+          return sub.status === 'active';
+        });
+        
+        if (hasActiveSubscription) {
+          console.log(`⚠️ المعلن ${advertiser_id} لديه اشتراك نشط آخر، لن يتم تغيير حالته`);
+          return;
+        }
+      }
+      
+      // تحديث حالة المعلن
+      await adminDb.collection('advertisers').doc(advertiser_id).update({
+        status: newStatus,
+        updated_at: FieldValue.serverTimestamp()
+      });
+      
+      console.log(`✅ تم تحديث حالة المعلن ${advertiser_id} إلى: ${newStatus}`);
+    } catch (error) {
+      console.error(`❌ خطأ في تحديث حالة المعلن ${advertiser_id}:`, error);
+      // لا نرمي خطأ هنا لأننا لا نريد أن يفشل التغيير الرئيسي
+    }
+  }
+  
+  /**
    * 1. إيقاف مؤقت (Pause)
    * - الإعلان يتوقف مؤقتاً
    * - الأيام لا تُحتسب أثناء التوقف
@@ -107,6 +148,9 @@ export class SubscriptionStatusService {
           amount_remaining: subscription.remaining_amount,
         }
       });
+      
+      // ✅ تحديث حالة المعلن إلى غير نشط
+      await this.updateAdvertiserStatus(subscription.advertiser_id, 'inactive');
       
       return {
         success: true,
@@ -229,6 +273,9 @@ export class SubscriptionStatusService {
         }
       });
       
+      // ✅ تحديث حالة المعلن إلى نشط
+      await this.updateAdvertiserStatus(subscription.advertiser_id, 'active');
+      
       return {
         success: true,
         message: `تم إعادة تشغيل الاشتراك بنجاح. تم تمديد تاريخ النهاية بـ ${pauseDurationDays} يوم.`,
@@ -336,6 +383,9 @@ export class SubscriptionStatusService {
         }
       });
       
+      // ✅ تحديث حالة المعلن إلى غير نشط
+      await this.updateAdvertiserStatus(subscription.advertiser_id, 'inactive');
+      
       return {
         success: true,
         message: 'تم إيقاف الاشتراك بشكل كامل',
@@ -442,6 +492,9 @@ export class SubscriptionStatusService {
           amount_remaining: subscription.remaining_amount,
         }
       });
+      
+      // ✅ تحديث حالة المعلن إلى نشط
+      await this.updateAdvertiserStatus(subscription.advertiser_id, 'active');
       
       return {
         success: true,
