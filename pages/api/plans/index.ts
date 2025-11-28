@@ -9,7 +9,9 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      // Use Admin Service to bypass Firestore security rules
+      // Cache plans for 5 minutes (they don't change often)
+      res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+      
       const plans = await PlansAdminService.getAll();
       res.status(200).json(plans);
     } catch (error: any) {

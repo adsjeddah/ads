@@ -7,7 +7,9 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      // Use Admin Service - bypasses Firestore Security Rules
+      // Cache dashboard stats for 2 minutes
+      res.setHeader('Cache-Control', 'private, s-maxage=120, stale-while-revalidate=300');
+      
       const stats = await StatisticsAdminService.getDashboardStats();
       res.status(200).json(stats);
     } catch (error: any) {

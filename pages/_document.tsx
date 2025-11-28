@@ -53,6 +53,25 @@ function gtag_report_conversion(url) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
         
+        {/* تحميل خط Cairo بـ font-display: swap لتجنب FOIT */}
+        <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap"
+          as="style"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap"
+          media="print"
+          onLoad="this.media='all'"
+        />
+        <noscript>
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap"
+          />
+        </noscript>
+        
         {/* Meta Tags */}
         <meta name="description" content="بروكر - دليلك الشامل للشركات والخدمات في المملكة العربية السعودية" />
         <meta name="keywords" content="دليل شركات السعودية, نقل عفش, نظافة, كشف تسربات, مكافحة حشرات, خدمات المملكة" />

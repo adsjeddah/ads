@@ -5,9 +5,16 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   
-  // 🚀 تحسينات الأداء لـ Google Ads
+  // 🚀 تحسينات الأداء
   experimental: {
-    optimizePackageImports: ['framer-motion', 'react-icons'], // تحسين imports
+    optimizePackageImports: ['framer-motion', 'react-icons', 'date-fns', 'recharts'],
+  },
+  
+  // تحسين bundle size
+  modularizeImports: {
+    'react-icons': {
+      transform: 'react-icons/{{member}}',
+    },
   },
   
   // ⚡ تحسين الصور

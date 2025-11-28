@@ -14,6 +14,9 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
+      // Cache for 1 minute with stale-while-revalidate
+      res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+      
       const { status, sector, city, include_subscriptions } = req.query;
       
       // Use Admin service for GET to avoid permissions issues
