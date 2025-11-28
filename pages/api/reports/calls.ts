@@ -2,6 +2,33 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb, verifyAdminToken } from '../../../lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 
+// تحويل التاريخ إلى التوقيت السعودي
+function toSaudiTime(date: Date): Date {
+  const saudiTime = new Date(date.toLocaleString('en-US', { 
+    timeZone: 'Asia/Riyadh' 
+  }));
+  return saudiTime;
+}
+
+// الحصول على التاريخ والوقت الحالي بتوقيت السعودية
+function getSaudiNow(): Date {
+  return toSaudiTime(new Date());
+}
+
+// بداية اليوم بتوقيت السعودية
+function startOfSaudiDay(date: Date): Date {
+  const saudiDate = toSaudiTime(date);
+  saudiDate.setHours(0, 0, 0, 0);
+  return saudiDate;
+}
+
+// نهاية اليوم بتوقيت السعودية
+function endOfSaudiDay(date: Date): Date {
+  const saudiDate = toSaudiTime(date);
+  saudiDate.setHours(23, 59, 59, 999);
+  return saudiDate;
+}
+
 /**
  * API لجلب تقارير المكالمات المجمعة
  * GET /api/reports/calls?period=day|week|month|custom&start_date=xxx&end_date=xxx&city=xxx&sector=xxx
@@ -36,35 +63,38 @@ export default async function handler(
 
     const { period = 'week', start_date, end_date, city, sector } = req.query;
 
-    // حساب نطاق التواريخ
-    const now = new Date();
+    // حساب نطاق التواريخ بتوقيت السعودية
+    const now = getSaudiNow();
     let startDate: Date;
-    let endDate: Date = now;
+    let endDate: Date = endOfSaudiDay(now);
 
     if (period === 'custom' && start_date && end_date) {
-      startDate = new Date(start_date as string);
-      endDate = new Date(end_date as string);
+      startDate = startOfSaudiDay(new Date(start_date as string));
+      endDate = endOfSaudiDay(new Date(end_date as string));
     } else {
       switch (period) {
         case 'day':
-          startDate = new Date(now);
-          startDate.setHours(0, 0, 0, 0);
+          startDate = startOfSaudiDay(now);
           break;
         case 'week':
-          startDate = new Date(now);
-          startDate.setDate(startDate.getDate() - 7);
+          const weekAgo = new Date(now);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          startDate = startOfSaudiDay(weekAgo);
           break;
         case 'month':
-          startDate = new Date(now);
-          startDate.setMonth(startDate.getMonth() - 1);
+          const monthAgo = new Date(now);
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          startDate = startOfSaudiDay(monthAgo);
           break;
         case 'year':
-          startDate = new Date(now);
-          startDate.setFullYear(startDate.getFullYear() - 1);
+          const yearAgo = new Date(now);
+          yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+          startDate = startOfSaudiDay(yearAgo);
           break;
         default:
-          startDate = new Date(now);
-          startDate.setDate(startDate.getDate() - 7);
+          const defaultWeekAgo = new Date(now);
+          defaultWeekAgo.setDate(defaultWeekAgo.getDate() - 7);
+          startDate = startOfSaudiDay(defaultWeekAgo);
       }
     }
 
