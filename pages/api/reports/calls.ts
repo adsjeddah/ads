@@ -187,9 +187,14 @@ export default async function handler(
     for (const doc of statsSnapshot.docs) {
       const data = doc.data();
       
-      // الحصول على تاريخ المستند
+      // الحصول على تاريخ المستند (دعم date_key الجديد و date القديم)
       let docDate: Date | null = null;
-      if (data.date) {
+      const docDateKey: string | null = data.date_key || null;
+      
+      if (docDateKey) {
+        // استخدام date_key إذا كان موجوداً (أكثر دقة)
+        docDate = new Date(docDateKey + 'T00:00:00');
+      } else if (data.date) {
         if (data.date.toDate && typeof data.date.toDate === 'function') {
           docDate = data.date.toDate();
         } else if (data.date.seconds) {

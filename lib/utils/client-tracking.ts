@@ -200,3 +200,142 @@ export function initializeTracking(): void {
   extractUTMFromURL();
 }
 
+/**
+ * تسجيل مكالمة بشكل موثوق باستخدام sendBeacon
+ * هذه الطريقة تضمن إرسال البيانات حتى عند إغلاق الصفحة أو التنقل منها
+ * 
+ * @param advertiserId - معرف المعلن
+ * @param phone - رقم الهاتف
+ * @returns Promise<boolean> - هل تم الإرسال بنجاح
+ */
+export async function trackCallReliably(
+  advertiserId: string, 
+  phone: string
+): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  
+  const trackingData = collectEventData();
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/statistics/record`;
+  
+  const payload = {
+    type: 'call',
+    advertiserId,
+    phone,
+    ...trackingData,
+    timestamp: new Date().toISOString()
+  };
+
+  // طريقة 1: استخدام sendBeacon (الأكثر موثوقية للإرسال عند التنقل)
+  if (navigator.sendBeacon) {
+    const blob = new Blob([JSON.stringify(payload)], { 
+      type: 'application/json' 
+    });
+    const success = navigator.sendBeacon(apiUrl, blob);
+    if (success) {
+      console.log('✅ Call tracked via sendBeacon:', advertiserId);
+      return true;
+    }
+  }
+
+  // طريقة 2: استخدام fetch مع keepalive
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      keepalive: true // يضمن إكمال الطلب حتى لو تم إغلاق الصفحة
+    });
+    
+    if (response.ok) {
+      console.log('✅ Call tracked via fetch keepalive:', advertiserId);
+      return true;
+    }
+  } catch (error) {
+    console.error('❌ Failed to track call:', error);
+  }
+
+  return false;
+}
+
+/**
+ * تسجيل نقرة بشكل موثوق
+ */
+export async function trackClickReliably(advertiserId: string): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  
+  const trackingData = collectEventData();
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/statistics/record`;
+  
+  const payload = {
+    type: 'click',
+    advertiserId,
+    ...trackingData,
+    timestamp: new Date().toISOString()
+  };
+
+  if (navigator.sendBeacon) {
+    const blob = new Blob([JSON.stringify(payload)], { 
+      type: 'application/json' 
+    });
+    const success = navigator.sendBeacon(apiUrl, blob);
+    if (success) {
+      console.log('✅ Click tracked via sendBeacon:', advertiserId);
+      return true;
+    }
+  }
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true
+    });
+    
+    if (response.ok) {
+      console.log('✅ Click tracked via fetch:', advertiserId);
+      return true;
+    }
+  } catch (error) {
+    console.error('❌ Failed to track click:', error);
+  }
+
+  return false;
+}
+
+/**
+ * تسجيل مشاهدة بشكل موثوق
+ */
+export async function trackViewReliably(advertiserId: string): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  
+  const trackingData = collectEventData();
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/statistics/record`;
+  
+  const payload = {
+    type: 'view',
+    advertiserId,
+    ...trackingData,
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    if (response.ok) {
+      console.log('✅ View tracked:', advertiserId);
+      return true;
+    }
+  } catch (error) {
+    console.error('❌ Failed to track view:', error);
+  }
+
+  return false;
+}
+

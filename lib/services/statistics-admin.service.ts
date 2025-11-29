@@ -1,7 +1,23 @@
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '../firebase-admin';
-import { getSaudiNow, startOfDay } from '../utils/date';
+import { getSaudiNow, startOfDay, endOfDay } from '../utils/date';
 import { Statistics } from '../../types/models';
+
+// Saudi Arabia is UTC+3
+const SAUDI_OFFSET_HOURS = 3;
+
+/**
+ * الحصول على مفتاح التاريخ السعودي (YYYY-MM-DD)
+ * هذا يضمن تطابق السجلات بغض النظر عن الـ milliseconds
+ */
+function getSaudiDateKey(date: Date = new Date()): string {
+  // تحويل إلى توقيت السعودية
+  const saudiTime = new Date(date.getTime() + (SAUDI_OFFSET_HOURS * 60 * 60 * 1000));
+  const year = saudiTime.getUTCFullYear();
+  const month = String(saudiTime.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(saudiTime.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export class StatisticsAdminService {
   // Get dashboard statistics
@@ -107,16 +123,30 @@ export class StatisticsAdminService {
 
   // Record a view (server-side) with optional tracking
   static async recordView(advertiserId: string, trackingData?: any) {
+    const now = new Date();
+    const dateKey = getSaudiDateKey(now);
     const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
     const statsRef = adminDb.collection('statistics');
-    const snapshot = await statsRef
+    
+    // البحث باستخدام date_key للدقة
+    let snapshot = await statsRef
       .where('advertiser_id', '==', advertiserId)
-      .where('date', '==', todayTimestamp)
+      .where('date_key', '==', dateKey)
+      .limit(1)
       .get();
 
-    // إعداد تفاصيل المشاهدة (اختياري - يمكن حفظه أو تجاهله لتقليل حجم البيانات)
+    // إذا لم يُوجد سجل بـ date_key، جرب البحث بالتاريخ القديم
+    if (snapshot.empty) {
+      snapshot = await statsRef
+        .where('advertiser_id', '==', advertiserId)
+        .where('date', '==', todayTimestamp)
+        .limit(1)
+        .get();
+    }
+
+    // إعداد تفاصيل المشاهدة
     const viewDetail = trackingData ? {
       timestamp: Timestamp.now(),
       ...trackingData
@@ -126,14 +156,16 @@ export class StatisticsAdminService {
       const docData: any = {
         advertiser_id: advertiserId,
         date: todayTimestamp,
+        date_key: dateKey,
         views: 1,
         clicks: 0,
         calls: 0,
         click_details: [],
-        call_details: []
+        call_details: [],
+        created_at: Timestamp.now(),
+        updated_at: Timestamp.now()
       };
       
-      // حفظ تفاصيل المشاهدات فقط إذا كانت مطلوبة (اختياري)
       if (viewDetail) {
         docData.view_details = [viewDetail];
       }
@@ -144,16 +176,14 @@ export class StatisticsAdminService {
       const docData = snapshot.docs[0].data();
       
       const updateData: any = {
-        views: FieldValue.increment(1)
+        views: FieldValue.increment(1),
+        date_key: dateKey,
+        updated_at: Timestamp.now()
       };
 
-      // إضافة تفاصيل المشاهدة إلى المصفوفة (اختياري)
       if (viewDetail) {
         const existingViewDetails = docData.view_details || [];
-        updateData.view_details = [
-          ...existingViewDetails,
-          viewDetail
-        ];
+        updateData.view_details = [...existingViewDetails, viewDetail];
       }
 
       await docRef.update(updateData);
@@ -162,14 +192,28 @@ export class StatisticsAdminService {
 
   // Record a click (server-side) with advanced tracking
   static async recordClick(advertiserId: string, trackingData?: any) {
+    const now = new Date();
+    const dateKey = getSaudiDateKey(now);
     const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
     const statsRef = adminDb.collection('statistics');
-    const snapshot = await statsRef
+    
+    // البحث باستخدام date_key للدقة
+    let snapshot = await statsRef
       .where('advertiser_id', '==', advertiserId)
-      .where('date', '==', todayTimestamp)
+      .where('date_key', '==', dateKey)
+      .limit(1)
       .get();
+
+    // إذا لم يُوجد سجل بـ date_key، جرب البحث بالتاريخ القديم
+    if (snapshot.empty) {
+      snapshot = await statsRef
+        .where('advertiser_id', '==', advertiserId)
+        .where('date', '==', todayTimestamp)
+        .limit(1)
+        .get();
+    }
 
     // إعداد تفاصيل النقرة
     const clickDetail = trackingData ? {
@@ -181,76 +225,125 @@ export class StatisticsAdminService {
       await statsRef.add({
         advertiser_id: advertiserId,
         date: todayTimestamp,
+        date_key: dateKey,
         views: 0,
         clicks: 1,
         calls: 0,
         click_details: [clickDetail],
-        call_details: []
+        call_details: [],
+        created_at: Timestamp.now(),
+        updated_at: Timestamp.now()
       });
     } else {
       const docRef = snapshot.docs[0].ref;
       const docData = snapshot.docs[0].data();
       
-      const updateData: any = {
-        clicks: FieldValue.increment(1)
-      };
-
-      // إضافة تفاصيل النقرة إلى المصفوفة
       const existingClickDetails = docData.click_details || [];
-      updateData.click_details = [
-        ...existingClickDetails,
-        clickDetail
-      ];
-
-      await docRef.update(updateData);
+      
+      await docRef.update({
+        clicks: FieldValue.increment(1),
+        click_details: [...existingClickDetails, clickDetail],
+        date_key: dateKey,
+        updated_at: Timestamp.now()
+      });
     }
   }
 
   // Record a call (server-side) with advanced tracking
   static async recordCall(advertiserId: string, phone?: string, trackingData?: any) {
+    const now = new Date();
+    const dateKey = getSaudiDateKey(now);
     const today = startOfDay(getSaudiNow());
     const todayTimestamp = Timestamp.fromDate(today);
 
+    console.log(`📞 Recording call for advertiser: ${advertiserId}, dateKey: ${dateKey}`);
+
     const statsRef = adminDb.collection('statistics');
-    const snapshot = await statsRef
+    
+    // البحث باستخدام date_key للدقة، أو بنطاق زمني كبديل
+    let snapshot = await statsRef
       .where('advertiser_id', '==', advertiserId)
-      .where('date', '==', todayTimestamp)
+      .where('date_key', '==', dateKey)
+      .limit(1)
       .get();
 
-    // إعداد تفاصيل المكالمة
+    // إذا لم يُوجد سجل بـ date_key، جرب البحث بالتاريخ القديم (للتوافق)
+    if (snapshot.empty) {
+      snapshot = await statsRef
+        .where('advertiser_id', '==', advertiserId)
+        .where('date', '==', todayTimestamp)
+        .limit(1)
+        .get();
+    }
+
+    // إعداد تفاصيل المكالمة مع معلومات إضافية للتتبع
     const callDetail = {
       timestamp: Timestamp.now(),
       phone: phone || null,
+      recorded_at: now.toISOString(),
       ...(trackingData || {})
     };
 
     if (snapshot.empty) {
-      await statsRef.add({
+      // إنشاء سجل جديد
+      const newDocRef = await statsRef.add({
         advertiser_id: advertiserId,
         date: todayTimestamp,
+        date_key: dateKey, // مفتاح إضافي للبحث الموثوق
         views: 0,
         clicks: 0,
         calls: 1,
         click_details: [],
-        call_details: [callDetail]
+        call_details: [callDetail],
+        created_at: Timestamp.now(),
+        updated_at: Timestamp.now()
       });
+      console.log(`✅ New call record created: ${newDocRef.id} for ${advertiserId}`);
     } else {
+      // تحديث السجل الموجود
       const docRef = snapshot.docs[0].ref;
       const docData = snapshot.docs[0].data();
       
-      const updateData: any = {
-        calls: FieldValue.increment(1)
-      };
-
-      // إضافة تفاصيل المكالمة إلى المصفوفة
       const existingCallDetails = docData.call_details || [];
-      updateData.call_details = [
-        ...existingCallDetails,
-        callDetail
-      ];
-
-      await docRef.update(updateData);
+      
+      await docRef.update({
+        calls: FieldValue.increment(1),
+        call_details: [...existingCallDetails, callDetail],
+        date_key: dateKey, // تحديث للتأكد من وجوده
+        updated_at: Timestamp.now()
+      });
+      
+      console.log(`✅ Call record updated: ${docRef.id} for ${advertiserId}, total calls: ${existingCallDetails.length + 1}`);
     }
+  }
+
+  // البحث عن سجل اليوم بطريقة موثوقة
+  private static async findTodayRecord(advertiserId: string) {
+    const dateKey = getSaudiDateKey();
+    const today = startOfDay(getSaudiNow());
+    const todayTimestamp = Timestamp.fromDate(today);
+
+    const statsRef = adminDb.collection('statistics');
+    
+    // البحث باستخدام date_key أولاً
+    let snapshot = await statsRef
+      .where('advertiser_id', '==', advertiserId)
+      .where('date_key', '==', dateKey)
+      .limit(1)
+      .get();
+
+    if (!snapshot.empty) {
+      return snapshot.docs[0];
+    }
+
+    // البحث بالتاريخ كبديل
+    snapshot = await statsRef
+      .where('advertiser_id', '==', advertiserId)
+      .where('date', '==', todayTimestamp)
+      .limit(1)
+      .get();
+
+    return snapshot.empty ? null : snapshot.docs[0];
   }
 }
 

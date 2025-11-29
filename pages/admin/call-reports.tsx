@@ -129,6 +129,9 @@ export default function CallReports() {
   const [expandedAdvertiser, setExpandedAdvertiser] = useState<string | null>(null);
   const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('area');
   const [showFilters, setShowFilters] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -141,6 +144,17 @@ export default function CallReports() {
     
     fetchData();
   }, [period, customStartDate, customEndDate, selectedCity, selectedSector]);
+
+  // التحديث التلقائي كل 10 ثواني
+  useEffect(() => {
+    if (!autoRefresh) return;
+    
+    const intervalId = setInterval(() => {
+      fetchDataSilently();
+    }, 10000); // كل 10 ثواني
+    
+    return () => clearInterval(intervalId);
+  }, [autoRefresh, period, customStartDate, customEndDate, selectedCity, selectedSector]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -166,12 +180,62 @@ export default function CallReports() {
         setAdvertisers(response.data.data.advertisers);
         setChartData(response.data.data.chart_data);
         setBreakdown(response.data.data.breakdown);
+        setLastUpdated(new Date());
       }
     } catch (error: any) {
       console.error('Error fetching call reports:', error);
       toast.error('حدث خطأ في جلب التقارير');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // تحديث صامت بدون loading spinner (للتحديث التلقائي)
+  const fetchDataSilently = async () => {
+    if (isRefreshing) return; // تجنب الطلبات المتزامنة
+    
+    setIsRefreshing(true);
+    try {
+      const token = localStorage.getItem('token');
+      const params: any = { period };
+      
+      if (period === 'custom' && customStartDate && customEndDate) {
+        params.start_date = customStartDate;
+        params.end_date = customEndDate;
+      }
+      
+      if (selectedCity !== 'all') params.city = selectedCity;
+      if (selectedSector !== 'all') params.sector = selectedSector;
+
+      const response = await axios.get('/api/reports/calls', {
+        headers: { Authorization: `Bearer ${token}` },
+        params
+      });
+
+      if (response.data.success) {
+        // مقارنة البيانات الجديدة مع القديمة لإظهار إشعار إذا كان هناك مكالمات جديدة
+        const newTotalCalls = response.data.data.summary.total_calls;
+        const oldTotalCalls = summary?.total_calls || 0;
+        
+        if (newTotalCalls > oldTotalCalls) {
+          const newCalls = newTotalCalls - oldTotalCalls;
+          toast.success(`📞 ${newCalls} مكالمة جديدة!`, {
+            duration: 3000,
+            position: 'top-center',
+            icon: '🔔'
+          });
+        }
+        
+        setSummary(response.data.data.summary);
+        setAdvertisers(response.data.data.advertisers);
+        setChartData(response.data.data.chart_data);
+        setBreakdown(response.data.data.breakdown);
+        setLastUpdated(new Date());
+      }
+    } catch (error: any) {
+      console.error('Error in silent refresh:', error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -412,6 +476,60 @@ export default function CallReports() {
               </div>
 
               <div className="flex items-center gap-3">
+                {/* مؤشر التحديث اللحظي */}
+                <div className="flex items-center gap-2">
+                  {isRefreshing && (
+                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  )}
+                  {lastUpdated && (
+                    <span className="text-xs text-gray-500 hidden md:inline">
+                      آخر تحديث: {format(lastUpdated, 'HH:mm:ss', { locale: ar })}
+                    </span>
+                  )}
+                </div>
+
+                {/* زر التحديث اليدوي */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={fetchData}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                  title="تحديث البيانات"
+                >
+                  <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </motion.button>
+
+                {/* زر التحديث التلقائي */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                    autoRefresh 
+                      ? 'bg-green-500 hover:bg-green-600 text-white' 
+                      : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                  }`}
+                  title={autoRefresh ? 'إيقاف التحديث التلقائي' : 'تفعيل التحديث التلقائي'}
+                >
+                  {autoRefresh ? (
+                    <>
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                      </span>
+                      <span className="hidden md:inline text-sm">لحظي</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="h-2 w-2 rounded-full bg-gray-400"></span>
+                      <span className="hidden md:inline text-sm">متوقف</span>
+                    </>
+                  )}
+                </motion.button>
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

@@ -579,17 +579,33 @@ export default function CleaningDammam() {
     }
   }, [shuffledAdvertisers]);
 
-  const handleCall = async (phone: string, advertiserId: string) => {
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/statistics/record`, {
-        advertiserId,
-        type: 'call',
-        phone
-      });
-    } catch (error) {
-      console.error('Error recording call:', error);
+  const handleCall = (phone: string, advertiserId: string) => {
+    // تسجيل المكالمة مباشرة باستخدام sendBeacon (الأكثر موثوقية)
+    const apiUrl = '/api/statistics/record';
+    const payload = {
+      type: 'call',
+      advertiserId,
+      phone,
+      page_url: window.location.href,
+      timestamp: new Date().toISOString()
+    };
+    
+    // استخدام sendBeacon أولاً (يعمل حتى عند التنقل)
+    if (navigator.sendBeacon) {
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      navigator.sendBeacon(apiUrl, blob);
+      console.log('📞 Call tracked via sendBeacon:', advertiserId);
+    } else {
+      // fallback: استخدام fetch مع keepalive
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).catch(err => console.error('Failed to track call:', err));
     }
     
+    // فتح تطبيق الاتصال فوراً
     window.location.href = `tel:${phone}`;
   };
 
