@@ -565,16 +565,18 @@ export default function CleaningDammam() {
     }
   };
 
-  // تتبع مشاهدات المعلنين عند تحميل الصفحة
-  const [viewsTracked, setViewsTracked] = useState<Set<string>>(new Set());
+  // استخدام useRef لتتبع المشاهدات المسجلة
+  const viewsTrackedRef = React.useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    shuffledAdvertisers.forEach(advertiser => {
-      if (!viewsTracked.has(advertiser.id)) {
-        trackView(advertiser.id);
-        setViewsTracked(prev => new Set(prev).add(advertiser.id));
-      }
-    });
+    if (shuffledAdvertisers.length > 0) {
+      shuffledAdvertisers.forEach(advertiser => {
+        if (!viewsTrackedRef.current.has(advertiser.id)) {
+          viewsTrackedRef.current.add(advertiser.id);
+          trackView(advertiser.id);
+        }
+      });
+    }
   }, [shuffledAdvertisers]);
 
   const handleCall = async (phone: string, advertiserId: string) => {

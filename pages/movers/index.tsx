@@ -657,6 +657,7 @@ export default function MoversIndex() {
         advertiserId,
         type: 'view'
       });
+      console.log('View recorded for:', advertiserId);
     } catch (error) {
       console.error('Error recording view:', error);
     }
@@ -674,17 +675,19 @@ export default function MoversIndex() {
     }
   };
 
-  // تتبع مشاهدات المعلنين عند تحميل الصفحة
-  const [viewsTracked, setViewsTracked] = useState<Set<string>>(new Set());
+  // استخدام useRef لتتبع المشاهدات المسجلة (لتجنب إعادة التسجيل)
+  const viewsTrackedRef = React.useRef<Set<string>>(new Set());
 
   useEffect(() => {
     // تتبع المشاهدات مرة واحدة لكل معلن
-    shuffledAdvertisers.forEach(advertiser => {
-      if (!viewsTracked.has(advertiser.id)) {
-        trackView(advertiser.id);
-        setViewsTracked(prev => new Set(prev).add(advertiser.id));
-      }
-    });
+    if (shuffledAdvertisers.length > 0) {
+      shuffledAdvertisers.forEach(advertiser => {
+        if (!viewsTrackedRef.current.has(advertiser.id)) {
+          viewsTrackedRef.current.add(advertiser.id);
+          trackView(advertiser.id);
+        }
+      });
+    }
   }, [shuffledAdvertisers]);
 
   const handleCall = async (phone: string, advertiserId: string) => {
