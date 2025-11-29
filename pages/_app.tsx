@@ -7,22 +7,22 @@ import { useRouter } from 'next/router'
 // Toaster options - مُعرّفة خارج المكون لتجنب إعادة الإنشاء
 const toasterOptions = {
   duration: 3000,
-  style: {
-    background: '#363636',
-    color: '#fff',
-    borderRadius: '10px',
-    padding: '16px',
-  },
-  success: {
-    style: {
-      background: '#10b981',
-    },
-  },
-  error: {
-    style: {
-      background: '#ef4444',
-    },
-  },
+          style: {
+            background: '#363636',
+            color: '#fff',
+            borderRadius: '10px',
+            padding: '16px',
+          },
+          success: {
+            style: {
+              background: '#10b981',
+            },
+          },
+          error: {
+            style: {
+              background: '#ef4444',
+            },
+          },
 };
 
 // Routes للـ prefetch

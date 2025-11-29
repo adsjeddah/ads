@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb, verifyAdminToken } from '../../../lib/firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
+
+const SAUDI_OFFSET_HOURS = 3;
 
 /**
  * API للتشخيص - عرض جميع الإحصائيات المسجلة
@@ -24,8 +27,16 @@ export default async function handler(
     
     // الحصول على الوقت الحالي
     const now = new Date();
-    const SAUDI_OFFSET = 3 * 60 * 60 * 1000;
+    const SAUDI_OFFSET = SAUDI_OFFSET_HOURS * 60 * 60 * 1000;
     const saudiNow = new Date(now.getTime() + SAUDI_OFFSET);
+    
+    // حساب بداية ونهاية اليوم السعودي بنفس طريقة calls.ts
+    const saudiYear = saudiNow.getUTCFullYear();
+    const saudiMonth = saudiNow.getUTCMonth();
+    const saudiDay = saudiNow.getUTCDate();
+    
+    const todayStartUTC = new Date(Date.UTC(saudiYear, saudiMonth, saudiDay, 0, 0, 0, 0) - SAUDI_OFFSET);
+    const todayEndUTC = new Date(Date.UTC(saudiYear, saudiMonth, saudiDay, 23, 59, 59, 999) - SAUDI_OFFSET);
     
     // جلب جميع الإحصائيات
     const statsSnapshot = await adminDb.collection('statistics').get();
@@ -33,27 +44,29 @@ export default async function handler(
     const allStats = statsSnapshot.docs.map(doc => {
       const data = doc.data();
       
-      let dateInfo = 'N/A';
-      let dateUTC = null;
-      let dateSaudi = null;
+      let dateUTC: Date | null = null;
+      let dateTimestamp: number | null = null;
       
       if (data.date) {
         if (data.date.toDate) {
-          const d = data.date.toDate();
-          dateUTC = d.toISOString();
-          dateSaudi = new Date(d.getTime() + SAUDI_OFFSET).toISOString();
+          dateUTC = data.date.toDate();
+          dateTimestamp = data.date.seconds;
         } else if (data.date.seconds) {
-          const d = new Date(data.date.seconds * 1000);
-          dateUTC = d.toISOString();
-          dateSaudi = new Date(d.getTime() + SAUDI_OFFSET).toISOString();
+          dateUTC = new Date(data.date.seconds * 1000);
+          dateTimestamp = data.date.seconds;
         }
       }
+      
+      // هل التاريخ ضمن نطاق اليوم السعودي؟
+      const isToday = dateUTC ? (dateUTC >= todayStartUTC && dateUTC <= todayEndUTC) : false;
       
       return {
         id: doc.id,
         advertiser_id: data.advertiser_id,
-        date_utc: dateUTC,
-        date_saudi: dateSaudi,
+        date_utc: dateUTC?.toISOString() || null,
+        date_timestamp: dateTimestamp,
+        date_saudi: dateUTC ? new Date(dateUTC.getTime() + SAUDI_OFFSET).toISOString() : null,
+        is_today: isToday,
         views: data.views || 0,
         clicks: data.clicks || 0,
         calls: data.calls || 0,
@@ -70,22 +83,25 @@ export default async function handler(
     });
     
     // إحصائيات اليوم
-    const todayStr = saudiNow.toISOString().split('T')[0];
-    const todayStats = allStats.filter(s => 
-      s.date_saudi && s.date_saudi.startsWith(todayStr)
-    );
+    const todayStats = allStats.filter(s => s.is_today);
     
     return res.status(200).json({
       success: true,
       server_time: {
         utc: now.toISOString(),
         saudi: saudiNow.toISOString(),
-        saudi_date: todayStr
+        saudi_date: `${saudiYear}-${String(saudiMonth + 1).padStart(2, '0')}-${String(saudiDay).padStart(2, '0')}`
+      },
+      today_range: {
+        start_utc: todayStartUTC.toISOString(),
+        end_utc: todayEndUTC.toISOString(),
+        start_timestamp: Math.floor(todayStartUTC.getTime() / 1000),
+        end_timestamp: Math.floor(todayEndUTC.getTime() / 1000)
       },
       total_records: allStats.length,
       today_records: todayStats.length,
       today_stats: todayStats,
-      all_stats: allStats.slice(0, 50), // أول 50 فقط
+      all_stats: allStats.slice(0, 50),
       summary: {
         total_views: allStats.reduce((sum, s) => sum + s.views, 0),
         total_clicks: allStats.reduce((sum, s) => sum + s.clicks, 0),

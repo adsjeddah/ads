@@ -152,7 +152,7 @@ export default async function handler(
     // جلب جميع المعلنين
     let advertisersSnapshot;
     try {
-      const advertisersRef = adminDb.collection('advertisers');
+    const advertisersRef = adminDb.collection('advertisers');
       advertisersSnapshot = await advertisersRef.get();
     } catch (advError: any) {
       console.error('Advertisers query error:', advError.message);

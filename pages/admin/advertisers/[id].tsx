@@ -565,16 +565,16 @@ export default function AdvertiserDetails() {
                   {advertiser.status === 'active' ? <FaStop className="text-sm" /> : <FaPlay className="text-sm" />}
                 </button>
                 
-                <Link href="/admin/dashboard?tab=advertisers">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-primary-600 transition-colors text-sm md:text-base"
-                  >
-                    <FaArrowLeft />
-                    <span className="hidden sm:inline">العودة للمعلنين</span>
-                    <span className="sm:hidden">رجوع</span>
-                  </motion.button>
-                </Link>
+              <Link href="/admin/dashboard?tab=advertisers">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-primary-600 transition-colors text-sm md:text-base"
+                >
+                  <FaArrowLeft />
+                  <span className="hidden sm:inline">العودة للمعلنين</span>
+                  <span className="sm:hidden">رجوع</span>
+                </motion.button>
+              </Link>
               </div>
             </div>
           </div>
@@ -837,10 +837,10 @@ export default function AdvertiserDetails() {
                         
                         {/* Status Manager Component */}
                         {/* إدارة حالة الاشتراك - متاحة لجميع الحالات */}
-                        <SubscriptionStatusManager 
-                          subscription={sub as any}
-                          onStatusChanged={fetchAdvertiserDetails}
-                        />
+                          <SubscriptionStatusManager 
+                            subscription={sub as any}
+                            onStatusChanged={fetchAdvertiserDetails}
+                          />
                       </div>
                     ))}
                   </div>
