@@ -553,6 +553,30 @@ export default function WaterLeaksDammam() {
     return shuffledAdvertisers;
   };
 
+  // تتبع المشاهدة عند ظهور المعلن على الشاشة
+  const trackView = async (advertiserId: string) => {
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/statistics/record`, {
+        advertiserId,
+        type: 'view'
+      });
+    } catch (error) {
+      console.error('Error recording view:', error);
+    }
+  };
+
+  // تتبع مشاهدات المعلنين عند تحميل الصفحة
+  const [viewsTracked, setViewsTracked] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    shuffledAdvertisers.forEach(advertiser => {
+      if (!viewsTracked.has(advertiser.id)) {
+        trackView(advertiser.id);
+        setViewsTracked(prev => new Set(prev).add(advertiser.id));
+      }
+    });
+  }, [shuffledAdvertisers]);
+
   const handleCall = async (phone: string, advertiserId: string) => {
     try {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/statistics/record`, {

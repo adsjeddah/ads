@@ -650,6 +650,43 @@ export default function MoversIndex() {
     return shuffledAdvertisers;
   };
 
+  // تتبع المشاهدة عند ظهور المعلن على الشاشة
+  const trackView = async (advertiserId: string) => {
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/statistics/record`, {
+        advertiserId,
+        type: 'view'
+      });
+    } catch (error) {
+      console.error('Error recording view:', error);
+    }
+  };
+
+  // تتبع النقرة على بطاقة المعلن
+  const trackClick = async (advertiserId: string) => {
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/statistics/record`, {
+        advertiserId,
+        type: 'click'
+      });
+    } catch (error) {
+      console.error('Error recording click:', error);
+    }
+  };
+
+  // تتبع مشاهدات المعلنين عند تحميل الصفحة
+  const [viewsTracked, setViewsTracked] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    // تتبع المشاهدات مرة واحدة لكل معلن
+    shuffledAdvertisers.forEach(advertiser => {
+      if (!viewsTracked.has(advertiser.id)) {
+        trackView(advertiser.id);
+        setViewsTracked(prev => new Set(prev).add(advertiser.id));
+      }
+    });
+  }, [shuffledAdvertisers]);
+
   const handleCall = async (phone: string, advertiserId: string) => {
     // تتبع النقرة على زر الاتصال
     try {
@@ -666,7 +703,10 @@ export default function MoversIndex() {
     window.location.href = `tel:${phone}`;
   };
 
-  const handleWhatsApp = (whatsapp: string, companyName: string) => {
+  const handleWhatsApp = async (whatsapp: string, companyName: string, advertiserId: string) => {
+    // تتبع النقرة على واتساب كنقرة
+    await trackClick(advertiserId);
+    
     const message = encodeURIComponent(`مرحباً، أريد الاستفسار عن خدمات نقل العفش - ${companyName}`);
     window.open(`https://wa.me/${whatsapp}?text=${message}`, '_blank');
   };
