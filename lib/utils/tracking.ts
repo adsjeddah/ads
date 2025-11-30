@@ -10,7 +10,14 @@
 
 import { NextApiRequest } from 'next';
 import { UAParser } from 'ua-parser-js';
-const geoip = require('geoip-lite');
+
+// geoip-lite اختياري - قد لا يعمل على Vercel Serverless
+let geoip: any = null;
+try {
+  geoip = require('geoip-lite');
+} catch (error) {
+  console.warn('geoip-lite not available, geo location will be skipped');
+}
 
 /**
  * استخراج عنوان IP الحقيقي من Request
@@ -46,12 +53,24 @@ export function getClientIP(req: NextApiRequest): string | null {
 
 /**
  * استخراج معلومات الموقع الجغرافي من IP
+ * ملاحظة: geoip-lite قد لا يعمل على Vercel Serverless
  */
 export function getGeoLocationFromIP(ip: string | null) {
+  // إذا كان IP محلي
   if (!ip || ip === '::1' || ip === '127.0.0.1') {
     return {
       country: 'Local',
       city: 'Localhost',
+      region: null,
+      isp: null
+    };
+  }
+  
+  // إذا كان geoip غير متاح، أرجع قيم فارغة
+  if (!geoip) {
+    return {
+      country: null,
+      city: null,
       region: null,
       isp: null
     };
@@ -65,11 +84,11 @@ export function getGeoLocationFromIP(ip: string | null) {
         country: geo.country === 'SA' ? 'السعودية' : geo.country,
         city: translateCity(geo.city),
         region: translateRegion(geo.region),
-        isp: null // geoip-lite doesn't provide ISP, would need paid service
+        isp: null // geoip-lite doesn't provide ISP
       };
     }
   } catch (error) {
-    console.error('Error getting geo location:', error);
+    console.warn('Error getting geo location:', error);
   }
   
   return {
