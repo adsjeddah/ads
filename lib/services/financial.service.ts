@@ -42,6 +42,93 @@ export interface PaymentAllocation {
 export class FinancialService {
   
   /**
+   * 🆕 تحديث coverage_type للمعلن بناءً على اشتراكاته النشطة
+   * يتم استدعاء هذه الدالة تلقائياً بعد إنشاء أو تعديل أي اشتراك
+   */
+  static async updateAdvertiserCoverageFromSubscriptions(advertiserId: string): Promise<{
+    updated: boolean;
+    new_coverage_type: 'kingdom' | 'city' | 'both' | null;
+    coverage_cities: string[];
+  }> {
+    console.log(`🔄 تحديث coverage_type للمعلن ${advertiserId}...`);
+    
+    // 1. جلب جميع الاشتراكات النشطة للمعلن
+    const subscriptions = await SubscriptionAdminService.getByAdvertiserId(advertiserId);
+    
+    // 2. فلترة الاشتراكات النشطة فقط (active أو pending_payment)
+    const activeSubscriptions = subscriptions.filter(sub => 
+      sub.status === 'active' || sub.status === 'pending_payment' || sub.status === 'paused'
+    );
+    
+    if (activeSubscriptions.length === 0) {
+      console.log(`   ℹ️ لا يوجد اشتراكات نشطة للمعلن`);
+      return { updated: false, new_coverage_type: null, coverage_cities: [] };
+    }
+    
+    // 3. تحديد نوع التغطية بناءً على الاشتراكات
+    let hasKingdomSubscription = false;
+    let hasCitySubscription = false;
+    const coverageCities: string[] = [];
+    
+    for (const sub of activeSubscriptions) {
+      // جلب معلومات الباقة لمعرفة نوع التغطية
+      const planDoc = await adminDb.collection('plans').doc(sub.plan_id).get();
+      if (!planDoc.exists) continue;
+      
+      const plan = planDoc.data() as any;
+      
+      // التحقق من نوع التغطية من الاشتراك أو الباقة
+      const coverageArea = sub.coverage_area || plan.plan_type;
+      
+      if (coverageArea === 'kingdom') {
+        hasKingdomSubscription = true;
+        console.log(`   ✅ اشتراك مملكة: ${sub.id}`);
+      } else if (coverageArea === 'city') {
+        hasCitySubscription = true;
+        const city = sub.city || plan.city;
+        if (city && !coverageCities.includes(city)) {
+          coverageCities.push(city);
+          console.log(`   ✅ اشتراك مدينة (${city}): ${sub.id}`);
+        }
+      }
+    }
+    
+    // 4. تحديد نوع التغطية النهائي
+    let newCoverageType: 'kingdom' | 'city' | 'both';
+    
+    if (hasKingdomSubscription && hasCitySubscription) {
+      newCoverageType = 'both';
+    } else if (hasKingdomSubscription) {
+      newCoverageType = 'kingdom';
+    } else {
+      newCoverageType = 'city';
+    }
+    
+    // 5. تحديث المعلن
+    const updateData: any = {
+      coverage_type: newCoverageType,
+      updated_at: FieldValue.serverTimestamp()
+    };
+    
+    if (coverageCities.length > 0) {
+      updateData.coverage_cities = coverageCities;
+    }
+    
+    await adminDb.collection('advertisers').doc(advertiserId).update(updateData);
+    
+    console.log(`   ✅ تم تحديث coverage_type إلى: ${newCoverageType}`);
+    if (coverageCities.length > 0) {
+      console.log(`   ✅ المدن المغطاة: ${coverageCities.join(', ')}`);
+    }
+    
+    return {
+      updated: true,
+      new_coverage_type: newCoverageType,
+      coverage_cities: coverageCities
+    };
+  }
+  
+  /**
    * حساب ضريبة القيمة المضافة (VAT)
    */
   static calculateVAT(
@@ -260,6 +347,15 @@ export class FinancialService {
       };
 
       paymentId = await PaymentAdminService.create(paymentData);
+    }
+
+    // 🆕 تحديث coverage_type للمعلن بناءً على الاشتراكات النشطة
+    try {
+      const coverageUpdate = await this.updateAdvertiserCoverageFromSubscriptions(data.advertiser_id);
+      console.log(`📊 تم تحديث تغطية المعلن: ${coverageUpdate.new_coverage_type}`);
+    } catch (coverageError) {
+      // نسجل الخطأ لكن لا نوقف العملية
+      console.error('⚠️ خطأ في تحديث coverage_type للمعلن:', coverageError);
     }
 
     return {

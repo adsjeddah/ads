@@ -24,6 +24,14 @@ export class SubscriptionAdminService {
       created_at: FieldValue.serverTimestamp()
     };
     
+    // 🆕 إضافة حقول التغطية الجغرافية إذا كانت موجودة
+    if (data.coverage_area) {
+      subscriptionData.coverage_area = data.coverage_area;
+    }
+    if (data.city) {
+      subscriptionData.city = data.city;
+    }
+    
     const docRef = await adminDb.collection('subscriptions').add(subscriptionData);
     
     return docRef.id;
