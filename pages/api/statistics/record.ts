@@ -3,6 +3,23 @@ import { StatisticsAdminService } from '../../../lib/services/statistics-admin.s
 import { collectTrackingData } from '../../../lib/utils/tracking';
 
 /**
+ * تكوين الـ API - مهم جداً لـ Vercel!
+ * - runtime: nodejs - يمنع Vercel من استخدام Edge Runtime
+ * - api.bodyParser: يسمح بقراءة الـ body بشكل صحيح
+ */
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+    // تعطيل response caching في Vercel
+    externalResolver: true,
+  },
+  // استخدام Node.js runtime بدلاً من Edge
+  runtime: 'nodejs',
+};
+
+/**
  * API لتسجيل الإحصائيات مع بيانات التتبع المتقدمة
  * POST /api/statistics/record
  * 
@@ -26,10 +43,16 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{ message: string; session_id?: string } | { error: string }>
 ) {
-  // إضافة CORS headers
+  // إضافة CORS headers - مهم جداً لـ Vercel
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 ساعات
+  
+  // منع الـ caching للـ API responses
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
 
   // Handle OPTIONS request for CORS preflight
   if (req.method === 'OPTIONS') {

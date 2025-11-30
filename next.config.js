@@ -43,6 +43,41 @@ const nextConfig = {
   // 🎯 Headers للـ Caching والأمان
   async headers() {
     return [
+      // ⚠️ مهم: Headers الـ API أولاً لأنها أكثر تحديداً
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate'
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache'
+          },
+          {
+            key: 'Expires',
+            value: '0'
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*'
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS'
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization, X-Requested-With'
+          },
+          {
+            key: 'Access-Control-Max-Age',
+            value: '86400'
+          },
+        ],
+      },
+      // Static assets caching
       {
         source: '/:all*(svg|jpg|jpeg|png|gif|webp|avif|ico|css|js)',
         locale: false,
@@ -62,6 +97,7 @@ const nextConfig = {
           },
         ],
       },
+      // General security headers
       {
         source: '/:path*',
         headers: [
