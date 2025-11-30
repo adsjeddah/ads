@@ -556,7 +556,7 @@ export default function PestControlDammam() {
   // تتبع المشاهدة عند ظهور المعلن على الشاشة
   const trackView = async (advertiserId: string) => {
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/statistics/record`, {
+      await axios.post(`/api/statistics/record`, {
         advertiserId,
         type: 'view'
       });

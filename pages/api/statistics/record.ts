@@ -26,6 +26,21 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{ message: string; session_id?: string } | { error: string }>
 ) {
+  // إضافة CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle OPTIONS request for CORS preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // GET request للتحقق من عمل الـ API
+  if (req.method === 'GET') {
+    return res.status(200).json({ message: 'Statistics API is working' });
+  }
+
   // تسجيل وقت بداية الطلب للتتبع
   const startTime = Date.now();
   
@@ -85,7 +100,7 @@ export default async function handler(
       res.status(500).json({ error: 'Failed to record statistic: ' + error.message });
     }
   } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
+    res.status(405).json({ error: `Method ${req.method} Not Allowed` });
   }
 }

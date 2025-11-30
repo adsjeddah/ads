@@ -215,7 +215,7 @@ export async function trackCallReliably(
   if (typeof window === 'undefined') return false;
   
   const trackingData = collectEventData();
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/statistics/record`;
+  const apiUrl = '/api/statistics/record';
   
   const payload = {
     type: 'call',
@@ -266,7 +266,7 @@ export async function trackClickReliably(advertiserId: string): Promise<boolean>
   if (typeof window === 'undefined') return false;
   
   const trackingData = collectEventData();
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/statistics/record`;
+  const apiUrl = '/api/statistics/record';
   
   const payload = {
     type: 'click',
@@ -312,7 +312,7 @@ export async function trackViewReliably(advertiserId: string): Promise<boolean> 
   if (typeof window === 'undefined') return false;
   
   const trackingData = collectEventData();
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ''}/api/statistics/record`;
+  const apiUrl = '/api/statistics/record';
   
   const payload = {
     type: 'view',
