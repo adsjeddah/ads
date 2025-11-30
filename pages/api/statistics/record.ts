@@ -3,20 +3,17 @@ import { StatisticsAdminService } from '../../../lib/services/statistics-admin.s
 import { collectTrackingData } from '../../../lib/utils/tracking';
 
 /**
- * تكوين الـ API - مهم جداً لـ Vercel!
- * - runtime: nodejs - يمنع Vercel من استخدام Edge Runtime
- * - api.bodyParser: يسمح بقراءة الـ body بشكل صحيح
+ * تكوين الـ API - مهم لـ Vercel Pages Router
  */
 export const config = {
   api: {
-    bodyParser: {
-      sizeLimit: '1mb',
-    },
-    // تعطيل response caching في Vercel
+    // السماح بـ body parsing لجميع أنواع الـ content
+    bodyParser: true,
+    // إخبار Next.js أن هناك resolver خارجي
     externalResolver: true,
+    // زيادة حد حجم الاستجابة
+    responseLimit: false,
   },
-  // استخدام Node.js runtime بدلاً من Edge
-  runtime: 'nodejs',
 };
 
 /**
@@ -26,47 +23,39 @@ export const config = {
  * يدعم:
  * - طلبات axios/fetch العادية
  * - طلبات sendBeacon (للتتبع الموثوق عند التنقل)
- * 
- * Body:
- * - type: 'view' | 'click' | 'call'
- * - advertiserId: string (required)
- * - phone: string (optional, for calls)
- * - page_url: string (optional)
- * - screen_resolution: string (optional)
- * - session_id: string (optional)
- * - time_on_page: number (optional)
- * - is_returning_visitor: boolean (optional)
- * - previous_visits: number (optional)
- * - utm_source, utm_medium, utm_campaign, utm_term, utm_content (optional)
  */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<{ message: string; session_id?: string } | { error: string }>
 ) {
-  // إضافة CORS headers - مهم جداً لـ Vercel
+  // ⚠️ مهم جداً: CORS headers في البداية
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 ساعات
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400');
   
-  // منع الـ caching للـ API responses
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  // منع الـ caching
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
 
-  // Handle OPTIONS request for CORS preflight
+  // ⚠️ معالجة OPTIONS أولاً (CORS preflight)
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
   // GET request للتحقق من عمل الـ API
   if (req.method === 'GET') {
-    return res.status(200).json({ message: 'Statistics API is working' });
+    return res.status(200).json({ message: 'Statistics API is working - v2' });
   }
 
   // تسجيل وقت بداية الطلب للتتبع
   const startTime = Date.now();
   
+  // ⚠️ معالجة POST
   if (req.method === 'POST') {
     try {
       // التعامل مع الجسم سواء كان JSON أو نص (sendBeacon قد يرسل كنص)
