@@ -522,9 +522,9 @@ export default function PestControlDammam() {
         }
       });
       
+      // 🆕 المنطق الجديد: فقط الشركات التي لديها اشتراك نشط لهذه المدينة
       const kingdomAdvertisers = response.data.filter((adv: any) => 
         adv.sector === 'pest-control' && (
-          adv.coverage_type === 'kingdom' || 
           adv.coverage_type === 'both' ||
           (adv.coverage_type === 'city' && adv.coverage_cities?.includes('dammam'))
         )

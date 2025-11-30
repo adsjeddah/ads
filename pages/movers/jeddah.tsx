@@ -522,9 +522,12 @@ export default function MoversJeddah() {
         }
       });
       
+      // 🆕 المنطق الجديد: فقط الشركات التي لديها اشتراك نشط لهذه المدينة
+      // - both = لديه اشتراك مملكة + اشتراك مدينة نشطين
+      // - city + jeddah = لديه اشتراك جدة نشط
+      // ❌ لا نعرض kingdom هنا (تظهر فقط في صفحة المملكة الرئيسية)
       const kingdomAdvertisers = response.data.filter((adv: any) => 
         adv.sector === 'movers' && (
-          adv.coverage_type === 'kingdom' || 
           adv.coverage_type === 'both' ||
           (adv.coverage_type === 'city' && adv.coverage_cities?.includes('jeddah'))
         )
