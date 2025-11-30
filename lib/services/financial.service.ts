@@ -55,9 +55,11 @@ export class FinancialService {
     // 1. جلب جميع الاشتراكات النشطة للمعلن
     const subscriptions = await SubscriptionAdminService.getByAdvertiserId(advertiserId);
     
-    // 2. فلترة الاشتراكات النشطة فقط (active أو pending_payment)
+    // 2. فلترة الاشتراكات النشطة فقط (active فقط!)
+    // ❌ لا نحسب: paused, stopped, expired, cancelled, pending_payment
+    // ✅ فقط active = الاشتراك الذي يجب أن يظهر فيه المعلن
     const activeSubscriptions = subscriptions.filter(sub => 
-      sub.status === 'active' || sub.status === 'pending_payment' || sub.status === 'paused'
+      sub.status === 'active'
     );
     
     if (activeSubscriptions.length === 0) {

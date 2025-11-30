@@ -28,14 +28,12 @@ async function fixAdvertiserCoverage(advertiserId) {
     .where('advertiser_id', '==', advertiserId)
     .get();
   
-  // 2. فلترة الاشتراكات النشطة
+  // 2. فلترة الاشتراكات النشطة فقط (active فقط!)
+  // ❌ لا نحسب: paused, stopped, expired, cancelled, pending_payment
+  // ✅ فقط active = الاشتراك الذي يجب أن يظهر فيه المعلن
   const activeSubscriptions = subscriptionsSnapshot.docs
     .map(doc => ({ id: doc.id, ...doc.data() }))
-    .filter(sub => 
-      sub.status === 'active' || 
-      sub.status === 'pending_payment' || 
-      sub.status === 'paused'
-    );
+    .filter(sub => sub.status === 'active');
   
   if (activeSubscriptions.length === 0) {
     console.log(`   ℹ️ لا يوجد اشتراكات نشطة`);
