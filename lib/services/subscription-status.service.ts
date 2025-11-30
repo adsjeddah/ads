@@ -14,6 +14,7 @@ import { adminDb } from '../firebase-admin';
 import { Subscription, SubscriptionStatusHistory } from '../../types/models';
 import { getSaudiNow, daysBetween, addDays, toSaudiTime, firestoreTimestampToDate } from '../utils/date';
 import { SubscriptionAdminService } from './subscription-admin.service';
+import { FinancialService } from './financial.service';
 
 export class SubscriptionStatusService {
   
@@ -41,17 +42,31 @@ export class SubscriptionStatusService {
         
         if (hasActiveSubscription) {
           console.log(`⚠️ المعلن ${advertiser_id} لديه اشتراك نشط آخر، لن يتم تغيير حالته`);
-          return;
+        } else {
+          // تحديث حالة المعلن إلى غير نشط
+          await adminDb.collection('advertisers').doc(advertiser_id).update({
+            status: newStatus,
+            updated_at: FieldValue.serverTimestamp()
+          });
+          console.log(`✅ تم تحديث حالة المعلن ${advertiser_id} إلى: ${newStatus}`);
         }
+      } else {
+        // تحديث حالة المعلن إلى نشط
+        await adminDb.collection('advertisers').doc(advertiser_id).update({
+          status: newStatus,
+          updated_at: FieldValue.serverTimestamp()
+        });
+        console.log(`✅ تم تحديث حالة المعلن ${advertiser_id} إلى: ${newStatus}`);
       }
       
-      // تحديث حالة المعلن
-      await adminDb.collection('advertisers').doc(advertiser_id).update({
-        status: newStatus,
-        updated_at: FieldValue.serverTimestamp()
-      });
+      // 🆕 تحديث coverage_type بناءً على الاشتراكات النشطة
+      try {
+        const coverageUpdate = await FinancialService.updateAdvertiserCoverageFromSubscriptions(advertiser_id);
+        console.log(`📊 تم تحديث coverage_type للمعلن ${advertiser_id}: ${coverageUpdate.new_coverage_type}`);
+      } catch (coverageError) {
+        console.error(`⚠️ خطأ في تحديث coverage_type للمعلن ${advertiser_id}:`, coverageError);
+      }
       
-      console.log(`✅ تم تحديث حالة المعلن ${advertiser_id} إلى: ${newStatus}`);
     } catch (error) {
       console.error(`❌ خطأ في تحديث حالة المعلن ${advertiser_id}:`, error);
       // لا نرمي خطأ هنا لأننا لا نريد أن يفشل التغيير الرئيسي
