@@ -99,12 +99,56 @@ const SECTORS_AR: Record<string, string> = {
 };
 
 const CITIES_AR: Record<string, string> = {
+  // المدن الرئيسية (مفاتيح موحدة من الـ API)
   'jeddah': 'جدة',
   'riyadh': 'الرياض',
   'dammam': 'الدمام',
   'makkah': 'مكة',
   'madinah': 'المدينة',
-  'غير محدد': 'غير محدد'
+  'khobar': 'الخبر',
+  'dhahran': 'الظهران',
+  'tabuk': 'تبوك',
+  'abha': 'أبها',
+  'taif': 'الطائف',
+  'buraydah': 'بريدة',
+  'hail': 'حائل',
+  'najran': 'نجران',
+  'jazan': 'جازان',
+  'jubail': 'الجبيل',
+  'yanbu': 'ينبع',
+  'qatif': 'القطيف',
+  'khamis_mushait': 'خميس مشيط',
+  // الأسماء الإنجليزية البديلة
+  'mecca': 'مكة',
+  'medina': 'المدينة',
+  'khamis mushait': 'خميس مشيط',
+  // الأسماء العربية المباشرة
+  'جدة': 'جدة',
+  'الرياض': 'الرياض',
+  'الدمام': 'الدمام',
+  'مكة': 'مكة',
+  'مكة المكرمة': 'مكة',
+  'المدينة': 'المدينة',
+  'المدينة المنورة': 'المدينة',
+  'الخبر': 'الخبر',
+  'الظهران': 'الظهران',
+  'تبوك': 'تبوك',
+  'أبها': 'أبها',
+  'الطائف': 'الطائف',
+  'بريدة': 'بريدة',
+  'حائل': 'حائل',
+  'نجران': 'نجران',
+  'جازان': 'جازان',
+  'الجبيل': 'الجبيل',
+  'ينبع': 'ينبع',
+  'القطيف': 'القطيف',
+  'خميس مشيط': 'خميس مشيط',
+  // غير محدد
+  'localhost': 'غير محدد',
+  'local': 'غير محدد',
+  'null': 'غير محدد',
+  'غير محدد': 'غير محدد',
+  '': 'غير محدد'
 };
 
 export default function CallReports() {
@@ -1078,7 +1122,16 @@ export default function CallReports() {
                                               </span>
                                             </td>
                                             <td className="px-3 py-2 hidden sm:table-cell">
-                                              {call.city || '-'}
+                                              <span className="inline-flex items-center gap-1">
+                                                <FaMapMarkerAlt className="text-red-400 text-xs" />
+                                                {(() => {
+                                                  // استخدام resolved_city (المحسوبة من API) أو city كبديل
+                                                  const cityKey = call.resolved_city || call.city;
+                                                  if (!cityKey || cityKey === 'غير محدد') return 'غير محدد';
+                                                  const lowerCity = cityKey.toLowerCase();
+                                                  return CITIES_AR[lowerCity] || CITIES_AR[cityKey] || cityKey;
+                                                })()}
+                                              </span>
                                             </td>
                                             <td className="px-3 py-2 hidden md:table-cell">
                                               <span className={`px-2 py-1 rounded text-xs ${

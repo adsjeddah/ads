@@ -305,23 +305,146 @@ export default async function handler(
         clicks: data.clicks
       }));
 
-    // إحصائيات المدن
+    // إحصائيات المدن (حسب مدينة المتصل من call_details)
     const citiesStats: Record<string, number> = {};
     const sectorsStats: Record<string, number> = {};
     const devicesStats: Record<string, number> = {};
     const sourcesStats: Record<string, number> = {};
 
+    // خريطة لتوحيد أسماء المدن (تحويل للمفتاح الموحد)
+    const cityNormalizeMap: Record<string, string> = {
+      // الرياض
+      'riyadh': 'riyadh',
+      'الرياض': 'riyadh',
+      // جدة
+      'جدة': 'jeddah',
+      'jeddah': 'jeddah',
+      // الدمام
+      'الدمام': 'dammam',
+      'dammam': 'dammam',
+      // مكة
+      'مكة': 'makkah',
+      'مكة المكرمة': 'makkah',
+      'mecca': 'makkah',
+      'makkah': 'makkah',
+      // المدينة
+      'المدينة': 'madinah',
+      'المدينة المنورة': 'madinah',
+      'medina': 'madinah',
+      'madinah': 'madinah',
+      // الخبر
+      'الخبر': 'khobar',
+      'khobar': 'khobar',
+      // الظهران
+      'الظهران': 'dhahran',
+      'dhahran': 'dhahran',
+      // تبوك
+      'تبوك': 'tabuk',
+      'tabuk': 'tabuk',
+      // أبها
+      'أبها': 'abha',
+      'abha': 'abha',
+      // الطائف
+      'الطائف': 'taif',
+      'taif': 'taif',
+      // بريدة
+      'بريدة': 'buraydah',
+      'buraydah': 'buraydah',
+      // حائل
+      'حائل': 'hail',
+      'hail': 'hail',
+      // نجران
+      'نجران': 'najran',
+      'najran': 'najran',
+      // جازان
+      'جازان': 'jazan',
+      'jazan': 'jazan',
+      // الجبيل
+      'الجبيل': 'jubail',
+      'jubail': 'jubail',
+      // ينبع
+      'ينبع': 'yanbu',
+      'yanbu': 'yanbu',
+      // القطيف
+      'القطيف': 'qatif',
+      'qatif': 'qatif',
+      // خميس مشيط
+      'خميس مشيط': 'khamis_mushait',
+      'khamis mushait': 'khamis_mushait',
+      // غير محدد
+      'localhost': 'غير محدد',
+      'local': 'غير محدد',
+      'null': 'غير محدد',
+      '': 'غير محدد'
+    };
+
+    // تطبيع اسم المدينة
+    const normalizeCity = (city: string | null | undefined): string => {
+      if (!city) return 'غير محدد';
+      const lowerCity = city.toLowerCase().trim();
+      return cityNormalizeMap[lowerCity] || city;
+    };
+
+    // استخراج المدينة من page_url (مثل /movers/riyadh -> riyadh)
+    const extractCityFromUrl = (url: string | null | undefined): string | null => {
+      if (!url) return null;
+      
+      // البحث عن المدن المعروفة في الـ URL
+      const knownCities = ['riyadh', 'jeddah', 'dammam', 'makkah', 'madinah', 'mecca', 'medina', 
+                          'khobar', 'dhahran', 'tabuk', 'abha', 'taif', 'buraydah', 'hail', 
+                          'najran', 'jazan', 'jubail', 'yanbu', 'qatif'];
+      
+      const lowerUrl = url.toLowerCase();
+      for (const city of knownCities) {
+        if (lowerUrl.includes(`/${city}`) || lowerUrl.includes(`city=${city}`)) {
+          return city;
+        }
+      }
+      return null;
+    };
+
+    // الحصول على المدينة من call_details مع fallback من page_url
+    const getCityFromCallDetail = (cd: any): string => {
+      // 1. أولاً: استخدم city إذا كانت موجودة
+      if (cd.city) {
+        return normalizeCity(cd.city);
+      }
+      
+      // 2. ثانياً: استخرج المدينة من page_url
+      const urlCity = extractCityFromUrl(cd.page_url);
+      if (urlCity) {
+        return normalizeCity(urlCity);
+      }
+      
+      // 3. ثالثاً: غير محدد
+      return 'غير محدد';
+    };
+
     advertisersArray.forEach(adv => {
-      citiesStats[adv.city] = (citiesStats[adv.city] || 0) + adv.total_calls;
+      // إحصائيات القطاعات (حسب قطاع المعلن)
       sectorsStats[adv.sector] = (sectorsStats[adv.sector] || 0) + adv.total_calls;
       
+      // تحليل تفاصيل المكالمات للحصول على المدينة والجهاز والمصدر
       adv.call_details.forEach(cd => {
+        // المدينة التي جاء منها الاتصال (من بيانات التتبع أو من URL الصفحة)
+        const callCity = getCityFromCallDetail(cd);
+        citiesStats[callCity] = (citiesStats[callCity] || 0) + 1;
+        
+        // نوع الجهاز
         if (cd.device_type) {
           devicesStats[cd.device_type] = (devicesStats[cd.device_type] || 0) + 1;
         }
+        
+        // مصدر الزيارة
         const source = cd.utm_source || 'direct';
         sourcesStats[source] = (sourcesStats[source] || 0) + 1;
       });
+      
+      // إذا لم تكن هناك تفاصيل مكالمات، نستخدم مدينة المعلن كبديل
+      if (adv.call_details.length === 0 && adv.total_calls > 0) {
+        const fallbackCity = normalizeCity(adv.city);
+        citiesStats[fallbackCity] = (citiesStats[fallbackCity] || 0) + adv.total_calls;
+      }
     });
 
     // المعلن الأكثر اتصالاً
@@ -355,7 +478,11 @@ export default async function handler(
         advertisers: advertisersArray.map(adv => ({
           ...adv,
           last_call_date: adv.last_call_date?.toISOString() || null,
-          call_details: adv.call_details.slice(0, 50) // أول 50 مكالمة فقط
+          // إضافة المدينة المُحلَّلة لكل مكالمة
+          call_details: adv.call_details.slice(0, 50).map(cd => ({
+            ...cd,
+            resolved_city: getCityFromCallDetail(cd) // المدينة المستخرجة من التتبع أو URL
+          }))
         })),
         breakdown: {
           cities: Object.entries(citiesStats).map(([name, count]) => ({ name, count })),
